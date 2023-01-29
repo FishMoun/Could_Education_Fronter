@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Index from "./components/Index.vue";
+import Index from "./components/Home.vue";
 import Login from "./components/Login.vue";
 export default {
   name: "App",
@@ -13,3 +13,14 @@ export default {
   },
 };
 </script>
+<style>
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+}
+</style>

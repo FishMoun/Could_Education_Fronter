@@ -1,12 +1,11 @@
 <template>
-	这是主页
+    这是互动消息
 </template>
 
 <script>
-
 export default {
-	name: "Index"
-};
+
+}
 </script>
 
 <style>

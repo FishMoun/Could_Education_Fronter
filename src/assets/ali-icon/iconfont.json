@@ -1,0 +1,44 @@
+{
+  "id": "3869998",
+  "name": "education_fronter",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "2170932",
+      "name": "首页-首页",
+      "font_class": "shouye-shouye",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "7384771",
+      "name": "课程管理",
+      "font_class": "kecheng",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "7964502",
+      "name": "我的",
+      "font_class": "wode",
+      "unicode": "e630",
+      "unicode_decimal": 58928
+    },
+    {
+      "icon_id": "7964504",
+      "name": "实验",
+      "font_class": "shiyani",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "17930620",
+      "name": "消息",
+      "font_class": "xiaoxi",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    }
+  ]
+}

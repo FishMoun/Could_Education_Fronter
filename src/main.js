@@ -7,6 +7,7 @@ import 'element-plus/dist/index.css'
 import router from './router'
 //引入Vuex
 import store from './store'
+import './assets/ali-icon/iconfont.js'
 const app = createApp(App)
 //使用elementui
 app.use(ElementPlus)
