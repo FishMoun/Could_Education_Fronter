@@ -142,7 +142,7 @@ export default {
 <style lang="scss" scoped>
 .logo-container {
   width: 100%;
-  height: 80px;
+  height: 87px;
   line-height: 90px;
   text-align: center;
   font-size: 20px;
