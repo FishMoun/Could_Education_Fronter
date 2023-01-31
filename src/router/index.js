@@ -57,7 +57,7 @@ const router = createRouter({
 				},
 				{
 					path: "/experimentlearning",
-					name: "experimentlearning",
+					name: "实验学习",
 					component: Experimentlearning,
 					redirect: "/mycourse",
 					children: [
@@ -74,7 +74,7 @@ const router = createRouter({
 				},
 				{
 					path: "/message",
-					name: "message",
+					name: "消息",
 					component: Message,
 					redirect: "/mycourse",
 					children: [
@@ -91,7 +91,7 @@ const router = createRouter({
 				},
 				{
 					path: "/mine",
-					name: "mine",
+					name: "我的",
 					component: Mine,
 					redirect: "/accountmanagement",
 					children: [

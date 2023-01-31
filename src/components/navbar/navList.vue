@@ -2,18 +2,11 @@
   <div>
     <div class="tabs-view-container">
       <div class="tabs-wrapper">
-        <span
-            :class="isActive(item)"
-            v-for="item of tabList"
-            :index="item.path"
-            :key="item.path"
-            @click="goTo(item)"
-        >
+        <span :class="isActive(item)" v-for="item of tabList" :index="item.path" :key="item.path" @click="goTo(item)">
           {{ item.name }}
-          <i
-              class="el-icon-close"
-              v-if="item.path != '/'"
-              @click.stop="removeTab(item)"/>
+          <el-icon style="vertical-align: middle" v-if="item.path != '/'" @click.stop="removeTab(item)">
+            <Close />
+          </el-icon>
         </span>
       </div>
       <div class="tabs-close-item" style="float:right" @click="closeAllTab">
@@ -24,52 +17,61 @@
 </template>
 
 <script>
+import { useRoute, useRouter } from "vue-router"
+import { useStore } from "vuex"
+import { computed, onMounted } from 'vue';
 export default {
-  data() {
-    return {
-      tabList:this.$store.state.tabList,
-      currentRoute:this.$route.path
-    }
-  },
-   mounted() {
-    //保存当前页标签
-    this.$store.dispatch("saveTab", this.$route);
-  },
-  computed: {
-    //标签是否处于当前页
-    isActive() {
-      return function(tab) {
-        if (tab.path === this.$route.path) {
+  name: "navList",
+  setup() {
+    const store = useStore()
+    const tabList = computed(() => store.state.tabList)
+    const route = useRoute()
+    const router = useRouter()
+    const currentRoute = computed(() => route.path)
+    const isActive = computed(() => {
+      return function (tab) {
+        if (tab.path === route.path) {
           return "tabs-view-item-active";
         }
         return "tabs-view-item";
-      };
-    },
-    isFold() {
-      return this.$store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
+      }
+    })
+    const isFold = computed(() => {
+      return store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
+    })
+    onMounted(() => {
+      store.dispatch("saveTab", route)
+    })
+    function goTo(tab) { //跳转标签
+      router.push({ path: tab.path });
     }
-  },
-  methods: {
-    goTo(tab) { //跳转标签
-      this.$router.push({ path: tab.path });
-    },
-    removeTab(tab) { //删除标签
-      this.$store.commit("removeTab", tab);
+    function removeTab(tab) { //删除标签
+      store.commit("removeTab", tab);
       //如果删除的是当前页则返回上一标签页
-      if (tab.path === this.$route.path) {
-        var tabList = this.$store.state.tabList;
-        this.$router.push({ path: tabList[tabList.length - 1].path });
+      if (tab.path === route.path) {
+        var tabList = store.state.tabList;
+        router.push({ path: tabList[tabList.length - 1].path });
       }
-    },
-    closeAllTab() {
-      this.$store.commit("resetTab");
-      console.log(this.$route.path);
-      if (this.$route.path != "/shouye") {
-        this.$router.push({ path: "/shouye" });
+    }
+    function closeAllTab() {
+      store.commit("resetTab");
+      console.log(route.path);
+      if (route.path != "/index") {
+        router.push({ path: "/index" });
       } else {
-        this.$router.go(0);
+        router.go(0);
       }
-    },
+    }
+    return {
+      currentRoute,
+      tabList,
+      isActive,
+      isFold,
+      goTo,
+      removeTab,
+      closeAllTab
+
+    }
   }
 };
 </script>
@@ -81,6 +83,7 @@ export default {
   white-space: nowrap;
   width: 95%;
 }
+
 .tabs-view-container {
   display: flex;
   position: relative;
@@ -91,6 +94,7 @@ export default {
   border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
 }
+
 .tabs-view-item {
   display: inline-block;
   cursor: pointer;
@@ -132,9 +136,9 @@ export default {
   font-size: 15px;
   margin-top: 4px;
   margin-left: 5px;
-  background-color: #2c2c2c;
+  background-color: #3c8bf7;
   color: #fff;
-  border-color: #2c2c2c;
+  border-color: #3c8bf7;
   border-radius: 7px;
 }
 

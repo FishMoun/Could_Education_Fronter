@@ -7,25 +7,17 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { useRoute } from "vue-router";
+import { reactive, onMounted } from 'vue'
 export default {
-  data() {
+  name: "bread",
+  setup() {
+    const route = useRoute()
+    let breadcrumbList = reactive(route.matched.filter((item) => item.name))
     return {
-      breadcrumbList: [],
-    };
-  },
-  computed: {
-  },
-  created() {
-    //替换面包屑导航
-    let matched = this.$route.matched.filter((item) => item.name);
-    // console.log(matched);
-    const first = matched[0];
-    // if (first && first.name !== "首页") {
-    //   matched = [{ path: "/", name: "首页" }].concat(matched);
-    // }
-    this.breadcrumbList = matched;
-  },
+      breadcrumbList
+    }
+  }
 };
 </script>
 

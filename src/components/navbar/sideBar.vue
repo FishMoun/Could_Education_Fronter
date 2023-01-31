@@ -1,51 +1,83 @@
 <template>
-  <div class="logo-container">
-    <img src="/src/assets/logo.png" />
-    <span v-if="!isCollapse">教学管理系统</span>
+  <div>
+    <div class="logo-container">
+      <img src="/src/assets/logo.png" />
+      <span v-if="!isCollapse">教学管理系统</span>
+    </div>
+    <el-menu :default-active="$route.path" class="el-menu-vertical-demo" :unique-opened="true" :collapse="isCollapse"
+      :collapse-transition="false" background-color="#ffffff" active-text-color="#46a6ff" router>
+      <template v-for="item in asideMenu">
+        <template v-if="item.submenu">
+          <el-sub-menu :index="item.path">
+            <template #title>
+              <el-icon>
+                <svg class="icon" aria-hidden="true">
+                  <use :xlink:href="'#icon-' + item.icon"></use>
+                </svg>
+              </el-icon>
+              <span>{{ item.label }}</span> </template>
+
+            <template v-for="subItem in item.submenu">
+              <el-menu-item :index="subItem.path" class="subitem">
+                {{ subItem.label }}
+              </el-menu-item>
+            </template>
+          </el-sub-menu>
+        </template>
+        <template v-else>
+          <el-menu-item :index="item.path">
+            <el-icon>
+              <svg class="icon" aria-hidden="true">
+                <use :xlink:href="'#icon-' + item.icon"></use>
+              </svg>
+            </el-icon>
+
+            <template #title>{{ item.label }}
+            </template>
+          </el-menu-item>
+        </template>
+      </template>
+    </el-menu>
   </div>
-  <el-menu :default-active="$route.path" class="el-menu-vertical-demo" :unique-opened="true" :collapse="isCollapse"
-    :collapse-transition="false" background-color="#ffffff" active-text-color="#46a6ff" router>
-    <template v-for="item in asideMenu">
-      <template v-if="item.submenu">
-        <el-sub-menu :index="item.path">
-          <template #title>
-            <svg class="icon" aria-hidden="true">
-              <use :xlink:href="'#icon-' + item.icon"></use>
-            </svg>
-            <span>{{ item.label }}</span>
-          </template>
-          <template v-for="subItem in item.submenu">
-            <el-menu-item :index="subItem.path" class="subitem">
-              {{ subItem.label }}
-            </el-menu-item>
-          </template>
-        </el-sub-menu>
-      </template>
-      <template v-else>
-        <el-menu-item :index="item.path">
-          <template #title>
-            <svg class="icon" aria-hidden="true">
-              <use :xlink:href="'#icon-' + item.icon"></use>
-            </svg>
-            <span>{{ item.label }}</span>
-          </template>
-        </el-menu-item>
-      </template>
-    </template>
-  </el-menu>
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
+import { useStore } from 'vuex';
 export default {
   name: "sideBar",
   setup() {
+    const store = useStore()
+    const isCollapse = computed(() => store.state.isCollapse)
     const asideMenu = reactive([
       {
         path: "/index",
         name: "index",
         label: "首页",
         icon: "shouye-shouye",
+      },
+      {
+        path: "/mine",
+        name: "mine",
+        label: "我的",
+        icon: "wode",
+        submenu: [
+          {
+            path: "/accountmanagement",
+            label: "账号管理",
+            name: "accountmanagement",
+          },
+          {
+            path: "/homeworkmanagement",
+            label: "作业管理",
+            name: "homeworkmanagement",
+          },
+          {
+            path: "/studysituation",
+            label: "学习情况",
+            name: "studysituation",
+          },
+        ],
       },
       {
         path: "/courselearning",
@@ -95,33 +127,12 @@ export default {
             name: "interactivemessage",
           },
         ],
-      },
-      {
-        path: "/mine",
-        name: "mine",
-        label: "我的",
-        icon: "wode",
-        submenu: [
-          {
-            path: "/accountmanagement",
-            label: "账号管理",
-            name: "accountmanagement",
-          },
-          {
-            path: "/homeworkmanagement",
-            label: "作业管理",
-            name: "homeworkmanagement",
-          },
-          {
-            path: "/studysituation",
-            label: "学习情况",
-            name: "studysituation",
-          },
-        ],
       }
+
     ])
     return {
-      asideMenu
+      asideMenu,
+      isCollapse
     }
   }
 
@@ -133,7 +144,7 @@ export default {
   width: 100%;
   height: 80px;
   line-height: 90px;
-  padding-left: 1em;
+  text-align: center;
   font-size: 20px;
   font-weight: bold;
   border-bottom: 1px solid #f5f4f4;
@@ -146,7 +157,6 @@ export default {
 
 
 .subitem {
-  margin-left: 20px;
   width: 100%
 }
 
