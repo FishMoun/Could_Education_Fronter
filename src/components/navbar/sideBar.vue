@@ -77,6 +77,11 @@ export default {
             label: "学习情况",
             name: "studysituation",
           },
+          {
+            path: "/mycloudspace",
+            label: "个人云盘",
+            name: "mycloudspace",
+          },
         ],
       },
       {

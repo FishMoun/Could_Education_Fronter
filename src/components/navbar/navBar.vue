@@ -10,7 +10,7 @@
       <bread></bread>
     </div>
     <div class="right-container">
-      <el-dropdown style="margin-right:10px">
+      <el-dropdown style="margin-right: 10px">
         <span class="el-dropdown-link">
           admin
           <el-icon class="el-icon--right">
@@ -25,7 +25,11 @@
         </template>
       </el-dropdown>
       <div class="btn-fullscreen" @click="handleFullScreen">
-        <el-tooltip effect="dark" :content="fullscreen ? `取消全屏` : `全屏`" placement="bottom">
+        <el-tooltip
+          effect="dark"
+          :content="fullscreen ? `取消全屏` : `全屏`"
+          placement="bottom"
+        >
           <el-icon>
             <FullScreen />
           </el-icon>
@@ -36,20 +40,19 @@
 </template>
 
 <script>
-
 import { useStore, mapMutations } from "vuex";
 import bread from "./bread.vue";
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 export default {
   name: "navBar",
   components: {
-    bread
+    bread,
   },
   setup() {
-    const fullscreen = ref(false)
-    const store = useStore()
-    const isCollapse = computed(() => store.state.isCollapse)
-    const storeMutations = mapMutations(['setCollapse'])
+    const fullscreen = ref(false);
+    const store = useStore();
+    const isCollapse = computed(() => store.state.isCollapse);
+    const storeMutations = mapMutations(["setCollapse"]);
     //全屏
     function handleFullScreen() {
       let element = document.documentElement;
@@ -81,10 +84,9 @@ export default {
       fullscreen,
       isCollapse,
       ...storeMutations,
-      handleFullScreen
-    }
-  }
-
+      handleFullScreen,
+    };
+  },
 };
 </script>
 

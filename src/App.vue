@@ -9,11 +9,11 @@ export default {
   name: "App",
   components: {
     Index,
-    Login
+    Login,
   },
 };
 </script>
-<style>
+<style lang="scss">
 html,
 body,
 #app {

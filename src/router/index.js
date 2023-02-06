@@ -17,6 +17,7 @@ import Websitemessage from "../components/pages/message/Websitemessage.vue"
 import Interactivemessage from "../components/pages/message/Interactivemessage.vue"
 
 import Mine from "../components/pages/mine/Mine.vue"
+import MyCloudSpace from "../components/pages/mine/MyCloudSpace.vue"
 import Accountmanagement from "../components/pages/mine/Accountmanagement.vue"
 import Homeworkmanagement from "../components/pages/mine/Homeworkmanagement.vue"
 import Studysituation from "../components/pages/mine/Studysituation.vue"
@@ -107,6 +108,15 @@ const router = createRouter({
 							path: "/studysituation",
 							name: "学习情况",
 							component: Studysituation,
+						}, {
+							path: "/mycloudspace",
+							component: MyCloudSpace,
+							name: '个人云盘',
+							redirect: '/mycloudspace/%2Froot',
+							children: [
+								{ path: '/mycloudspace', redirect: '/mycloudspace/%2Froot' },
+								{ path: '/mycloudspace/:path', name: 'mycloudspace', component: MyCloudSpace },
+							]
 						},
 					]
 				}
