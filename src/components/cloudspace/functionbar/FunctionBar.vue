@@ -2,39 +2,20 @@
   <div>
     <div class="FunctionBar">
       <div class="left">
-        <el-upload
-          multiple
+        <el-upload multiple
           :action="`/api/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
-          class="uploadButton"
-          :show-file-list="false"
-          :on-success="upload"
-          :on-error="onError"
-          :on-progress="onProgress"
-          :before-upload="beforeUpload"
-          v-if="barType == 'file' && $route.params.path.search('search') == -1"
-        >
+          class="uploadButton" :show-file-list="false" :on-success="upload" :on-error="onError"
+          :on-progress="onProgress" :before-upload="beforeUpload"
+          v-if="barType == 'file' && $route.params.path.search('search') == -1">
           <el-button type="primary" size="small" class="upload">
-            <i class="iconfont icon-yunshangchuan"></i> 上传</el-button
-          >
+            <el-icon><UploadFilled /></el-icon>&nbsp;上传</el-button>
         </el-upload>
-        <el-button
-          v-if="barType == 'file' && $route.params.path.search('search') == -1"
-          size="small"
-          class="create"
-          @click="createFolder"
-          :disabled="!isCreateAble"
-        >
-          <i class="iconfont icon-add"></i> 新建</el-button
-        >
-        <el-button
-          size="small"
-          class="selectAll"
-          :class="isSelectAll ? 'select' : ''"
-          @click="selectAll"
-        >
+        <el-button v-if="barType == 'file' && $route.params.path.search('search') == -1" size="small" class="create"
+          @click="createFolder" :disabled="!isCreateAble">
+          <i class="iconfont icon-add"></i> 新建</el-button>
+        <el-button size="small" class="selectAll" :class="isSelectAll ? 'select' : ''" @click="selectAll">
           <i class="iconfont icon-complete"></i>
-          全选</el-button
-        >
+          全选</el-button>
         <!-- 多选操作按钮 -->
         <div class="multButtons" v-if="isMultBtnsShow">
           <div class="tips">多选操作按钮</div>
@@ -42,10 +23,7 @@
             <div @click="$emit('multDownload')">
               <i class="iconfont icon-bottom"></i> 下载
             </div>
-            <div
-              @click="$emit('multCollect', true)"
-              v-if="!$store.state.isAllFileCollect"
-            >
+            <div @click="$emit('multCollect', true)" v-if="!$store.state.isAllFileCollect">
               <i class="iconfont icon-favorite"></i> 收藏
             </div>
             <div @click="$emit('multCollect', false)" v-else>
@@ -65,65 +43,40 @@
       <!-- 右边 -->
       <div class="right">
         <div class="search">
-          <el-input
-            placeholder="请输入内容"
-            suffix-icon="el-icon-search"
-            v-model="searchContent"
-            @keyup.native.enter="$emit('goSearch', searchContent)"
-          >
+          <el-input placeholder="请输入内容" suffix-icon="el-icon-search" v-model="searchContent"
+            @keyup.native.enter="$emit('goSearch', searchContent)">
           </el-input>
         </div>
         <div class="sortType">
           <el-popover width="150" trigger="hover" :visible-arrow="false">
-            <div
-              class="sortTypeItem"
-              @click="$store.commit('updateSortType', 'time')"
-            >
-              <i
-                class="iconfont icon-select"
-                v-show="$store.state.sortType == 'time'"
-              ></i>
+            <div class="sortTypeItem" @click="$store.commit('updateSortType', 'time')">
+              <i class="iconfont icon-select" v-show="$store.state.sortType == 'time'"></i>
               按修改时间排序
             </div>
-            <div
-              class="sortTypeItem"
-              @click="$store.commit('updateSortType', 'size')"
-            >
-              <i
-                class="iconfont icon-select"
-                v-show="$store.state.sortType == 'size'"
-              ></i>
+            <div class="sortTypeItem" @click="$store.commit('updateSortType', 'size')">
+              <i class="iconfont icon-select" v-show="$store.state.sortType == 'size'"></i>
               按文件大小排序
             </div>
             <i slot="reference" class="iconfont icon-paixu"></i>
           </el-popover>
         </div>
         <div class="displayType" @click="changeShowType">
-          <i
-            class="iconfont icon-paixu1"
-            v-if="$store.state.showType == 'icon'"
-          ></i>
+          <i class="iconfont icon-paixu1" v-if="$store.state.showType == 'icon'"></i>
           <i class="iconfont icon-sifangge" v-else></i>
         </div>
       </div>
 
       <!-- 进度条提示框 -->
       <!-- <progress-dialog
-          :isUploadProgressShow="isUploadProgressShow"
-          :uploadProgress="uploadProgress"
-        ></progress-dialog> -->
-      <div
-        class="goLastFolder"
-        v-if="$route.params.path != '/root' && barType == 'file'"
-      >
+        :isUploadProgressShow="isUploadProgressShow"
+        :uploadProgress="uploadProgress"
+      ></progress-dialog> -->
+      <div class="goLastFolder" v-if="$route.params.path != '/root' && barType == 'file'">
         <a @click.prevent="goLastFolder">返回上一级</a>
         |
-        <a
-          @click.prevent="
-            $router.push({ name: 'mycloudspace', params: { path: '/root' } })
-          "
-          >返回根目录</a
-        >
+        <a @click.prevent="
+          $router.push({ name: 'mycloudspace', params: { path: '/root' } })
+        ">返回根目录</a>
       </div>
     </div>
     <div class="tableHead" v-if="$store.state.showType == 'table'">
@@ -134,8 +87,8 @@
     </div>
   </div>
 </template>
-  
-  <script>
+
+<script>
 import ProgressDialog from "../progressDialog/ProgressDialog.vue";
 export default {
   name: "FunctionBar",
@@ -312,13 +265,13 @@ export default {
     ) {
       this.searchContent = this.$route.params.path
         .split("/")
-        [this.$route.params.path.split("/").length - 1].split("?")[1];
+      [this.$route.params.path.split("/").length - 1].split("?")[1];
     }
   },
 };
 </script>
-  
-  <style scoped>
+
+<style scoped>
 .FunctionBar {
   display: flex;
   align-items: center;
@@ -359,7 +312,7 @@ export default {
   font-weight: bold;
 }
 
-.right > div {
+.right>div {
   margin-right: 15px;
 }
 
@@ -472,6 +425,7 @@ i {
   line-height: 43px;
   width: 50%;
 }
+
 .tableHeadName {
   width: calc(50% + 43px);
   padding: 0;
@@ -494,4 +448,3 @@ i {
   text-align: center;
 }
 </style>
-  
