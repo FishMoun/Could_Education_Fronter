@@ -1,30 +1,28 @@
 <template>
-  <el-card class="box-card">
-    <function-bar
-      @pushUploadData="pushUploadData"
-      @multDelete="$refs.iconTypeList.deleteCurrentFile('mult')"
-      @multDownload="$refs.iconTypeList.downloadCurrentFile('mult')"
-      @multMove="$refs.iconTypeList.moveFile('mult')"
-      @changeSortType="(type) => (sortType = type)"
-      @changShowType="(type) => (showType = type)"
-      @goSearch="goSearch"
-      @multCollect="
-        (flag) => {
-          $refs.iconTypeList.collectCurrentFile(flag, 'mult');
-        }
-      "
-    ></function-bar>
-    <icon-type-list
-      :listData="listData"
-      :folderList="folderList"
-      :sortType="sortType"
-      :showType="showType"
-      :searchFolder="searchFolder"
-      @getListData="getListData"
-      @getFolderList="getFolderList"
-      ref="iconTypeList"
-    ></icon-type-list>
-  </el-card>
+  <function-bar
+    @pushUploadData="pushUploadData"
+    @multDelete="$refs.iconTypeList.deleteCurrentFile('mult')"
+    @multDownload="$refs.iconTypeList.downloadCurrentFile('mult')"
+    @multMove="$refs.iconTypeList.moveFile('mult')"
+    @changeSortType="(type) => (sortType = type)"
+    @changShowType="(type) => (showType = type)"
+    @goSearch="goSearch"
+    @multCollect="
+      (flag) => {
+        $refs.iconTypeList.collectCurrentFile(flag, 'mult');
+      }
+    "
+  ></function-bar>
+  <icon-type-list
+    :listData="listData"
+    :folderList="folderList"
+    :sortType="sortType"
+    :showType="showType"
+    :searchFolder="searchFolder"
+    @getListData="getListData"
+    @getFolderList="getFolderList"
+    ref="iconTypeList"
+  ></icon-type-list>
 </template>
 
 <script>
@@ -192,7 +190,4 @@ export default {
 </script>
 
 <style scope>
-.box-card {
-  width: 100%;
-}
 </style>

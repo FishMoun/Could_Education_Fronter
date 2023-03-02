@@ -9,7 +9,9 @@
       </el-header>
       <el-main>
         <nav-list class="navList" :key="$route.path + 1"></nav-list>
-        <router-view></router-view>
+        <div class="content">
+          <router-view></router-view>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -57,9 +59,16 @@ export default {
 .el-main {
   background-color: #f5f4f4;
   height: 100%;
+  padding: 0;
 }
-
-.navList {
-  margin: -19px -20px 0 -20px;
+.content {
+  background-color: #fff;
+  min-height: calc(100vh - 110px);
+  width: 98%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  margin: 10px;
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
 }
 </style>

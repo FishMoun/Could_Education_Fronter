@@ -827,7 +827,10 @@ export default {
       // console.log(currentFolder);
       // // 在vuex中更新当前目录
       // this.$store.commit("updateCurrentFolder", currentFolder);
-      this.$router.push({ name: "mycloudspace", params: { path: currentFolder } });
+      this.$router.push({
+        name: "mycloudspace",
+        params: { path: currentFolder },
+      });
     },
 
     // 判断当前所在的文件夹位置
@@ -1301,9 +1304,9 @@ export default {
   
   <style scoped>
 .iconTypeListContainer {
-  height: calc(100vh - 100px);
-  width: calc(100vw - 240px);
-  overflow-y: scroll;
+  max-height: 100%;
+  height: auto;
+  /* overflow-y: scroll; */
   position: relative;
 }
 

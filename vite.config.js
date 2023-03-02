@@ -24,7 +24,7 @@ export default defineConfig({
 		proxy: {
 			'/api': {
 				// target: 'http://120.79.189.150:8001',
-				target: 'http://play.teachertom.xyz:9090',
+				target: 'http://10.195.12.78:9090',
 				changeOrigin: true,
 				ws: true,
 				rewrite: (path) => path.replace(/^\/api/, '')
