@@ -6,9 +6,9 @@
     <el-container>
       <el-header>
         <nav-bar :key="$route.path + 1"></nav-bar>
+        <nav-list :key="$route.path + 1"></nav-list>
       </el-header>
       <el-main>
-        <nav-list class="navList" :key="$route.path + 1"></nav-list>
         <div class="content">
           <router-view></router-view>
         </div>
@@ -46,8 +46,8 @@ export default {
 }
 
 .el-header {
-  height: 50px;
-  line-height: 50px;
+  height: auto;
+  padding: 0;
 }
 
 .el-aside {
@@ -63,8 +63,8 @@ export default {
 }
 .content {
   background-color: #fff;
-  min-height: calc(100vh - 110px);
-  width: 98%;
+  height: calc(100vh - 110px);
+  width: auto;
   position: relative;
   overflow: hidden;
   border-radius: 5px;

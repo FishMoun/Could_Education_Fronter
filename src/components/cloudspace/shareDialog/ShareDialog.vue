@@ -1,26 +1,29 @@
 <template>
   <el-dialog
-    class="shareDialog"
+    class="sharedialog"
     :title="'分享文件: ' + shareItem.name + '.' + shareItem.type"
-    :visible.sync="isShow"
+    v-model="isShow"
     @close="
       () => {
         $emit('closeDialog');
         showItem = {};
       }
     "
+    center
   >
-    <input class="urlInput" v-model="showItem.url" readonly />
-    <el-button
-      size="small"
-      type="primary"
-      data-clipboard-target=".urlInput"
-      class="btn"
-      >复制链接</el-button
-    >
-    <div slot="footer" class="dialog-footer">
-      tips: 若分享的文件是视频或音频,有效期仅为一小时
+    <div class="sharecontent">
+      <input class="urlInput" v-model="showItem.url" readonly />
+      <el-button
+        size="small"
+        type="primary"
+        data-clipboard-target=".urlInput"
+        class="btn"
+        >复制链接</el-button
+      >
     </div>
+    <template #footer>
+      tips: 若分享的文件是视频或音频,有效期仅为一小时
+    </template>
   </el-dialog>
 </template>
 
@@ -95,7 +98,6 @@ export default {
   border-radius: 20px;
   margin-top: 20px;
 }
-
 .urlInput {
   display: block;
   width: 90%;
@@ -105,5 +107,11 @@ export default {
   border: 1px solid #ccc;
   color: rgb(87, 87, 87);
   padding: 0 10px;
+}
+.sharecontent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 </style>

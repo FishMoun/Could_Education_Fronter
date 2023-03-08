@@ -52,6 +52,7 @@ export default {
     // 请求文件列表
     async getListData() {
       if (this.$route.params.path.search("search") !== -1) return;
+      console.log(this.$route.params.path, "test");
       let res = await this.$request(
         `/educenter/file/getCurDirFiles/${this.$store.state.userInfo.id}`,
         this.$route.params.path,

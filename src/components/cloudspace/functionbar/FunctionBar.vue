@@ -2,6 +2,7 @@
   <div>
     <div class="FunctionBar">
       <div class="left">
+        <!-- 上传按钮 -->
         <el-upload
           multiple
           :action="`/api/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
@@ -13,49 +14,51 @@
           :before-upload="beforeUpload"
           v-if="barType == 'file' && $route.params.path.search('search') == -1"
         >
-          <el-button type="primary" size="small" class="upload">
+          <el-button type="primary" size="middle" class="upload">
             <el-icon><UploadFilled /></el-icon>&nbsp;上传</el-button
           >
         </el-upload>
+        <!-- 新建按钮 -->
         <el-button
           v-if="barType == 'file' && $route.params.path.search('search') == -1"
-          size="small"
+          size="middle"
           class="create"
           @click="createFolder"
           :disabled="!isCreateAble"
         >
-          <i class="iconfont icon-add"></i> 新建</el-button
+          <el-icon><Plus /></el-icon>&nbsp;新建</el-button
         >
+        <!-- 全选按钮 -->
         <el-button
-          size="small"
+          size="middle"
           class="selectAll"
           :class="isSelectAll ? 'select' : ''"
           @click="selectAll"
         >
-          <i class="iconfont icon-complete"></i>
-          全选</el-button
+          <el-icon><CircleCheck /></el-icon>
+          &nbsp;全选</el-button
         >
         <!-- 多选操作按钮 -->
         <div class="multButtons" v-if="isMultBtnsShow">
           <div class="tips">多选操作按钮</div>
           <div class="multButtonsContainer">
             <div @click="$emit('multDownload')">
-              <i class="iconfont icon-bottom"></i> 下载
+              <el-icon><Download /></el-icon> 下载
             </div>
             <div
               @click="$emit('multCollect', true)"
               v-if="!$store.state.isAllFileCollect"
             >
-              <i class="iconfont icon-favorite"></i> 收藏
+              <el-icon><Star /></el-icon> 收藏
             </div>
             <div @click="$emit('multCollect', false)" v-else>
-              <i class="iconfont icon-favorite"></i> 取消收藏
+              <el-icon><StarFilled /></el-icon> 取消收藏
             </div>
             <div @click="$emit('multDelete')">
-              <i class="iconfont icon-ashbin"></i> 删除
+              <el-icon><Delete /></el-icon> 删除
             </div>
             <div v-if="barType == 'file'" @click="$emit('multMove')">
-              <i class="iconfont icon-yidong"></i>
+              <el-icon><Right /></el-icon>
               移动到
             </div>
           </div>
@@ -64,46 +67,54 @@
 
       <!-- 右边 -->
       <div class="right">
-        <div class="search">
-          <el-input
-            placeholder="请输入内容"
-            suffix-icon="el-icon-search"
-            v-model="searchContent"
-            @keyup.native.enter="$emit('goSearch', searchContent)"
-          >
-          </el-input>
-        </div>
-        <div class="sortType">
-          <el-popover width="150" trigger="hover" :visible-arrow="false">
-            <div
-              class="sortTypeItem"
-              @click="$store.commit('updateSortType', 'time')"
-            >
-              <i
-                class="iconfont icon-select"
-                v-show="$store.state.sortType == 'time'"
-              ></i>
-              按修改时间排序
-            </div>
-            <div
-              class="sortTypeItem"
-              @click="$store.commit('updateSortType', 'size')"
-            >
-              <i
-                class="iconfont icon-select"
-                v-show="$store.state.sortType == 'size'"
-              ></i>
-              按文件大小排序
-            </div>
-            <i slot="reference" class="iconfont icon-paixu"></i>
-          </el-popover>
-        </div>
-        <div class="displayType" @click="changeShowType">
-          <i
-            class="iconfont icon-paixu1"
-            v-if="$store.state.showType == 'icon'"
-          ></i>
-          <i class="iconfont icon-sifangge" v-else></i>
+        <!-- 搜索框 -->
+        <el-input
+          placeholder="请输入内容"
+          v-model="searchContent"
+          @keyup.native.enter="$emit('goSearch', searchContent)"
+        >
+          <template #suffix>
+            <el-icon class="el-input__icon"><search /></el-icon>
+          </template>
+        </el-input>
+        <!-- 排序下拉框 -->
+        <el-dropdown>
+          <span class="icon-link">
+            <el-icon>
+              <Sort />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu style="width: 150px">
+              <el-dropdown-item
+                @click="$store.commit('updateSortType', 'time')"
+              >
+                <span style="width: 2em">
+                  <el-icon v-if="$store.state.sortType == 'time'"
+                    ><Select
+                  /></el-icon>
+                </span>
+                按修改时间排序
+              </el-dropdown-item>
+              <el-dropdown-item @click="$store.commit('updateSortType', 'size')"
+                ><span style="width: 2em">
+                  <el-icon v-if="$store.state.sortType == 'size'"
+                    ><Select
+                  /></el-icon>
+                </span>
+                按文件大小排序
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <div class="icon-link" @click="changeShowType">
+          <el-icon v-if="$store.state.showType == 'icon'">
+            <svg>
+              <use xlink:href="#icon-danlieliebiao"></use>
+            </svg>
+          </el-icon>
+          <el-icon v-else><Menu /></el-icon>
         </div>
       </div>
 
@@ -136,11 +147,13 @@
 </template>
 
 <script>
+import { Select } from "@element-plus/icons-vue";
 import ProgressDialog from "../progressDialog/ProgressDialog.vue";
 export default {
   name: "FunctionBar",
   components: {
     ProgressDialog,
+    Select,
   },
   props: {
     // functionbar的类型 file collect
@@ -333,25 +346,16 @@ export default {
   z-index: 50;
 }
 
-.el-input :deep(input) {
-  width: 14vw;
-  border-radius: 30px;
-  height: 35px;
-  line-height: 35px;
-  background-color: #f1f2f3;
-  border: 1px solid #f1f2f3;
-}
-
-.el-input :deep(i) {
-  line-height: 35px !important;
-  color: #687176;
-}
-
 .right {
   display: flex;
   align-items: center;
 }
-
+.icon-link {
+  cursor: pointer;
+  color: var(--el-color-primary);
+  display: flex;
+  align-items: center;
+}
 .right i {
   font-size: 20px;
   color: #a0a0a0;
@@ -362,33 +366,17 @@ export default {
   margin-right: 15px;
 }
 
-.select {
-  background-color: #696bcc !important;
-  color: white !important;
-  border: 1px solid #696bcc !important;
-}
-
-.selectAll:hover {
-  background-color: #595bb3;
-  color: white;
-}
-
-i {
-  cursor: pointer;
-}
-
 .sortTypeItem {
   font-size: 13px;
-  padding: 10px 0 10px 40px;
   position: relative;
   cursor: pointer;
-  color: #595bb3;
+  color: #7eb7f7;
 }
 
 .sortTypeItem i {
   position: absolute;
   left: 13px;
-  color: #595bb3;
+  color: #7eb7f7;
 }
 
 .sortTypeItem:hover {
@@ -397,6 +385,7 @@ i {
 
 .left {
   display: flex;
+  align-items: center;
 }
 
 .uploadButton {
@@ -439,13 +428,13 @@ i {
 }
 
 .multButtonsContainer div:hover {
-  background-color: #595bb3;
+  background-color: #7eb7f7;
   color: white;
 }
 
 .goLastFolder {
   cursor: pointer;
-  color: #595bb3;
+  color: #7eb7f7;
   font-size: 14px;
   margin-left: 20px;
   position: absolute;

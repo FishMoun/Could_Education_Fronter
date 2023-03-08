@@ -3,7 +3,7 @@
     <!-- 查看图片的dialog -->
     <el-dialog
       :title="currentImg.name"
-      :visible.sync="isPlayerShow"
+      v-model="isPlayerShow"
       @close="$emit('closeDialog')"
     >
       <div class="dialogImgContainer">
@@ -23,24 +23,27 @@
       </div>
     </el-dialog>
     <div class="control">
-      <i class="iconfont icon-fangda" @click="changeSize('large')"></i>
-      <i class="iconfont icon-suoxiao" @click="changeSize('small')"></i>
-      <i class="iconfont icon-youxuan" @click="rotateImg"></i>
-      <i
-        class="iconfont icon-shoucang"
+      <el-icon @click="changeSize('large')"><ZoomIn /></el-icon>
+      <el-icon @click="changeSize('small')"><ZoomOut /></el-icon>
+      <el-icon @click="rotateImg">
+        <svg>
+          <use xlink:href="#icon-xuanzhuan"></use>
+        </svg>
+      </el-icon>
+      <el-icon
         v-if="currentImg.collection == 0 || currentImg.collection == null"
         @click="$emit('collectCurrentImg', { flag: true, item: currentImg })"
-      ></i>
+        ><Star
+      /></el-icon>
       <img
         src="@/assets/img/collect.png"
         alt=""
         @click="$emit('collectCurrentImg', { flag: false, item: currentImg })"
         v-else-if="currentImg.collection == 1"
       />
-      <i
-        class="iconfont icon-fenxiang"
-        @click="$emit('shareCurrentFile', currentImg)"
-      ></i>
+      <el-icon @click="$emit('shareCurrentFile', currentImg)"
+        ><Share
+      /></el-icon>
     </div>
   </div>
 </template>

@@ -1,9 +1,11 @@
 <template>
-  <el-breadcrumb separator="/" class="bread-container">
-    <el-breadcrumb-item v-for="item of breadcrumbList" :key="item.path">
-      <span v-if="item.name !== 'mycloudspace'">{{ item.name }}</span>
-    </el-breadcrumb-item>
-  </el-breadcrumb>
+  <transition-group name="breadcrumb">
+    <el-breadcrumb separator="/" class="bread-container">
+      <el-breadcrumb-item v-for="item of breadcrumbList" :key="item.path">
+        <span v-if="item.name !== 'mycloudspace'">{{ item.name }}</span>
+      </el-breadcrumb-item>
+    </el-breadcrumb>
+  </transition-group>
 </template>
 
 <script>

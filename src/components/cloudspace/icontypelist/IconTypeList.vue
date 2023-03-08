@@ -717,6 +717,7 @@ export default {
       }
       // 打开的是图片文件
       else if (filetype == "image") {
+        console.log("图片双击测试");
         this.currentImg = item;
         this.isImgDialogShow = true;
       }

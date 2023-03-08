@@ -1,51 +1,61 @@
 <template>
-  <div>
-    <div class="tabs-view-container">
-      <div class="tabs-wrapper">
-        <span :class="isActive(item)" v-for="item of tabList" :index="item.path" :key="item.path" @click="goTo(item)">
-          {{ item.name }}
-          <el-icon style="vertical-align: middle" v-if="item.path != '/'" @click.stop="removeTab(item)">
-            <Close />
-          </el-icon>
-        </span>
-      </div>
-      <div class="tabs-close-item" style="float:right" @click="closeAllTab">
-        全部关闭
-      </div>
+  <div class="tabs-view-container">
+    <div class="tabs-wrapper">
+      <span
+        :class="isActive(item)"
+        v-for="item of tabList"
+        :index="item.path"
+        :key="item.path"
+        @click="goTo(item)"
+      >
+        {{ item.name }}
+        <el-icon
+          style="vertical-align: middle"
+          v-show="item.name != '首页'"
+          @click.stop="removeTab(item)"
+        >
+          <Close />
+        </el-icon>
+      </span>
+    </div>
+    <div class="tabs-close-item" style="float: right" @click="closeAllTab">
+      全部关闭
     </div>
   </div>
 </template>
 
 <script>
-import { useRoute, useRouter } from "vue-router"
-import { useStore } from "vuex"
-import { computed, onMounted } from 'vue';
+import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { computed, onMounted } from "vue";
 export default {
   name: "navList",
   setup() {
-    const store = useStore()
-    const tabList = computed(() => store.state.tabList)
-    const route = useRoute()
-    const router = useRouter()
-    const currentRoute = computed(() => route.path)
+    const store = useStore();
+    const tabList = computed(() => store.state.tabList);
+    const route = useRoute();
+    const router = useRouter();
+    const currentRoute = computed(() => route.path);
     const isActive = computed(() => {
       return function (tab) {
         if (tab.path === route.path) {
           return "tabs-view-item-active";
         }
         return "tabs-view-item";
-      }
-    })
+      };
+    });
     const isFold = computed(() => {
       return store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
-    })
+    });
     onMounted(() => {
-      store.dispatch("saveTab", route)
-    })
-    function goTo(tab) { //跳转标签
+      store.dispatch("saveTab", route);
+    });
+    function goTo(tab) {
+      //跳转标签
       router.push({ path: tab.path });
     }
-    function removeTab(tab) { //删除标签
+    function removeTab(tab) {
+      //删除标签
       store.commit("removeTab", tab);
       //如果删除的是当前页则返回上一标签页
       if (tab.path === route.path) {
@@ -69,10 +79,9 @@ export default {
       isFold,
       goTo,
       removeTab,
-      closeAllTab
-
-    }
-  }
+      closeAllTab,
+    };
+  },
 };
 </script>
 
@@ -92,7 +101,6 @@ export default {
   height: 36px;
   background: #fff;
   border-bottom: 1px solid #d8dce5;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
 }
 
 .tabs-view-item {
