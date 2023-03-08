@@ -27,7 +27,7 @@
 <script>
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 export default {
   name: "navList",
   setup() {
@@ -47,6 +47,9 @@ export default {
     const isFold = computed(() => {
       return store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
     });
+    watch(store.state.tabList, (newValue) => {
+      if (newValue.length === 0) router.replace({ path: "/index" });
+    });
     onMounted(() => {
       store.dispatch("saveTab", route);
     });
@@ -65,7 +68,6 @@ export default {
     }
     function closeAllTab() {
       store.commit("resetTab");
-      console.log(route.path);
       if (route.path != "/index") {
         router.push({ path: "/index" });
       } else {

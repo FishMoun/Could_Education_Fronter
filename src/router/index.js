@@ -7,6 +7,8 @@ import Index from "../components/pages/index/Index.vue"
 
 import Courselearning from "../components/pages/courselearning/Courselearning.vue"
 import Mycourse from "../components/pages/courselearning/Mycourse.vue"
+import Courseview from "../components/pages/courselearning/Courseview.vue"
+import Classlearning from "../components/pages/courselearning/Classlearning.vue"
 
 import Experimentlearning from "../components/pages/experimentlearning/Experimentlearning.vue"
 import Myexperiment from "../components/pages/experimentlearning/Myexperiment.vue"
@@ -53,14 +55,22 @@ const router = createRouter({
 							path: "/mycourse",
 							name: "我的课程",
 							component: Mycourse,
-						}
+						}, {
+							path: "/courseview",
+							name: "课程概览",
+							component: Courseview,
+						}, {
+							path: "/classlearning",
+							name: "节次学习",
+							component: Classlearning,
+						},
 					]
 				},
 				{
 					path: "/experimentlearning",
 					name: "实验学习",
 					component: Experimentlearning,
-					redirect: "/mycourse",
+					redirect: "/myexperiment",
 					children: [
 						{
 							path: "/myexperiment",
@@ -77,7 +87,7 @@ const router = createRouter({
 					path: "/message",
 					name: "消息",
 					component: Message,
-					redirect: "/mycourse",
+					redirect: "/websitemessage",
 					children: [
 						{
 							path: "/websitemessage",
