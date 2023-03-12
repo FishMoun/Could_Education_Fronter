@@ -5,7 +5,7 @@ import qs from 'qs'
 export function request(url, params, method, type, header) {
     const instance = axios.create({
         baseURL: '/api',
-        timeout: 100000,
+        timeout: 500,
         withCredentials: true,
     })
 
