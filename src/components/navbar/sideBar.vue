@@ -4,8 +4,16 @@
       <img src="/src/assets/logo.png" />
       <span v-if="!isCollapse">教学管理系统</span>
     </div>
-    <el-menu :default-active="$route.path" class="el-menu-vertical-demo" :unique-opened="true" :collapse="isCollapse"
-      :collapse-transition="false" background-color="#ffffff" active-text-color="#46a6ff" router>
+    <el-menu
+      :default-active="$route.path"
+      class="el-menu-vertical-demo"
+      :unique-opened="true"
+      :collapse="isCollapse"
+      :collapse-transition="false"
+      background-color="#ffffff"
+      active-text-color="#46a6ff"
+      router
+    >
       <template v-for="item in asideMenu">
         <template v-if="item.submenu">
           <el-sub-menu :index="item.path">
@@ -15,7 +23,8 @@
                   <use :xlink:href="'#icon-' + item.icon"></use>
                 </svg>
               </el-icon>
-              <span>{{ item.label }}</span> </template>
+              <span>{{ item.label }}</span>
+            </template>
 
             <template v-for="subItem in item.submenu">
               <el-menu-item :index="subItem.path" class="subitem">
@@ -32,8 +41,7 @@
               </svg>
             </el-icon>
 
-            <template #title>{{ item.label }}
-            </template>
+            <template #title>{{ item.label }} </template>
           </el-menu-item>
         </template>
       </template>
@@ -42,14 +50,24 @@
 </template>
 
 <script>
-import { reactive, computed } from 'vue';
-import { useStore } from 'vuex';
+import { reactive, computed, watch } from "vue";
+import { useStore } from "vuex";
 export default {
   name: "sideBar",
   setup() {
-    const store = useStore()
-    const isCollapse = computed(() => store.state.isCollapse)
-    const asideMenu = reactive([
+    const store = useStore();
+    const isCollapse = computed(() => store.state.isCollapse);
+    //管理员侧边栏
+    const asideMenuAdmin = reactive([
+      {
+        path: "/coursemanagement",
+        name: "coursemanagement",
+        label: "课程管理",
+        icon: "shouye-shouye",
+      },
+    ]);
+    //学生侧边栏
+    const asideMenuStudent = reactive([
       {
         path: "/index",
         name: "index",
@@ -94,7 +112,7 @@ export default {
             path: "/mycourse",
             name: "mycourse",
             label: "我的课程",
-          }
+          },
         ],
       },
       {
@@ -132,15 +150,17 @@ export default {
             name: "interactivemessage",
           },
         ],
-      }
-
-    ])
+      },
+    ]);
+    //根据身份状态渲染对应的侧边栏
+    const asideMenu = computed(() => {
+      return store.state.isAdmin ? asideMenuAdmin : asideMenuStudent;
+    });
     return {
       asideMenu,
-      isCollapse
-    }
-  }
-
+      isCollapse,
+    };
+  },
 };
 </script>
 
@@ -159,13 +179,9 @@ export default {
   border-right: none;
 }
 
-
-
 .subitem {
-  width: 100%
+  width: 100%;
 }
-
-
 
 .icon {
   width: 1.2em;
