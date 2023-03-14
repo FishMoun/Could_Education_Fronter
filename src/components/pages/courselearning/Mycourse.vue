@@ -136,11 +136,13 @@ export default {
   font-size: 14px;
 }
 .body {
+  height: calc(100% - 70px);
   display: flex;
   flex-wrap: wrap;
+  overflow-y: scroll;
 }
 .courseItem {
-  max-width: 189px;
+  max-width: 186px;
   min-width: 100px;
   margin: 10px;
 }
