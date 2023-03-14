@@ -33,6 +33,9 @@ export default {
 .box {
     cursor: pointer;
 }
+.el-card__body:hover {
+    background-color: var(--el-color-primary-light-9);
+}
 
 .bottom {
     margin-top: 13px;
