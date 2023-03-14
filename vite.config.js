@@ -4,8 +4,13 @@ import {
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
+	optimizeDeps: {
+		include: [
+			'pdfjs-dist/build/pdf',
+			'pdfjs-dist/build/pdf.worker'
+		]
+	},
 	plugins: [vue()],
 	resolve: {
 		alias: {

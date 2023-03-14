@@ -47,7 +47,9 @@ export default createStore({
     // 当前上传进度数据数组
     uploadProgressList: [],
     // #endregion
-
+    // #region 身份标识
+    isAdmin: false
+    // #endregion 
   },
   mutations: {
     // #region 导航功能

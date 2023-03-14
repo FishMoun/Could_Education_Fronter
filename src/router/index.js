@@ -23,6 +23,8 @@ import MyCloudSpace from "../components/pages/mine/MyCloudSpace.vue"
 import Accountmanagement from "../components/pages/mine/Accountmanagement.vue"
 import Homeworkmanagement from "../components/pages/mine/Homeworkmanagement.vue"
 import Studysituation from "../components/pages/mine/Studysituation.vue"
+
+import Coursemanagement from "../components/pages/admin/Coursemanagement.vue"
 // 创建路由对象
 const router = createRouter({
 	// 指定路由的工作模式
@@ -40,6 +42,7 @@ const router = createRouter({
 			component: Home,
 			redirect: '/index',
 			children: [
+				// #region 学生路由 
 				{
 					path: "/index",
 					name: "首页",
@@ -129,7 +132,15 @@ const router = createRouter({
 							]
 						},
 					]
-				}
+				},
+				// #endregion
+				// #region 管理员路由
+				{
+					path: "/coursemanagement",
+					name: "课程管理",
+					component: Coursemanagement,
+				},
+				// #endregion 
 			],
 		},
 

@@ -12,13 +12,17 @@ import './assets/ali-icon/iconfont.js'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 //引入二次封装的axios
 import { request } from './network/request';
+// import pdf from 'vue-pdf3';
+
 
 const app = createApp(App)
+
 app.config.globalProperties.$request = request;
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
-
+//使用pdf预览插件
+// app.use(pdf);
 //使用elementui
 app.use(ElementPlus)
 //使用vue-router
