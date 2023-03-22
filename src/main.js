@@ -12,10 +12,9 @@ import './assets/ali-icon/iconfont.js'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 //引入二次封装的axios
 import { request } from './network/request';
-
+//引入视频播放组件
 import VueVideoPlayer from '@videojs-player/vue'
 import 'video.js/dist/video-js.css'
-
 
 const app = createApp(App)
 

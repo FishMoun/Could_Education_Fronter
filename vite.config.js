@@ -19,21 +19,29 @@ export default defineConfig({
 	}
 	,
 	server: {
-		// 自动打开浏览器
-		// open: true,
-		// host: 'localhost',
-		// // 端口
-		// port: 3000,
-		// // https
-		// https: false,
 		proxy: {
-			'/api': {
-				// target: 'http://120.79.189.150:8001',
-				target: 'http://10.195.12.78:9090',
+			//网盘
+			'/cloudspace': {
+				target: 'http://123.60.88.31:8001',
 				changeOrigin: true,
 				ws: true,
-				rewrite: (path) => path.replace(/^\/api/, '')
+				rewrite: (path) => path.replace(/^\/cloudspace/, '')
 			},
+			// 用户登录鉴权服务
+			'/ucenter': {
+				target: 'http://123.60.88.31:8003',
+				changeOrigin: true,
+				ws: true,
+				rewrite: (path) => path.replace(/^\/ucenter/, '')
+			},
+			//管理服务
+			'/manager': {
+				target: 'http://123.60.88.31:8002',
+				changeOrigin: true,
+				ws: true,
+				rewrite: (path) => path.replace(/^\/manager/, '')
+			},
+
 			'/downloadfile': {
 				target: 'https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com',
 				changeOrigin: true,

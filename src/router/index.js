@@ -23,6 +23,8 @@ import MyCloudSpace from "../components/pages/mine/MyCloudSpace.vue"
 import Accountmanagement from "../components/pages/mine/Accountmanagement.vue"
 import Homeworkmanagement from "../components/pages/mine/Homeworkmanagement.vue"
 import Studysituation from "../components/pages/mine/Studysituation.vue"
+import Homeworkdetail from "../components/pages/mine/Homeworkdetail.vue"
+import Homeworkcorrect from "../components/pages/mine/Homeworkcorrect.vue"
 
 import Coursemanagement from "../components/pages/admin/Coursemanagement.vue"
 // 创建路由对象
@@ -117,7 +119,20 @@ const router = createRouter({
 							path: "/homeworkmanagement",
 							name: "作业管理",
 							component: Homeworkmanagement,
-						}, {
+						},
+						//作业管理下路由
+						{
+							path: "/homeworkdetail",
+							name: "作业详细",
+							component: Homeworkdetail,
+						},
+						//作业批改
+						{
+							path: "/homeworkcorrect",
+							name: "作业批改",
+							component: Homeworkcorrect,
+						},
+						{
 							path: "/studysituation",
 							name: "学习情况",
 							component: Studysituation,

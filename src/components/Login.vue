@@ -16,16 +16,15 @@
       </template>
       <div class="boxBody">
         <el-row :gutter="0">
-          <!-- 为了测试方便，这里的v-model配合后端的api写法 -->
           <el-input
-            v-model="login.mobile"
+            v-model="boxStatus.username"
             size="large"
             class="w-50 m-2"
             placeholder="账号"
             :prefix-icon="User"
           />
           <el-input
-            v-model="login.password"
+            v-model="boxStatus.password"
             size="large"
             class="w-50 m-2"
             placeholder="密码"
@@ -41,7 +40,7 @@
         </div>
         <div class="more">
           <span>{{ boxStatus.isLogin ? "没有账户？" : "已有账户？" }}</span>
-          <span class="action" @click="changeStatus()">{{
+          <span class="action" @click="changeStatus">{{
             boxStatus.isLogin ? "去注册" : "去登录"
           }}</span>
         </div>
@@ -51,12 +50,16 @@
 </template>
 
 <script>
-import { reactive } from "vue";
+import { reactive, getCurrentInstance } from "vue";
+import { useStore } from "vuex";
 import { User, Lock } from "@element-plus/icons-vue";
 
 export default {
   name: "Login",
   setup() {
+    const store = useStore();
+    const { proxy } = getCurrentInstance();
+    console.log(proxy);
     const accountTypes = ["学生", "教师", "管理员"];
     const boxStatus = reactive({
       isLogin: true,
@@ -65,53 +68,43 @@ export default {
       confirmPassword: "",
       accountType: accountTypes[0],
     });
+    function changeStatus() {
+      boxStatus.isLogin = !boxStatus.isLogin;
+    }
+    //点击登录后发送两次请求，一次获取登录状态，一次获取访问资源的权限
+    async function onSubmit() {
+      let login = {
+        username: boxStatus.username,
+        password: boxStatus.password,
+      };
+      const params = {
+        client_id: "cloud",
+        client_secret: "123",
+        scope: "all",
+        grant_type: "password",
+        username: boxStatus.username,
+        password: boxStatus.password,
+      };
+      let res = await proxy.$request(
+        "/oauth/token",
+        params,
+        "post",
+        "paramsSerializer",
+        "json",
+        "/ucenter"
+      );
+      console.log(res);
+      store.state.accesstoken = res.data.access_token;
+      store.state.refreshtoken = res.data.refresh_token;
+    }
     return {
+      onSubmit,
+      changeStatus,
       accountTypes,
       boxStatus,
       User,
       Lock,
     };
-  },
-  data() {
-    return {
-      login: {
-        mobile: "",
-        password: "",
-      },
-    };
-  },
-  methods: {
-    changeStatus() {
-      this.boxStatus.isLogin = !this.boxStatus.isLogin;
-    }, //   点击登录的回调
-    async onSubmit() {
-      let res = await this.$request(
-        "/educenter/member/login",
-        this.login,
-        "post",
-        "params"
-      );
-      console.log(res);
-      if (res.status == 200 && res.data.success) {
-        // 登陆成功
-        // 将用户信息保存至vuex
-        this.$store.commit("updateUserInfo", res.data.data.mem);
-
-        // 将返回的用户信息保存至localstorage中
-        window.localStorage.setItem(
-          "userInfo",
-          JSON.stringify(res.data.data.mem)
-        );
-
-        // 将token存入本地
-        window.localStorage.setItem("token", res.data.data.token);
-
-        //   跳转至主界面
-        this.$router.push("/index");
-      } else if (res.status == 200 && !res.data.success) {
-        this.$message.warning("登录失败,账号或密码错误!");
-      }
-    },
   },
 };
 </script>

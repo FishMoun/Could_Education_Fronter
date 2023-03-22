@@ -49,8 +49,12 @@ export default createStore({
     // #endregion
     // #region 身份标识
     isAdmin: false,
-    isTeacher: false
+    isTeacher: false,
     // #endregion 
+    //token处理
+    jwttoken: '',
+    accesstoken: '',
+    refreshtoken: ''
   },
   mutations: {
     // #region 导航功能

@@ -11,6 +11,26 @@ export default {
     Index,
     Login,
   },
+  //解决在vuex状态无法保存的问题
+  created() {
+    // 先检查sessionStorage中是否有数据，若存在数据则加载到vuex
+    if (sessionStorage.getItem("store")) {
+      this.$store.replaceState(
+        Object.assign(
+          {},
+          this.$store.state,
+          JSON.parse(sessionStorage.getItem("store"))
+        )
+      );
+      // sessionStorage.removeItem("store");
+    }
+
+    //在页面刷新时将vuex里的信息保存到sessionStorage里
+    window.addEventListener("beforeunload", () => {
+      console.log("存入session");
+      sessionStorage.setItem("store", JSON.stringify(this.$store.state));
+    });
+  },
 };
 </script>
 <style lang="scss">

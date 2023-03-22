@@ -1,7 +1,7 @@
 <template>
-  <el-button @click="changerole" style="position: absolute; left: 0"
-    >当前是{{ isTeacher ? "老师" : "学生" }}模式</el-button
-  >
+  <el-button @click="changerole" style="position: absolute; left: 0">{{
+    isTeacher ? "老师" : "学生"
+  }}</el-button>
   <!-- 内容区 -->
   <div class="main">
     <div class="mainleft">
@@ -40,7 +40,7 @@
     </div>
     <div class="mainright">
       <div class="righthead">
-        <span style="font-size: 20px">全场景回溯</span>
+        <span style="font-size: 20px">课程场景</span>
         <el-radio-group class="view-change-button" v-model="tabview">
           <el-radio-button label="timemode">时序视图</el-radio-button>
           <el-radio-button label="outlinemode">大纲视图</el-radio-button>
@@ -120,7 +120,7 @@
             <template #default="{ node, data }">
               <span class="custom-tree-node">
                 <el-input
-                  v-if="data.inputvisible && isTeacher"
+                  v-if="isTeacher && showeditoutline && data.inputvisible"
                   ref="InputRef"
                   v-model="chapterInputValue"
                   class="ml-1 w-20"
@@ -128,7 +128,9 @@
                   @keyup.enter="handleInputConfirm(data, $event)"
                   @blur="handleInputConfirm(data, $event)"
                 />
-                <span v-else @click="showInput(data)">{{ node.label }}</span>
+                <span v-else @click="showInput(data)" style="font-size: 25px">{{
+                  node.label
+                }}</span>
                 <span style="color: #409eff" v-show="showeditoutline">
                   <a
                     @click="append(data)"
@@ -312,10 +314,12 @@ export default {
     },
     //出现输入框
     showInput(data) {
-      data.inputvisible = true;
-      this.$nextTick(() => {
-        this.$refs.InputRef.focus();
-      });
+      if (this.isTeacher && this.showeditoutline) {
+        data.inputvisible = true;
+        this.$nextTick(() => {
+          this.$refs.InputRef.focus();
+        });
+      }
     },
     //输入框确认
     handleInputConfirm(data, $event) {
@@ -332,12 +336,13 @@ export default {
 
 <style scoped>
 .introduction-card {
-  margin-top: 5vh;
+  margin-top: 20px;
   min-height: 20vh;
 }
+
 .timelinebox {
   height: 80vh;
-  width: 30vw;
+  width: 40vw;
   padding-right: 40px;
 }
 .card-content {
@@ -358,12 +363,14 @@ export default {
   height: 100%;
 }
 .main {
-  width: 80%;
+  width: 100%;
   display: flex;
+  flex-direction: row-reverse;
   justify-content: space-around;
 }
+/* 这里左右换位 */
 .mainleft {
-  width: 25vw;
+  width: 30vw;
 }
 .header {
   display: flex;
@@ -380,7 +387,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: 15px;
   padding-right: 8px;
+}
+.mainright {
+  position: relative;
+  left: 5vw;
 }
 </style>
