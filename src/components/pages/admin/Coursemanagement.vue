@@ -6,7 +6,6 @@
         <el-select
           v-model="termValue"
           placeholder="学期选择"
-          size="middle"
           style="margin-right: 10px"
         >
           <el-option
@@ -19,7 +18,6 @@
         <el-select
           v-model="collegeValue"
           placeholder="院系选择"
-          size="middle"
           style="margin-right: 10px"
         >
           <el-option
@@ -52,7 +50,7 @@
     </el-header>
     <el-main>
       <!-- 主体表格部分 -->
-      <el-table :data="tableData" table-layout="fixed">
+      <el-table v-loading="loading" :data="tableData" table-layout="fixed">
         <el-table-column prop="courseId" label="课程号" />
         <el-table-column prop="coursename" label="课程名" />
         <el-table-column label="课程封面">
@@ -71,8 +69,8 @@
         <el-table-column prop="class" label="上课班级" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default>
-            <el-button type="primary" size="middle">编辑</el-button>
-            <el-button type="danger" size="middle">删除</el-button>
+            <el-button type="primary">编辑</el-button>
+            <el-button type="danger">删除</el-button>
           </template>
         </el-table-column>
       </el-table></el-main
@@ -95,15 +93,15 @@
           </el-form-item>
           <el-form-item label="开课院系：">
             <el-select v-model="form.college" placeholder="选择院系">
-              <el-option label="计信院" value="计信院" />
+              <el-option label="计算机与信息学院" value="计算机与信息学院" />
               <el-option label="智能院" value="智能院" />
             </el-select>
           </el-form-item>
           <el-form-item label="学时：">
-            <el-input v-model="form.coursehour" />
+            <el-input v-model="form.coursehour" type="number" />
           </el-form-item>
           <el-form-item label="学分：">
-            <el-input v-model="form.credit" />
+            <el-input v-model="form.credit" type="number" />
           </el-form-item>
           <el-form-item label="课程类别：">
             <el-radio-group v-model="form.category">
@@ -149,9 +147,9 @@
             </el-select>
           </el-form-item>
           <el-form-item label="学年学期：">
-            <el-select v-model="form.region" placeholder="选择学年学期">
-              <el-option label="2022~2023第1学期" value="2022~2023第1学期" />
-              <el-option label="2022~2023第2学期" value="2022~2023第2学期" />
+            <el-select v-model="form.term" placeholder="选择学年学期">
+              <el-option label="2022~2023第1学期" value="2022-1" />
+              <el-option label="2022~2023第2学期" value="2022-2" />
             </el-select>
           </el-form-item>
         </div>
@@ -159,10 +157,10 @@
           <h2>具体排课(批量添加)</h2>
           <div class="right-form-item">
             <el-form-item label="开始周次：">
-              <el-input v-model="form.beginweek" />
+              <el-input v-model="form.beginweek" type="number" />
             </el-form-item>
             <el-form-item label="结束周次：">
-              <el-input v-model="form.endweek" />
+              <el-input v-model="form.endweek" type="number" />
             </el-form-item>
             <el-form-item label="选择周几：">
               <el-input v-model="form.weekth" />
@@ -201,6 +199,7 @@
       </el-form>
       <template #footer>
         <span class="dialog-footer">
+          <el-button @click="submitCourseForm">新增左侧课程信息</el-button>
           <el-button @click="dialogVisible = false">取消</el-button>
           <el-button type="primary" @click="dialogVisible = false">
             确定添加
@@ -217,119 +216,53 @@ import { Search } from "@element-plus/icons-vue";
 export default {
   data() {
     return {
+      //加载
+      loading: true,
       tableData: [
-        {
-          //课程号
-          courseId: "12345",
-          //课程名
-          coursename: "数据库原理",
-          //学时
-          classhours: "48",
-          coversrc: "/src/assets/img/default.jpg",
-          //学分
-          credit: "3",
-          //课程类别
-          category: "必修",
-          //开课院系
-          college: "计信院",
-          //周次
-          week: "6~10周",
-          //上课地点
-          classroom: "致高楼B101、致用楼B101",
-          //任课教师
-          teacher: "许卓明",
-          //上课班级
-          class: "软工20_1",
-        },
-        {
-          //课程号
-          courseId: "12345",
-          //课程名
-          coursename: "数据库原理",
-          //学时
-          classhours: "48",
-          //学分
-          credit: "3",
-          //课程类别
-          category: "必修",
-          //开课院系
-          college: "计信院",
-          //任课教师
-          teacher: "许卓明",
-          //上课班级
-          class: "软工20_1",
-        },
-        {
-          //课程号
-          courseId: "12345",
-          //课程名
-          coursename: "数据库原理",
-          //学时
-          classhours: "48",
-          //学分
-          credit: "3",
-          //课程类别
-          category: "必修",
-          //开课院系
-          college: "计信院",
-          //任课教师
-          teacher: "许卓明",
-          //上课班级
-          class: "软工20_1",
-        },
-        {
-          //课程号
-          courseId: "12345",
-          //课程名
-          coursename: "数据库原理",
-          //学时
-          classhours: "48",
-          //学分
-          credit: "3",
-          //课程类别
-          category: "必修",
-          //开课院系
-          college: "计信院",
-          //任课教师
-          teacher: "许卓明",
-          //上课班级
-          class: "软工20_1",
-        },
-        {
-          //课程号
-          courseId: "12345",
-          //课程名
-          coursename: "数据库原理",
-          //学时
-          classhours: "48",
-          //学分
-          credit: "3",
-          //课程类别
-          category: "必修",
-          //开课院系
-          college: "计信院",
-          //任课教师
-          teacher: "许卓明",
-          //上课班级
-          class: "软工20_1",
-        },
+        //测试数据
+        // {
+        //   //课程号
+        //   courseId: "12345",
+        //   //课程名
+        //   coursename: "数据库原理",
+        //   //学时
+        //   classhours: "48",
+        //   coversrc: "/src/assets/img/default.jpg",
+        //   //学分
+        //   credit: "3",
+        //   //课程类别
+        //   category: "必修",
+        //   //开课院系
+        //   college: "计信院",
+        //   //周次
+        //   week: "6~10周",
+        //   //上课地点
+        //   classroom: "致高楼B101、致用楼B101",
+        //   //任课教师
+        //   teacher: "许卓明",
+        //   //上课班级
+        //   class: "软工20_1",
+        // },
       ],
+      //筛选条件
+      //学期学年
       termValue: "",
       termoptions: [
         {
-          value: "2022",
+          value: "2022-1",
           label: "2022~2023第1学期",
         },
         {
-          value: "2023",
+          value: "2022-2",
           label: "2022~2023第2学期",
         },
       ],
+      //学院
       collegeValue: "",
       collegeoptions: [
         {
-          value: "计信院",
-          label: "计信院",
+          value: "计算机与信息学院",
+          label: "计算机与信息学院",
         },
         {
           value: "人工智能学院",
@@ -344,18 +277,19 @@ export default {
         //课程信息
         coursename: "",
         courseid: "",
-        coursehour: "",
-        credit: "",
+        coursehour: 48,
+        credit: 3,
         college: "",
         category: "",
         classroom: "",
         teacher: "",
         class: "",
+        term: "",
         //排课信息
         beginclass: "",
         endclass: "",
-        beginweek: "",
-        endweek: "",
+        beginweek: 1,
+        endweek: 12,
         weekth: "",
         c_classroom: "",
         c_teacher: "",
@@ -417,6 +351,86 @@ export default {
       this.tags.splice(this.tags.indexOf(tag), 1);
     },
     // #endregion
+    //新增课程信息
+    async submitCourseForm() {
+      //数据预处理
+      let yearandterm = this.form.term.split("-");
+      let tmptype = true;
+      if (this.form.category === "选修") tmptype = false;
+      const tmpform = {
+        id: this.form.courseid,
+        name: this.form.coursename,
+        creditHour: this.form.coursehour,
+        creditNum: this.form.credit,
+        //课程类型
+        type: tmptype,
+        year: Number(yearandterm[0]),
+        department: this.form.college,
+        term: Number(yearandterm[1]),
+        beginweek: this.form.beginweek,
+        endWeek: this.form.endweek,
+        //下面两个需要先找到ID实现，
+        teacherId: "1",
+        classId: "3",
+      };
+      console.log(tmpform);
+      //新增课程发送请求
+      let res = await this.$request(
+        "/admin/manager/course/save",
+        tmpform,
+        "post",
+        "params",
+        "json",
+        "/manager"
+      );
+      console.log(res);
+    },
+    //查询所有课程信息
+    async selectallcourse() {
+      let res = await this.$request(
+        "/admin/manager/course/list",
+        "",
+        "get",
+        "params",
+        "json",
+        "/manager"
+      );
+      this.tableData = [];
+      let courses = res.data.data.courses;
+      console.log(courses);
+      for (let i = 0; i < courses.length; ++i) {
+        //这里加上问号防止渲染的时候axios没有拿到数据
+        this.tableData[i] = {
+          courseId: courses[i]?.courseId,
+          coursename: courses[i]?.courseName,
+          classhours: courses[i]?.creditHour,
+          coversrc: courses[i]?.url,
+          credit: courses[i]?.creditNum,
+          category: courses[i]?.type ? "必修" : "选修",
+          college: courses[i]?.department,
+          week: courses[i]?.beginWeek + "~" + courses[i]?.endWeek + "周",
+          // classroom: ,
+          teacher: courses[i]?.teacherName,
+          class: courses[i]?.className,
+        };
+      }
+      this.loading = false;
+    },
+    //筛选查询课程信息
+    async selectPartCourseByCondition() {
+      let res = await this.$request(
+        "/admin/manager/course/list",
+        "",
+        "get",
+        "params",
+        "json",
+        "/manager"
+      );
+    },
+  },
+  mounted() {
+    // 渲染页面的表格
+    this.selectallcourse();
   },
 };
 </script>
