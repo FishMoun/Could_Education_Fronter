@@ -15,7 +15,7 @@ import Myexperiment from "../components/pages/experimentlearning/Myexperiment.vu
 import Onlineexperiment from "../components/pages/experimentlearning/Onlineexperiment.vue"
 
 import Message from "../components/pages/message/Message.vue"
-import Websitemessage from "../components/pages/message/Websitemessage.vue"
+import Coursemessage from "../components/pages/message/Coursemessage.vue"
 import Interactivemessage from "../components/pages/message/Interactivemessage.vue"
 
 import Mine from "../components/pages/mine/Mine.vue"
@@ -90,12 +90,12 @@ const router = createRouter({
 					path: "/message",
 					name: "消息",
 					component: Message,
-					redirect: "/websitemessage",
+					redirect: "/coursemessage",
 					children: [
 						{
-							path: "/websitemessage",
-							name: "站内消息",
-							component: Websitemessage,
+							path: "/coursemessage",
+							name: "课程消息",
+							component: Coursemessage,
 						}, {
 							path: "/interactivemessage",
 							name: "互动消息",

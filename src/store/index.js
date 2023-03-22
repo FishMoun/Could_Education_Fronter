@@ -48,7 +48,8 @@ export default createStore({
     uploadProgressList: [],
     // #endregion
     // #region 身份标识
-    isAdmin: false
+    isAdmin: false,
+    isTeacher: false
     // #endregion 
   },
   mutations: {

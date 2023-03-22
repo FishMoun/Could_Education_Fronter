@@ -12,7 +12,9 @@ import './assets/ali-icon/iconfont.js'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 //引入二次封装的axios
 import { request } from './network/request';
-// import pdf from 'vue-pdf3';
+
+import VueVideoPlayer from '@videojs-player/vue'
+import 'video.js/dist/video-js.css'
 
 
 const app = createApp(App)
@@ -29,4 +31,6 @@ app.use(ElementPlus)
 app.use(router)
 //使用vuex
 app.use(store)
+//使用video
+app.use(VueVideoPlayer)
 app.mount('#app')

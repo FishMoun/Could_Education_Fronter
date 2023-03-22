@@ -83,77 +83,121 @@
       :fullscreen="true"
       title="添加新的课程"
       center
-      :close-on-click-modal="false"
       :close-on-press-escape="false"
     >
       <el-form :model="form" label-width="120px" :inline="true">
-        <el-form-item label="课程名称：">
-          <el-input v-model="form.coursename" />
-        </el-form-item>
-        <el-form-item label="课程号：">
-          <el-input v-model="form.coursename" />
-        </el-form-item>
-        <el-form-item label="开课院系：">
-          <el-select v-model="form.region" placeholder="选择院系">
-            <el-option label="计信院" value="计信院" />
-            <el-option label="智能院" value="智能院" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学时：">
-          <el-input v-model="form.coursename" />
-        </el-form-item>
-        <el-form-item label="学分：">
-          <el-input v-model="form.coursename" />
-        </el-form-item>
-        <el-form-item label="课程类别：">
-          <el-radio-group v-model="form.resource">
-            <el-radio label="必修" />
-            <el-radio label="选修" />
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="上课地点：">
-          <el-input v-model="form.coursename" />
-        </el-form-item>
-        <el-form-item label="任课老师：">
-          <el-select
-            v-model="teachervalue"
-            multiple
-            filterable
-            default-first-option
-            :reserve-keyword="false"
-            placeholder="选择老师"
-          >
-            <el-option
-              v-for="item in teacherOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="上课班级：">
-          <el-select
-            v-model="classvalue"
-            multiple
-            filterable
-            allow-create
-            :reserve-keyword="false"
-            placeholder="选择班级"
-          >
-            <el-option
-              v-for="item in classOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学年学期：">
-          <el-select v-model="form.region" placeholder="选择学年学期">
-            <el-option label="2022~2023第1学期" value="2022~2023第1学期" />
-            <el-option label="2022~2023第2学期" value="2022~2023第2学期" />
-          </el-select>
-        </el-form-item>
+        <div class="left-form">
+          <el-form-item label="课程名称：">
+            <el-input v-model="form.coursename" />
+          </el-form-item>
+          <el-form-item label="课程号：">
+            <el-input v-model="form.courseid" />
+          </el-form-item>
+          <el-form-item label="开课院系：">
+            <el-select v-model="form.college" placeholder="选择院系">
+              <el-option label="计信院" value="计信院" />
+              <el-option label="智能院" value="智能院" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="学时：">
+            <el-input v-model="form.coursehour" />
+          </el-form-item>
+          <el-form-item label="学分：">
+            <el-input v-model="form.credit" />
+          </el-form-item>
+          <el-form-item label="课程类别：">
+            <el-radio-group v-model="form.category">
+              <el-radio label="必修" />
+              <el-radio label="选修" />
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="上课地点：">
+            <el-input v-model="form.classroom" />
+          </el-form-item>
+          <el-form-item label="任课老师：">
+            <el-select
+              v-model="form.teacher"
+              multiple
+              filterable
+              default-first-option
+              :reserve-keyword="false"
+              placeholder="选择老师"
+            >
+              <el-option
+                v-for="item in teacherOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="上课班级：">
+            <el-select
+              v-model="form.class"
+              multiple
+              filterable
+              allow-create
+              :reserve-keyword="false"
+              placeholder="选择班级"
+            >
+              <el-option
+                v-for="item in classOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="学年学期：">
+            <el-select v-model="form.region" placeholder="选择学年学期">
+              <el-option label="2022~2023第1学期" value="2022~2023第1学期" />
+              <el-option label="2022~2023第2学期" value="2022~2023第2学期" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <div class="right-form">
+          <h2>具体排课(批量添加)</h2>
+          <div class="right-form-item">
+            <el-form-item label="开始周次：">
+              <el-input v-model="form.beginweek" />
+            </el-form-item>
+            <el-form-item label="结束周次：">
+              <el-input v-model="form.endweek" />
+            </el-form-item>
+            <el-form-item label="选择周几：">
+              <el-input v-model="form.weekth" />
+            </el-form-item>
+            <el-form-item label="开始节次：">
+              <el-input v-model="form.beginclass" />
+            </el-form-item>
+            <el-form-item label="结束节次：">
+              <el-input v-model="form.endclass" />
+            </el-form-item>
+            <el-form-item label="上课教室：">
+              <el-input v-model="form.c_classroom" />
+            </el-form-item>
+            <el-form-item label="上课老师：">
+              <el-input v-model="form.c_teacher" />
+            </el-form-item>
+          </div>
+          <div class="right-form-button">
+            <el-button>增加</el-button>
+          </div>
+          <h3>小节列表</h3>
+          <el-scrollbar class="right-form-list">
+            <el-tag
+              v-for="tag in tags"
+              :key="tag.name"
+              class="classtag"
+              closable
+              :type="tag.type"
+              :disable-transitions="false"
+              @close="handleClose(tag)"
+            >
+              {{ tag.name }}
+            </el-tag>
+          </el-scrollbar>
+        </div>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -297,17 +341,26 @@ export default {
       inputcoursename: "",
       dialogVisible: false,
       form: {
+        //课程信息
         coursename: "",
-        region: "",
-        date1: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
+        courseid: "",
+        coursehour: "",
+        credit: "",
+        college: "",
+        category: "",
+        classroom: "",
+        teacher: "",
+        class: "",
+        //排课信息
+        beginclass: "",
+        endclass: "",
+        beginweek: "",
+        endweek: "",
+        weekth: "",
+        c_classroom: "",
+        c_teacher: "",
       },
       //任课老师选择
-      teachervalue: "",
       teacherOptions: [
         {
           value: "许卓明",
@@ -322,7 +375,6 @@ export default {
           label: "毛莺池",
         },
       ],
-      classvalue: "",
       classOptions: [
         {
           value: "软工20_1",
@@ -337,6 +389,19 @@ export default {
           label: "软工20_3",
         },
       ],
+      tags: [
+        { name: "第4周周一第1~2节", type: "" },
+        { name: "第5周周一第1~2节", type: "" },
+        { name: "第6周周一第1~2节", type: "" },
+        { name: "第7周周一第1~2节", type: "" },
+        { name: "第8周周一第1~2节", type: "" },
+        { name: "第9周周一第1~2节", type: "" },
+        { name: "第10周周一第1~2节", type: "" },
+        { name: "第11周周一第1~2节", type: "" },
+        { name: "第12周周一第1~2节", type: "" },
+        { name: "第13周周一第1~2节", type: "" },
+        { name: "第14周周一第1~2节", type: "" },
+      ],
     };
   },
   components: { Search },
@@ -347,6 +412,11 @@ export default {
       this.inputcourseId = "";
       this.inputcoursename = "";
     },
+    // #region 标签方法
+    handleClose(tag) {
+      this.tags.splice(this.tags.indexOf(tag), 1);
+    },
+    // #endregion
   },
 };
 </script>
@@ -367,5 +437,27 @@ export default {
 .searchbox {
 }
 .buttonbox {
+}
+.el-form {
+  display: flex;
+}
+.left-form {
+  width: 30vw;
+}
+.right-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40vw;
+}
+.right-form-list {
+  width: 80%;
+  height: 200px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 0;
+}
+
+.classtag {
+  width: 100%;
 }
 </style>

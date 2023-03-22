@@ -140,9 +140,9 @@ export default {
         icon: "xiaoxi",
         submenu: [
           {
-            path: "/websitemessage",
-            label: "站内消息",
-            name: "websitemessage",
+            path: "/coursemessage",
+            label: "课程消息",
+            name: "coursemessage",
           },
           {
             path: "/interactivemessage",
