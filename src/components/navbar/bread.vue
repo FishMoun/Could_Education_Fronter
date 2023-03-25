@@ -14,7 +14,6 @@ export default {
   setup() {
     const route = useRoute();
     let breadcrumbList = reactive(route.matched.filter((item) => item.name));
-    console.log("123", breadcrumbList);
     return {
       breadcrumbList,
     };

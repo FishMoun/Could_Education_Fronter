@@ -7,13 +7,10 @@ export function request(url,//请求地址
     method,//请求方法
     type, //请求类型（params，resful，paramsSerializer）
     header, //请求头（）
-    serviceURL//请求的服务类型
 ) {
-    if (serviceURL === undefined)
-        serviceURL = '/cloudspace'
     //创建axios实例
     const instance = axios.create({
-        baseURL: serviceURL,
+        baseURL: '/api',
         timeout: 2000,
         withCredentials: true,
     })

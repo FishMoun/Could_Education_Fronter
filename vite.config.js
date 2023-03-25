@@ -20,26 +20,12 @@ export default defineConfig({
 	,
 	server: {
 		proxy: {
-			//网盘
-			'/cloudspace': {
-				target: 'http://123.60.88.31:8001',
+			//后端网关地址
+			'/api': {
+				target: 'http://123.60.88.31:9000',
 				changeOrigin: true,
 				ws: true,
-				rewrite: (path) => path.replace(/^\/cloudspace/, '')
-			},
-			// 用户登录鉴权服务
-			'/ucenter': {
-				target: 'http://123.60.88.31:8003',
-				changeOrigin: true,
-				ws: true,
-				rewrite: (path) => path.replace(/^\/ucenter/, '')
-			},
-			//管理服务
-			'/manager': {
-				target: 'http://123.60.88.31:8002',
-				changeOrigin: true,
-				ws: true,
-				rewrite: (path) => path.replace(/^\/manager/, '')
+				rewrite: (path) => path.replace(/^\/api/, '')
 			},
 
 			'/downloadfile': {

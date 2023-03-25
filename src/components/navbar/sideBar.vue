@@ -65,6 +65,18 @@ export default {
         label: "课程管理",
         icon: "shouye-shouye",
       },
+      {
+        path: "/stumanagement",
+        name: "stumanagement",
+        label: "学生管理",
+        icon: "shouye-shouye",
+      },
+      {
+        path: "/teamanagement",
+        name: "teamanagement",
+        label: "教师管理",
+        icon: "shouye-shouye",
+      },
     ]);
     //学生侧边栏
     const asideMenuStudent = reactive([

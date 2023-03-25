@@ -27,6 +27,8 @@ import Homeworkdetail from "../components/pages/mine/Homeworkdetail.vue"
 import Homeworkcorrect from "../components/pages/mine/Homeworkcorrect.vue"
 
 import Coursemanagement from "../components/pages/admin/Coursemanagement.vue"
+import Stumanagement from "../components/pages/admin/Stumanagement.vue"
+import Teamanagement from "../components/pages/admin/Teamanagement.vue"
 // 创建路由对象
 const router = createRouter({
 	// 指定路由的工作模式
@@ -154,6 +156,17 @@ const router = createRouter({
 					path: "/coursemanagement",
 					name: "课程管理",
 					component: Coursemanagement,
+
+				},
+				{
+					path: "/stumanagement",
+					name: "学生管理",
+					component: Stumanagement,
+				},
+				{
+					path: "/teamanagement",
+					name: "教师管理",
+					component: Teamanagement,
 				},
 				// #endregion 
 			],
