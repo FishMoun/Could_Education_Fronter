@@ -8,14 +8,34 @@
       <template #header>
         <div class="card-header">
           <span>{{ boxStatus.isLogin ? "登录" : "注册" }}</span>
-          <span>
-            身份：
-            {{ boxStatus.accountType }}
-          </span>
+          <div class="status" v-show="!boxStatus.isLogin">
+            <span>身份：</span>
+            <el-select
+              v-model="boxStatus.accountType"
+              placeholder="选择身份"
+              size="small"
+              style="width: 90px"
+            >
+              <el-option
+                v-for="item in accountTypes"
+                :key="item"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
         </div>
       </template>
       <div class="boxBody">
         <el-row :gutter="0">
+          <el-input
+            v-model="boxStatus.nickname"
+            size="large"
+            class="w-50 m-2"
+            placeholder="昵称"
+            :prefix-icon="Cherry"
+            v-show="!boxStatus.isLogin"
+          />
           <el-input
             v-model="boxStatus.username"
             size="large"
@@ -28,6 +48,8 @@
             size="large"
             class="w-50 m-2"
             placeholder="密码"
+            type="password"
+            show-password
             :prefix-icon="Lock"
           />
         </el-row>
@@ -52,50 +74,91 @@
 <script>
 import { reactive, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
-import { User, Lock } from "@element-plus/icons-vue";
+import { useRouter } from "vue-router";
+import { User, Lock, Cherry } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 
 export default {
   name: "Login",
   setup() {
     const store = useStore();
+    const router = useRouter();
     const { proxy } = getCurrentInstance();
-    console.log(proxy);
-    const accountTypes = ["学生", "教师", "管理员"];
+    const accountTypes = [
+      { value: "student", label: "学生" },
+      { value: "teacher", label: "教师" },
+      { value: "admin", label: "管理员" },
+    ];
     const boxStatus = reactive({
       isLogin: true,
       username: "",
       password: "",
       confirmPassword: "",
-      accountType: accountTypes[0],
+      accountType: "学生",
+      nickname: "",
     });
     function changeStatus() {
       boxStatus.isLogin = !boxStatus.isLogin;
     }
-    //点击登录后发送两次请求，一次获取登录状态，一次获取访问资源的权限
     async function onSubmit() {
-      let login = {
-        username: boxStatus.username,
-        password: boxStatus.password,
-      };
-      const params = {
-        client_id: "cloud",
-        client_secret: "123",
-        scope: "all",
-        grant_type: "password",
-        username: boxStatus.username,
-        password: boxStatus.password,
-      };
+      if (boxStatus.isLogin === true) {
+        let login = {
+          username: boxStatus.username,
+          password: boxStatus.password,
+        };
+        let res = await proxy.$request(
+          "/ucenter/user/login",
+          login,
+          "post",
+          "params",
+          "json",
+          "/ucenter"
+        );
+        if (res.data.code === 20000) {
+          store.state.token = res.data.data.token;
+          let info = await getLoginInfo();
+          if (info) {
+            store.state.userInfo = info;
+            if (info.role === "admin") {
+              store.state.isAdmin = true;
+            }
+            if (info.role === "teacher") store.state.isTeacher = true;
+            router.push({
+              path: "/index",
+            });
+          }
+        } else ElMessage.error("登录失败！");
+      } else {
+        //注册请求
+        let register = {
+          nickname: boxStatus.nickname,
+          password: boxStatus.password,
+          role: boxStatus.accountType,
+          username: boxStatus.username,
+        };
+        let res = await proxy.$request(
+          "/ucenter/user/register",
+          register,
+          "post",
+          "params",
+          "json",
+          "/ucenter"
+        );
+        if (res.data.code === 20000) {
+          ElMessage.success("注册成功!");
+        } else ElMessage.error("注册失败！");
+      }
+    }
+    async function getLoginInfo() {
       let res = await proxy.$request(
-        "/oauth/token",
-        params,
-        "post",
-        "paramsSerializer",
+        "/ucenter/user/get-login-info",
+        "",
+        "get",
+        "params",
         "json",
         "/ucenter"
       );
-      console.log(res);
-      store.state.accesstoken = res.data.access_token;
-      store.state.refreshtoken = res.data.refresh_token;
+      return res?.data.data.userInfo;
     }
     return {
       onSubmit,
@@ -104,6 +167,7 @@ export default {
       boxStatus,
       User,
       Lock,
+      Cherry,
     };
   },
 };
@@ -132,7 +196,6 @@ export default {
     color: var(--el-color-white);
   }
 }
-
 .box-card {
   position: absolute;
   left: 50%;
@@ -152,8 +215,11 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 30px;
   }
-
+  .status {
+    display: flex;
+  }
   .el-button {
     width: 100%;
     height: 40px;
