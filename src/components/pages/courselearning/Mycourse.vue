@@ -8,10 +8,10 @@
   </div>
   <div class="body">
     <ul v-for="(course) in  courses" :key="course.id">
-    <li @click="goto(course.id)" class="courseItem">
-      <CourseItem :course="course" />
-    </li>
-  </ul>
+      <li @click="goto(course.id)" class="courseItem">
+        <CourseItem :course="course" />
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -43,35 +43,35 @@ export default {
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    },{
+    }, {
       id: '2',
       avatar: '图片',
       name: '数学',
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    },{
+    }, {
       id: '3',
       avatar: '图片',
       name: '数学',
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    },{
+    }, {
       id: '4',
       avatar: '图片',
       name: '数学',
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    },{
+    }, {
       id: '5',
       avatar: '图片',
       name: '数学',
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    },{
+    }, {
       id: '6',
       avatar: '图片',
       name: '数学',
@@ -135,15 +135,36 @@ export default {
   margin: 20px 0 20px 15px;
   font-size: 14px;
 }
+
 .body {
+  width: 100%;
   height: calc(100% - 70px);
   display: flex;
   flex-wrap: wrap;
   overflow-y: scroll;
 }
+
 .courseItem {
-  max-width: 186px;
-  min-width: 100px;
+  box-sizing: border-box;
+  width: calc((100vw - 320px) / 4);
   margin: 10px;
+}
+
+@media screen and (max-width:650px) {
+  .courseItem {
+    width: calc((100vw - 300px) / 3);
+  }
+}
+
+@media screen and (max-width:550px) {
+  .courseItem {
+    width: calc((100vw - 280px) / 2);
+  }
+}
+
+@media screen and (max-width:460px) {
+  .courseItem {
+    width: calc(100vw - 255px);
+  }
 }
 </style>
