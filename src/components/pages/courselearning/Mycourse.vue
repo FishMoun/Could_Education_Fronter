@@ -6,13 +6,15 @@
         @click="changeSem(semester)" />
     </el-select>
   </div>
+  <el-scrollbar height="380px">
   <div class="body">
     <ul v-for="(course) in  courses" :key="course.id">
-      <li @click="goto(course.id)" class="courseItem">
-        <CourseItem :course="course" />
-      </li>
+        <li @click="goto(course.id)" class="courseItem">
+          <CourseItem :course="course" />
+        </li>
     </ul>
   </div>
+</el-scrollbar>
 </template>
 
 <script>
@@ -30,13 +32,13 @@ export default {
       return this.curSemester ? this.curSemester.time : ''
     }
   },
-  setup() {
-    const curSemesterTime = ref('全部')
-    const curSemester = reactive({
+  data() {
+    const curSemesterTime = '全部'
+    const curSemester = {
       id: '-1',
       time: '全部'
-    })
-    const courses = reactive([{
+    }
+    const courses = [{
       id: '1',
       avatar: '图片',
       name: '数学',
@@ -78,13 +80,13 @@ export default {
       school: '河海大学',
       teacher: '王老师',
       class: '高三'
-    }])
-    const semesters = reactive([
+    }]
+    const semesters = [
       {
         id: '-1',
         time: '全部'
       }
-    ])
+    ]
     return {
       semesters,
       courses,
@@ -95,16 +97,18 @@ export default {
   async mounted() {
     // api：通过用户id获取到用户的课程信息
     try {
-      this.courses = await getCoursesById()
+      let res = await getCoursesById()
+      this.courses = res.data
     } catch (e) {
       console.log(e)
     }
     // api：通过用户id获取到用户的学期信息
     try {
+      let res = await getSemestersById()
       this.semesters = [{
         id: '-1',
         time: '全部'
-      }].concat(await getSemestersById())
+      }].concat(res.data)
     } catch (e) {
       console.log(e)
     }
@@ -118,7 +122,8 @@ export default {
       this.curSemesterTime = semester.time
       try {
         // api：通过学期信息获取课程列表
-        this.courses = await getCoursesBySem(semester.id)
+        let res = await getCoursesBySem(semester.id)
+        this.courses = res.data
       } catch (e) {
         console.log(e)
       }
@@ -138,33 +143,31 @@ export default {
 
 .body {
   width: 100%;
-  height: calc(100% - 70px);
   display: flex;
   flex-wrap: wrap;
-  overflow-y: scroll;
 }
 
 .courseItem {
   box-sizing: border-box;
-  width: calc((100vw - 320px) / 4);
+  width: calc((100vw - 300px) / 4);
   margin: 10px;
 }
 
 @media screen and (max-width:650px) {
   .courseItem {
-    width: calc((100vw - 300px) / 3);
+    width: calc((100vw - 280px) / 3);
   }
 }
 
 @media screen and (max-width:550px) {
   .courseItem {
-    width: calc((100vw - 280px) / 2);
+    width: calc((100vw - 260px) / 2);
   }
 }
 
 @media screen and (max-width:460px) {
   .courseItem {
-    width: calc(100vw - 255px);
+    width: calc(100vw - 240px);
   }
 }
 </style>
