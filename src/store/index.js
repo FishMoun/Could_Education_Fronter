@@ -52,9 +52,14 @@ export default createStore({
     isTeacher: false,
     // #endregion 
     //token处理
-    jwttoken: '',
-    accesstoken: '',
-    refreshtoken: ''
+    //用户标识
+    userInfo: {
+      avatar: '',
+      id: '',
+      nickName: '',
+      userName: ''
+    },
+    token: '',
   },
   mutations: {
     // #region 导航功能

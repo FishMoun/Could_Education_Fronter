@@ -1,6 +1,8 @@
 import axios from 'axios';
 import qs from 'qs'
 import store from '/src/store/index.js'
+import router from '/src/router/index.js'
+import { ElMessage } from 'element-plus';
 //封装好的axios方法
 export function request(url,//请求地址
     params, //参数
@@ -18,17 +20,28 @@ export function request(url,//请求地址
     // axios request拦截器
     instance.interceptors.request.use(
         config => {
-            //访问除了用户中心以外的服务携带accesstoken
-            // if (store.state.access_token && serviceURL !== "/ucenter")
-            //     config.headers.Authorization = "bearer" + " " + store.state.access_token
+            if (store.state.token && !url.includes("/ucenter/user/login") && !url.includes("register"))
+                config.headers.token = store.state.token
             return config
         },
         err => { return Promise.reject(err) }
     )
     // aixos response拦截器
     instance.interceptors.response.use(
-        res => { return res },
-        err => { return Promise.reject(err) }
+        res => {
+            return res
+        },
+        err => {
+            if (err.response)
+                if (err.response.status === 401) {
+                    ElMessage.warning("登录会话过期，请重新登录!")
+                    setTimeout(() => {
+                        router.replace({ name: "登录" })
+                    }, 2000);
+
+                }
+            return Promise.reject(err)
+        }
     )
     //具体操作
     if (method && method == 'post') {

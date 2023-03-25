@@ -69,13 +69,19 @@ export default {
         path: "/stumanagement",
         name: "stumanagement",
         label: "学生管理",
-        icon: "shouye-shouye",
+        icon: "wode",
       },
       {
         path: "/teamanagement",
         name: "teamanagement",
         label: "教师管理",
-        icon: "shouye-shouye",
+        icon: "wode",
+      },
+      {
+        path: "/classmanagement",
+        name: "classmanagement",
+        label: "班级管理",
+        icon: "wode",
       },
     ]);
     //学生侧边栏
