@@ -32,5 +32,18 @@ export const getSemestersById = () => {
  * api请求参数：当前学期，为空时表示全部学期
  */
 export const getCoursesBySem = (sem) => {
-    return request("/courses/post",sem,'post')
-}
+  return request("/courses/post", sem, "post");
+};
+
+/**
+ * 返回格式参考：
+ * [{
+ * id:xxx,
+ * time:xxx,
+ * title:xxx,
+ * content:xxx
+ * }]
+ */
+export const getMessagesByCourseId = (courseId) => {
+  return request("/msg/list/msg/" + courseId);
+};

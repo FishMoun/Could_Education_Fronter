@@ -40,6 +40,7 @@ export default {
   
 <style scoped>
 .box {
+  width: 100%;
   cursor: pointer;
 }
 :deep(.el-card__body:hover) {
