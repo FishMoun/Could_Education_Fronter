@@ -94,8 +94,8 @@
         finish-status="success"
         align-center
       >
-        <el-step :title="isCreate ? '添加' : '编辑' + '基本课程信息'" />
-        <el-step :title="isCreate ? '添加' : '编辑' + '课程小节信息'" />
+        <el-step :title="(isCreate ? '添加' : '编辑') + '基本课程信息'" />
+        <el-step :title="(isCreate ? '添加' : '编辑') + '课程小节信息'" />
       </el-steps>
       <el-form :model="form" label-width="120px" :inline="true">
         <div class="left-form" v-if="step === 0">

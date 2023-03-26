@@ -63,7 +63,7 @@ export default {
         path: "/coursemanagement",
         name: "coursemanagement",
         label: "课程管理",
-        icon: "shouye-shouye",
+        icon: "kecheng",
       },
       {
         path: "/stumanagement",

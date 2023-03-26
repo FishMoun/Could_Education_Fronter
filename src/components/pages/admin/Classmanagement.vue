@@ -12,7 +12,7 @@
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="{ row }">
             <el-button type="primary">编辑</el-button>
-            <el-button type="danger" @click="deleteStudentById(row.classId)"
+            <el-button type="danger" @click="deleteClassById(row.classId)"
               >删除</el-button
             >
           </template>
@@ -31,44 +31,42 @@ export default {
     };
   },
   methods: {
-    //查询所有的学生信息
-    async getAllStudentInfo() {
+    //查询所有的班级信息
+    async getAllClassInfo() {
       let res = await this.$request(
-        "/admin/manager/student/list",
+        "/admin/manager/class/list",
         "",
         "get",
         "params",
         "json"
       );
-      let students = res?.data.data.students;
-      for (let i = 0; i < students.length; ++i) {
+      let classes = res?.data.data.classes;
+      for (let i = 0; i < classes.length; ++i) {
         this.tableData[i] = {
-          classId: students[i].id,
-          name: students[i].name,
-          gender: students[i].gender ? "男" : "女",
-          college: students[i].department,
-          major: students[i].major,
-          class: students[i].className,
+          classId: classes[i].id,
+          name: classes[i].name,
+          college: classes[i].department,
+          major: classes[i].major,
         };
       }
     },
-    async deleteStudentById(stuId) {
+    async deleteClassById(classId) {
       let tmpparams = {
-        id: stuId,
+        id: classId,
       };
       let res = await this.$request(
-        "/admin/manager/student/remove",
+        "/admin/manager/class/remove",
         tmpparams,
         "delete",
         "params",
         "json"
       );
-      this.getAllStudentInfo();
+      this.getAllClassInfo();
     },
   },
   mounted() {
     //初始化学生列表
-    this.getAllStudentInfo();
+    this.getAllClassInfo();
   },
 };
 </script>
