@@ -158,6 +158,7 @@ export default {
         "json",
         "/ucenter"
       );
+      console.log(res)
       return res?.data.data.userInfo;
     }
     return {
