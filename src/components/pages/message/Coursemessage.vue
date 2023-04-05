@@ -20,6 +20,9 @@
                     <li v-for="message in messages" :key="message.id" class="msgItem">
                         <CourseMessageItem :message="message" />
                     </li>
+                    <li v-if="messages.length===0" class="msgItem">
+                       当前没有消息
+                    </li>
                 </el-scrollbar>
             </ul>
         </div>
@@ -27,13 +30,11 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
-
 import SemesterSelect from './utilCom/SemesterSelect.vue';
 import CourseItem from './utilCom/CourseItem.vue';
 import CourseMessageItem from './utilCom/CourseMessageItem.vue';
 
-import { getCoursesById, getSemestersById, getCoursesBySem, getMessagesByCourseId } from '../../../network/api'
+import { getCoursesById, getSemestersById, getCoursesBySem,getAllMessages, getMessagesByCourseId } from '../../../network/api'
 
 export default {
     components: { SemesterSelect, CourseItem, CourseMessageItem },
@@ -49,13 +50,13 @@ export default {
             }
         },
         async changeMessageCallback(course) {
-            if(this.curCourse.id = course.id){
+            if(this.curCourse.id === course.id){
                 return
             }
             this.curCourse = course
             try {
                 let res= await getMessagesByCourseId(course.id)
-                this.messages = res.data
+                this.messages = res.data.data.list
             } catch (e) {
                 console.log(e)
             }
@@ -78,12 +79,6 @@ export default {
             class: '高三'
         },]
         const curCourse = {
-            id: '1',
-            avatar: '图片',
-            name: '数学',
-            school: '河海大学',
-            teacher: '王老师',
-            class: '高三'
         }
         const semesters = [
             {
@@ -111,22 +106,23 @@ export default {
             content: "xxx111F"
 
         }]
+        const userinfo = {}
         return {
             semesters,
             courses,
             curSemester,
             curCourse,
-            messages
+            messages,
+            userinfo
         }
     },
     async mounted() {
+        const curUser = this.$store.state.userInfo;
+        this.userInfo = curUser;
         // api：通过用户id获取到用户的课程信息
         try {
             let res = await getCoursesById()
             this.courses = res.data
-            if(this.courses?.length){
-                this.curCourse = this.courses[0]
-            }
         } catch (e) {
             console.log(e)
         }
@@ -137,6 +133,13 @@ export default {
                 id: '-1',
                 time: '全部'
             }].concat(res.data)
+        } catch (e) {
+            console.log(e)
+        }
+        // api：获取用户所有消息
+        try {
+            let res = await getAllMessages(curUser.id)
+            this.messages = res.data.data.list
         } catch (e) {
             console.log(e)
         }
