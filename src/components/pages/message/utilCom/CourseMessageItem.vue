@@ -5,8 +5,9 @@
             message.title
           }}</div>
           <ul class="bottom">
-            <li class="overElpSingle">时间：{{ message.time }}</li>
-            <li class="content">{{ message.content }}zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz</li>
+            <li class="overElpSingle">发布者：{{ message.author }}</li>
+            <li class="overElpSingle">时间：{{ message.gmtCreate }}</li>
+            <li class="content">{{ message.content }}</li>
           </ul>
       </el-card>
     </el-row>
