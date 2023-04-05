@@ -62,6 +62,7 @@ export default {
         console.log(this.socket);
         this.socket.send("\n");
       };
+      term.write("Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ");
       term.onData((val) => {
         term.write(val);
       });
