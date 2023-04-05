@@ -32,6 +32,7 @@ import Teamanagement from "../components/pages/admin/Teamanagement.vue"
 import Classmanagement from "../components/pages/admin/Classmanagement.vue"
 
 import EditFlow from "../components/pages/experimentlearning/EditFlow.vue"
+import Terminal from "../components/pages/experimentlearning/Terminal.vue"
 // 创建路由对象
 const router = createRouter({
 	// 指定路由的工作模式
@@ -94,6 +95,10 @@ const router = createRouter({
 							path: "/editflow",
 							name: "流程编辑",
 							component: EditFlow,
+						}, {
+							path: "/terminal",
+							name: "命令行",
+							component: Terminal,
 						}
 					],
 				},
