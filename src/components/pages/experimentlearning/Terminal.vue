@@ -14,11 +14,22 @@ export default {
   data() {
     return {
       term: null,
-      socketUri:
-        "ws://123.60.57.45:2375/containers/e11ff6d92741069b8ecf362926ed41a902f65521ae82d09d5c6217e6bd0aa8a6/attach/ws?logs=0&stream=1&stdin=1&stdout=1&stderr=1",
+      socketUri: "ws://60.204.141.214:8005/exp/webssh",
       socket: "",
-      //   accessToken: "token",
+      Initoption: {
+        operate: "connect",
+        host: "60.204.141.214", //IP
+        port: "30034", //端口号
+        username: "cirros", //用户名
+        password: "gocubsgo", //密码
+      },
+      dataoption: { operate: "command", command: "" },
     };
+  },
+  computed: {
+    token() {
+      return this.$store.state.token;
+    },
   },
   mounted() {
     this.initTerm();
@@ -49,7 +60,8 @@ export default {
       });
       // 2.webSocket初始化
       if (this.socketUri === "") return;
-      this.socket = new WebSocket(this.socketUri);
+      console.log(this.token);
+      this.socket = new WebSocket(this.socketUri, this.token);
       const attachAddon = new AttachAddon(this.socket);
       const fitAddon = new FitAddon(); // 全屏插件
       term.loadAddon(attachAddon);
@@ -60,7 +72,7 @@ export default {
       this.term = term;
       this.socket.onopen = () => {
         console.log(this.socket);
-        this.socket.send("\n");
+        this.socket.send(this.Initoption);
       };
       term.write("Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ");
       term.onData((val) => {

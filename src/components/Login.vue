@@ -52,6 +52,43 @@
             show-password
             :prefix-icon="Lock"
           />
+          <!-- 学生班级输入 -->
+          <el-select
+            v-model="classId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="选择班级"
+            :remote-method="searchRemoteClass"
+            remote-show-suffix
+            :loading="loading"
+            v-show="!boxStatus.isLogin && boxStatus.accountType === 'student'"
+            size="large"
+            style="width: 100%; margin-bottom: 10px"
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.label"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+          <!-- 教室学院输入 -->
+          <el-select
+            v-model="departmentValue"
+            class="m-2"
+            placeholder="选择学院"
+            size="large"
+            style="width: 100%; margin-bottom: 10px"
+            v-show="!boxStatus.isLogin && boxStatus.accountType === 'teacher'"
+          >
+            <el-option
+              v-for="item in departmentOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-row>
       </div>
       <div class="boxFooter">
@@ -72,7 +109,7 @@
 </template>
 
 <script>
-import { reactive, getCurrentInstance } from "vue";
+import { reactive, getCurrentInstance, ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { User, Lock, Cherry } from "@element-plus/icons-vue";
@@ -89,12 +126,22 @@ export default {
       { value: "teacher", label: "教师" },
       { value: "admin", label: "管理员" },
     ];
+    // 班级参数相关
+    const classId = ref("");
+    const loading = ref(false);
+    const options = ref([]);
+    const classes = ref([]);
+    const departmentValue = ref("");
+    const departmentOptions = ref([
+      { label: "计算机与信息学院", value: "计算机与信息学院" },
+      { label: "人工智能院", value: "人工智能院" },
+    ]);
     const boxStatus = reactive({
       isLogin: true,
       username: "",
       password: "",
       confirmPassword: "",
-      accountType: "学生",
+      accountType: "student",
       nickname: "",
     });
     function changeStatus() {
@@ -119,6 +166,7 @@ export default {
           let info = await getLoginInfo();
           if (info) {
             store.state.userInfo = info;
+
             if (info.role === "admin") {
               store.state.isAdmin = true;
             }
@@ -141,11 +189,60 @@ export default {
           register,
           "post",
           "params",
-          "json",
-          "/ucenter"
+          "json"
         );
         if (res.data.code === 20000) {
-          ElMessage.success("注册成功!");
+          let id = res.data.data.user.id;
+
+          //根据身份进行关联
+          if (boxStatus.accountType === "student") {
+            let name = boxStatus.nickname;
+            let stuinfo = {
+              classId: classId.value,
+              department: classes.value.find(
+                (item) => item.id === classId.value
+              ).department,
+              userId: id,
+              major: classes.value.find((item) => item.id === classId.value)
+                .major,
+              name: name,
+              gender: true,
+            };
+            console.log(stuinfo);
+            let res1 = await proxy.$request(
+              "/admin/manager/student/save",
+              stuinfo,
+              "post",
+              "params",
+              "json"
+            );
+            console.log(res1);
+            if (res1.data.code === 20000) {
+              console.log(res1);
+              ElMessage.success("注册成功!");
+            }
+          } else if (boxStatus.accountType === "teacher") {
+            let name = boxStatus.nickname;
+            let teainfo = {
+              department: departmentValue.value,
+              userId: id,
+              name: name,
+              gender: true,
+            };
+            console.log(teainfo);
+            let res1 = await proxy.$request(
+              "/admin/manager/teacher/save",
+              teainfo,
+              "post",
+              "params",
+              "json"
+            );
+            console.log(res1);
+            if (res1.data.code === 20000) {
+              console.log(res1);
+              ElMessage.success("注册成功!");
+            }
+          }
         } else ElMessage.error("注册失败！");
       }
     }
@@ -158,10 +255,43 @@ export default {
         "json",
         "/ucenter"
       );
-      console.log(res)
+      console.log(res);
       return res?.data.data.userInfo;
     }
+    async function searchRemoteClass(query) {
+      loading.value = true;
+      let res = await proxy.$request(
+        "/admin/manager/class/list",
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res.data.code === 20000) {
+        loading.value = false;
+        options.value = res.data.data.classes.map((item) => {
+          return {
+            value: item.id,
+            label: item.name,
+          };
+        });
+        classes.value = res.data.data.classes.map((item) => {
+          return {
+            id: item.id,
+            department: item.department,
+            major: item.major,
+          };
+        });
+      }
+    }
     return {
+      departmentValue,
+      departmentOptions,
+      options,
+      searchRemoteClass,
+      loading,
+      classId,
       onSubmit,
       changeStatus,
       accountTypes,

@@ -77,9 +77,11 @@
                     content="进入学习空间"
                     placement="right"
                     effect="light"
-                    hide-after="10"
+                    :hide-after="10"
                   >
-                    <el-button style="height: 100%; width: 100%" @click="goto"
+                    <el-button
+                      style="height: 100%; width: 100%"
+                      @click="gotoClass(activity.id)"
                       ><el-icon><DArrowRight /></el-icon
                     ></el-button>
                   </el-tooltip>
@@ -157,6 +159,7 @@ export default {
   name: "Courseview",
   data() {
     return {
+
       //视图
       tabview: "timemode",
       //课程介绍编辑框
@@ -171,50 +174,15 @@ export default {
       showeditfinish: false,
       //时序属性
       activities: [
-        {
-          timestamp: "2023-3-10 8:00",
-          size: "large",
-          type: "primary",
-          title: "数据库绪论",
-          teacher: "许卓明",
-          weekth: "周五第1~2节",
-          overview: "",
-        },
-        {
-          timestamp: "2023-3-11 8:00",
-          size: "large",
-          type: "primary",
-          title: "数据库绪论",
-          teacher: "许卓明",
-          weekth: "周五第1~2节",
-          overview: "",
-        },
-        {
-          timestamp: "2023-3-12 8:00",
-          size: "large",
-          color: "#0bbd87",
-          title: "数据库绪论",
-          teacher: "许卓明",
-          weekth: "周五第1~2节",
-          overview: "",
-        },
-        {
-          timestamp: "2023-3-13 8:00",
-          size: "large",
-          title: "",
-          title: "数据库绪论",
-          teacher: "许卓明",
-          weekth: "周五第1~2节",
-          overview: "",
-        },
-        {
-          timestamp: "2023-3-14 8:00",
-          title: "",
-          title: "数据库绪论",
-          teacher: "许卓明",
-          weekth: "周五第1~2节",
-          overview: "",
-        },
+        // {
+        //   timestamp: "2023-3-10 8:00",
+        //   size: "large",
+        //   type: "primary",
+        //   title: "数据库绪论",
+        //   teacher: "许卓明",
+        //   weekth: "周五第1~2节",
+        //   overview: "",
+        // },
       ],
       //大纲数据
       treedata: [
@@ -227,6 +195,14 @@ export default {
             {
               id: 4,
               label: "Level two 1-1",
+              //小节信息
+              timetable: [
+                {
+                  //小节id
+                  id: "1",
+                  //下面给小节对应信息，传第几周周几第几节
+                },
+              ],
               //控制章节编辑输入框是否出现
               inputvisible: false,
             },
@@ -255,14 +231,53 @@ export default {
     isTeacher() {
       return this.$store.state.isTeacher;
     },
+    courseId(){
+      return this.$route.params.id
+    }
+  },
+  async mounted() {
+    await this.getTimeList();
   },
   methods: {
+    //获取时序列表
+    async getTimeList() {
+      let param = { id: this.$route.params.id };
+      let res = await this.$request(
+        "/admin/manager/timetable/course-time",
+        param,
+        "get",
+        "resful",
+        "json"
+      );
+      let weekday = ["一", "二", "三", "四", "五", "六", "日"];
+      let timeinfo = res.data.data.time;
+
+      let newactivity = [];
+      console.log(timeinfo);
+      for (let i = 0; i < timeinfo.length; i++) {
+        let item = timeinfo[i];
+
+        newactivity.push({
+          id: item.id,
+          timestamp: item.date.split(" ")[0],
+          size: "large",
+          type: "primary",
+          title: item.courseName + `第${i + 1}大节`,
+          teacher: item.teacherName,
+          weekth: `周${weekday[item.dayOfWeek]}第${item.beginIndex}~${
+            item.endIndex
+          }节`,
+          overview: "",
+        });
+      }
+      this.activities = JSON.parse(JSON.stringify(newactivity));
+    },
     //老师和学生切换
     changerole() {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
     },
-    goto() {
-      this.$router.push({ path: "/classlearning" });
+    gotoClass(classId) {
+      this.$router.push({ path: `/classlearning/${this.courseId}/${classId}` });
     },
     //编辑介绍内容
     editcontent() {

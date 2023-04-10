@@ -43,7 +43,7 @@
         >
       </div>
       <div class="buttonbox">
-        <el-button type="primary" @click="dialogVisible = true"
+        <el-button type="primary" @click="addNewCourse"
           ><el-icon><Plus /></el-icon>新增课程</el-button
         >
       </div>
@@ -117,7 +117,7 @@
           <el-form-item label="学分：">
             <el-input v-model="form.credit" type="number" />
           </el-form-item>
-          <el-form-item label="课程类别：">
+          <el-form-item label="课程类别：" style="width: 300px">
             <el-radio-group v-model="form.category">
               <el-radio label="必修" />
               <el-radio label="选修" />
@@ -236,7 +236,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="quitForm">退出</el-button>
-
+          <!-- <el-button @click="PressSubmitBasicButton">提交基本信息</el-button> -->
           <el-button
             type="primary"
             v-show="this.step === 1"
@@ -244,7 +244,7 @@
             >上一步</el-button
           >
           <el-button type="primary" @click="goToNext">
-            {{ this.step === 0 ? "下一步" : "提交" }}
+            {{ this.step === 0 ? "下一步" : "完成" }}
           </el-button>
         </span>
       </template>
@@ -359,6 +359,7 @@ export default {
       tempClassList: [],
       //拷贝的表单
       copyform: {},
+      //是否已提交基本信息
     };
   },
   computed: {
@@ -368,6 +369,15 @@ export default {
   },
   components: { Search },
   methods: {
+    //按下提交基本信息的按钮
+    // PressSubmitBasicButton(){
+
+    // }
+    //新增课程
+    addNewCourse() {
+      this.isCreate = true;
+      this.dialogVisible = true;
+    },
     reset() {
       this.termValue = "";
       this.collegeValue = "";
@@ -405,6 +415,7 @@ export default {
 
         classIds: [...this.form.class],
       };
+      console.log(tmpform);
       //新增课程发送请求
       let res = await this.$request(
         "/admin/manager/course/save",
@@ -456,8 +467,8 @@ export default {
           college: courses[i]?.department,
           week: courses[i]?.beginWeek + "~" + courses[i]?.endWeek + "周",
           // classroom: ,
-          teacher: courses[i]?.teacherNames,
-          class: courses[i]?.classNames,
+          teacher: courses[i]?.teachers.map((item) => item.name),
+          class: courses[i]?.classes.map((item) => item.name),
         };
       }
       this.loading = false;
@@ -592,6 +603,7 @@ export default {
     },
     //批量获取小节列表
     async getBatchClassList() {
+      console.log(123);
       let tmpform = {
         beginIndex: this.form.beginclass,
         beginWeek: this.form.c_beginweek,
@@ -610,9 +622,9 @@ export default {
 &endIndex=${tmpform.endIndex}\
 &endWeek=${tmpform.endWeek}\
 &location=${tmpform.location}\
-&teacherId=${tmpform.teacherId}
-      `;
+&teacherId=${tmpform.teacherId}`;
       let res = await this.$request(url, "", "get", "params", "json");
+      console.log(res);
       if (res?.data.code === 20000) {
         let tempList = res.data.data.tempList;
         this.tempClassList = this.tempClassList.concat(tempList);
@@ -649,11 +661,18 @@ export default {
     },
 
     //切换到下一步的小节表单,并且兼任提交的功能
-    goToNext() {
-      if (this.step === 0) this.step = 1;
-      else {
-        if (this.submitCourseForm() === true)
-          if (this.postClassList() === true) ElMessage.success("新增成功!");
+    async goToNext() {
+      if (this.step === 0) {
+        let result = await this.submitCourseForm();
+        if (result === true) this.step = 1;
+      } else {
+        let result = await this.postClassList();
+        if (result === true) {
+          ElMessage.success("新增成功!");
+          this.$nextTick(() => {
+            this.quitForm();
+          });
+        }
       }
     },
     //tag的字符串拼接
@@ -683,15 +702,17 @@ export default {
       //关闭对话框
       this.dialogVisible = false;
       //重置表单
-      this.step = 0;
-      this.termValue = "";
-      this.collegeValue = "";
-      this.tempClassList = [];
-      this.teachersList = [];
-      this.classesList = [];
-      console.log("copyform", this.copyform);
-      this.form = this.copyform;
-      console.log("form", this.form);
+      this.$nextTick(() => {
+        this.step = 0;
+        this.termValue = "";
+        this.collegeValue = "";
+        this.tempClassList = [];
+        this.teachersList = [];
+        this.classesList = [];
+
+        this.form = JSON.parse(JSON.stringify(this.copyform));
+      });
+      this.selectallcourse();
     },
     //编辑一个课程的内容
     async editForm(tmpId) {
@@ -769,6 +790,7 @@ export default {
   margin-top: 2vh;
   width: 30vw;
   height: 65vh;
+  overflow: auto;
 }
 .right-form {
   margin-top: 2vh;

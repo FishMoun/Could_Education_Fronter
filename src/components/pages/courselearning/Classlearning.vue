@@ -9,7 +9,7 @@
           >当前是{{ isTeacher ? "老师" : "学生" }}模式</el-button
         >
         <el-card shadow="never" class="introduction-card">
-          <div style="font-size: 20px">算法设计与分析第1节概要:</div>
+          <div style="font-size: 20px">本节概要:</div>
           <div v-if="introduction != ''">
             <p>{{ introduction }}</p>
           </div>
@@ -54,12 +54,27 @@
             <template #title>
               <div class="header">PPT课件</div>
             </template>
-            <el-button
-              style="margin-left: 10px; margin-top: 10px"
-              type="primary"
-              v-show="isTeacher == true"
-              >上传</el-button
+            <el-upload
+              v-model:file-list="fileList"
+              class="upload-demo"
+              :action="uploadPPTUrl"
+              :on-success="handleSuccess"
+              :on-error="handleErr"
+              :on-progress="handleprogress"
+              multiple
+              :limit="1"
+              :headers="{ token: this.$store.state.token }"
             >
+              <template #trigger>
+                <el-button
+                  style="margin-left: 10px; margin-top: 10px"
+                  type="primary"
+                  v-show="isTeacher == true"
+                  >上传</el-button
+                >
+              </template>
+            </el-upload>
+
             <div>
               <div class="pptzone">
                 <canvas :id="'the-canvas' + num"></canvas>
@@ -253,6 +268,7 @@ export default {
   },
   data() {
     return {
+      fileList: [],
       title: "查看协议",
       pdfDoc: null,
       pages: 0,
@@ -336,6 +352,16 @@ export default {
     isTeacher() {
       return this.$store.state.isTeacher;
     },
+    //PPT上传地址
+    uploadPPTUrl() {
+      return `/api/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
+    },
+    courseId() {
+      return this.$route.params.courseId;
+    },
+    classId() {
+      return this.$route.params.classId;
+    },
   },
   mounted() {
     this.initThePDFJSLIB();
@@ -343,6 +369,22 @@ export default {
     this._loadFile(url);
   },
   methods: {
+    //文件上传回调
+    handleSuccess(res) {
+      console.log("suc");
+      console.log(res);
+      if (res.data.code === 20000) ElMessage.success("上传成功!");
+      else ElMessage.success("上传失败，请稍后重试");
+    },
+    handleprogress(p) {
+      console.log("p");
+      console.log(p);
+    },
+    handleErr(err) {
+      console.log("err");
+      console.log(err);
+      ElMessage.success("上传失败，请稍后重试");
+    },
     // 初始化pdfjs
     initThePDFJSLIB: function () {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "/src/plugins/pdf.worker.js";

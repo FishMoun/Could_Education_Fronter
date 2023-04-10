@@ -1,6 +1,17 @@
 <template>
   <el-row style="height: 100%">
     <el-col :span="18">
+      <div
+        v-show="isTeacher"
+        style="position: absolute; z-index: 1; margin: 5px 0 0 5px"
+      >
+        <el-button type="primary" plain v-if="!isEditMode" @click="goToEdit"
+          >去编辑</el-button
+        >
+        <el-button type="success" plain v-else @click="quitEdit"
+          >保存</el-button
+        >
+      </div>
       <div style="display: flex; height: 100%">
         <div
           id="efContainer"
@@ -29,21 +40,20 @@
     <el-col :span="6">
       <div class="detail-zone">
         <div class="node-form-header">节点信息</div>
-        <div class="node-form-body">
-          <el-form
-            :model="nodeinfo"
-            ref="dataForm"
-            label-width="80px"
-            v-show="isFormShow"
-          >
+        <div class="node-form-body" v-show="isFormShow">
+          <el-form :model="nodeinfo" ref="dataForm" label-width="80px">
             <el-form-item label="名称">
-              <el-input v-model="nodeinfo.name"></el-input>
+              <el-input v-model="nodeinfo.name" v-if="isTeacher"></el-input>
+              <span v-else>{{ nodeinfo.name }}</span>
             </el-form-item>
-            <el-form-item>
+            <el-form-item v-show="isTeacher">
               <el-button type="primary" @click="saveNodeInfo">保存</el-button>
               <el-button type="danger" @click="deletenode">删除</el-button>
             </el-form-item>
           </el-form>
+          <el-card shadow="never">实验资源</el-card>
+          <el-card shadow="never">实验要求</el-card>
+          <el-card shadow="never">实验评价</el-card>
         </div>
       </div></el-col
     >
@@ -82,6 +92,7 @@ import flowNode from "./utilCom/node.vue";
 export default {
   data() {
     return {
+      isEditMode: false,
       //jsPlumb的实例
       jsPlumb: null,
       //流程图数据
@@ -174,6 +185,9 @@ export default {
     maxid() {
       return this.data.nodeList.length;
     },
+    isTeacher() {
+      return this.$store.state.isTeacher;
+    },
   },
   created() {
     this.data = {
@@ -213,20 +227,27 @@ export default {
     //加载节点Stra
     loadEasyFlow() {
       // 初始化节点
-      for (var i = 0; i < this.data.nodeList.length; i++) {
-        let node = this.data.nodeList[i];
-        this.jsPlumb.draggable(node.id, {
-          containment: "parent",
-          stop: function (el) {
-            // 拖拽节点结束后的对调
-          },
-        });
+      if (this.isTeacher && this.isEditMode) {
+        for (var i = 0; i < this.data.nodeList.length; i++) {
+          let node = this.data.nodeList[i];
+          this.jsPlumb.draggable(node.id, {
+            containment: "parent",
+            stop: function (el) {
+              // 拖拽节点结束后的对调
+            },
+          });
+        }
       }
       // 初始化连线
       for (var i = 0; i < this.data.lineList.length; i++) {
         let line = this.data.lineList[i];
         let linetype = line.type === 0 ? "Straight" : "Bezier";
         let location = line.type === 0 ? 0.5 : line.type === 1 ? 0.8 : 0.2;
+        let overlayvisible = this.isEditMode
+          ? line.type === 0
+            ? true
+            : false
+          : false;
         var connParam = {
           source: line.from,
           target: line.to,
@@ -267,8 +288,12 @@ export default {
             ],
           ],
         };
-        this.jsPlumb.connect(connParam);
+
+        let connection = this.jsPlumb.connect(connParam);
+        var overlay = connection.getOverlay("label");
+        overlay.setVisible(overlayvisible);
       }
+
       //使滚动条始终保持在渲染的位置
       this.$refs.efContainer.scrollLeft = this.scroll.left;
       this.$refs.efContainer.scrollTop = this.scroll.top;
@@ -729,6 +754,14 @@ export default {
       //删除一般节点
       //删除并行节点（不同的连接线的分类）
     },
+    goToEdit() {
+      this.isEditMode = true;
+      this.dataReload();
+    },
+    quitEdit() {
+      this.isEditMode = false;
+      this.dataReload();
+    },
   },
 };
 </script>
@@ -793,6 +826,8 @@ export default {
 }
 
 .node-form-body {
+  display: flex;
+  flex-direction: column;
   padding-top: 10px;
   padding-right: 10px;
   padding-bottom: 20px;
@@ -843,5 +878,10 @@ export default {
 
 ::-webkit-scrollbar-track {
   background-color: transparent;
+}
+.edit-header {
+  display: flex;
+  padding: 5px 5px 0 0;
+  justify-content: flex-end;
 }
 </style>

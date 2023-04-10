@@ -24,7 +24,9 @@ export function request(url,//请求地址
                 config.headers.token = store.state.token
             return config
         },
-        err => { return Promise.reject(err) }
+        err => {
+            return Promise.reject(err)
+        }
     )
     // aixos response拦截器
     instance.interceptors.response.use(
@@ -98,7 +100,9 @@ export function request(url,//请求地址
             params = {
                 params: params
             }
-            return instance.get(url, params).catch(err => { console.log(err) })
+            return instance.get(url, params).catch((err) => {
+                console.log(err)
+            })
         }
     } else if (method && method == 'put') {
         if (params) {

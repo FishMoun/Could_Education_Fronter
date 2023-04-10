@@ -2,7 +2,7 @@
   <el-row class="box">
     <el-card :body-style="{ padding: '0px' }">
       <img
-        :src="course.avatar"
+        :src="course.coverUrl"
         @error="
           (e) => {
             e.target.src =
@@ -16,9 +16,11 @@
           course.name
         }}</span>
         <ul class="bottom">
-          <li class="overElpSingle">学校：{{ course.school }}</li>
-          <li class="overElpSingle">老师：{{ course.teacher }}</li>
-          <li class="overElpSingle">班级：{{ course.class }}</li>
+          <li class="overElpSingle">课程名：{{ course.courseName }}</li>
+          <li class="overElpSingle">老师：{{ course.teachers?.join(",") }}</li>
+          <li class="overElpSingle">
+            上课周次：{{ course.beginWeek }}到{{ course.endWeek }}周
+          </li>
         </ul>
       </div>
     </el-card>
@@ -41,12 +43,13 @@ export default {
 <style scoped>
 .box {
   width: 100%;
-  cursor: pointer;
 }
 :deep(.el-card__body:hover) {
   background-color: var(--el-color-primary-light-9);
 }
-
+.el-card {
+  cursor: pointer;
+}
 .bottom {
   margin-top: 13px;
   line-height: 17px;

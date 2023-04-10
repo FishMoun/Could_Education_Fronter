@@ -65,7 +65,8 @@ export default {
   methods: {
     // 点击节点
     clickNode() {
-      this.$emit("clickNode", this.node);
+      if (this.node.type === 1 || this.node.type === 3)
+        this.$emit("clickNode", this.node);
     },
     changeNodeSite() {
       // 避免抖动

@@ -12,15 +12,17 @@
     <div class="right-container">
       <el-dropdown style="margin-right: 10px">
         <span class="el-dropdown-link">
-          admin
+          {{ nickname }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>账号管理</el-dropdown-item>
-            <el-dropdown-item>退出登录</el-dropdown-item>
+            <el-dropdown-item @click="goToAccountManagement"
+              >账号管理</el-dropdown-item
+            >
+            <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -42,17 +44,20 @@
 <script>
 import { useStore, mapMutations } from "vuex";
 import bread from "./bread.vue";
-import { ref, computed } from "vue";
+import { ref, computed, getCurrentInstance } from "vue";
+import { useRouter } from "vue-router";
 export default {
   name: "navBar",
   components: {
     bread,
   },
   setup() {
+    const { proxy } = getCurrentInstance();
     const fullscreen = ref(false);
     const store = useStore();
     const isCollapse = computed(() => store.state.isCollapse);
     const storeMutations = mapMutations(["setCollapse"]);
+    const nickname = computed(() => store.state.userInfo.nickName);
     //全屏
     function handleFullScreen() {
       let element = document.documentElement;
@@ -80,7 +85,28 @@ export default {
       }
       this.fullscreen = !this.fullscreen;
     }
+    //
+    const router = useRouter();
+    function goToAccountManagement() {
+      router.push({ path: "/accountmanagement" });
+    }
+    async function logout() {
+      let res = await proxy.$request(
+        "/ucenter/user/logout",
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res.data.code === 20000) {
+        router.push({ path: "/" });
+      }
+    }
     return {
+      logout,
+      goToAccountManagement,
+      nickname,
       fullscreen,
       isCollapse,
       ...storeMutations,

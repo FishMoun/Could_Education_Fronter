@@ -67,11 +67,11 @@ const router = createRouter({
 							name: "我的课程",
 							component: Mycourse,
 						}, {
-							path: "/courseview",
+							path: "/courseview/:id",
 							name: "课程概览",
 							component: Courseview,
 						}, {
-							path: "/classlearning",
+							path: "/classlearning/:courseId/:classId",
 							name: "节次学习",
 							component: Classlearning,
 						},
@@ -93,7 +93,7 @@ const router = createRouter({
 							component: Onlineexperiment,
 						}, {
 							path: "/editflow",
-							name: "流程编辑",
+							name: "实验流程",
 							component: EditFlow,
 						}, {
 							path: "/terminal",

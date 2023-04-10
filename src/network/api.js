@@ -12,8 +12,16 @@ import { request } from "./request";
       class:'高三'
     }]
  */
-export const getCoursesById = () => {
-  return request("/courses/get");
+export const getCoursesById = (userid) => {
+
+  let params = { userid }
+
+  // return request(`manager/user/user-course`, params, "get",
+  //   "resful",
+  //   "json");
+  return request("/api/manager/user/user-course", params, "get",
+    "resful",
+    "json");
 };
 
 /**
