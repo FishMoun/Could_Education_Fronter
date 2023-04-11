@@ -9,7 +9,6 @@
         <el-select
           v-model="termValue"
           placeholder="课程选择"
-          size="middle"
           style="margin-right: 10px"
         >
           <el-option
@@ -22,7 +21,6 @@
         <el-select
           v-model="collegeValue"
           placeholder="完成状态选择"
-          size="middle"
           style="margin-right: 10px"
         >
           <el-option
@@ -42,7 +40,61 @@
           ><el-icon><Search /></el-icon>查询</el-button
         >
       </div>
-      <div class="buttonbox"></div>
+      <el-button type="primary" @click="dialogVisible = true"
+        >创建作业</el-button
+      >
+      <!-- 布置作业的对话框 -->
+      <el-dialog
+        v-model="dialogVisible"
+        title="创建作业"
+        width="40%"
+        :before-close="handleClose"
+      >
+        <!-- 作业主体 -->
+        <el-form :model="form" label-width="120px">
+          <el-form-item label="选择课程:">
+            <el-select
+              v-model="form.courseId"
+              :loading="loading"
+              placeholder="选择课程"
+            >
+              <el-option
+                v-for="item in courseIdOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="截止时间:">
+            <el-date-picker
+              v-model="form.date"
+              type="datetime"
+              placeholder="选择截止时间"
+            />
+          </el-form-item>
+
+          <el-form-item label="作业标题:">
+            <el-input v-model="form.title" />
+          </el-form-item>
+          <el-form-item label="主要内容:">
+            <el-input
+              v-model="form.content"
+              :rows="4"
+              type="textarea"
+              resize="none"
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="dialogVisible = false">
+              确认布置
+            </el-button>
+          </span>
+        </template>
+      </el-dialog>
     </el-header>
     <el-main>
       <!-- 主体表格部分 学生-->
@@ -57,9 +109,7 @@
         <el-table-column prop="state" label="完成状态" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default>
-            <el-button type="primary" size="middle" @click="goToDetail"
-              >查看详细</el-button
-            >
+            <el-button type="primary" @click="goToDetail">查看详细</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -73,12 +123,8 @@
         <el-table-column prop="state" label="状态" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default>
-            <el-button type="primary" size="middle" @click="goToDetail"
-              >查看详细</el-button
-            >
-            <el-button type="primary" size="middle" @click="goToCorrect"
-              >去批改</el-button
-            >
+            <el-button type="primary" @click="goToDetail">查看详细</el-button>
+            <el-button type="primary" @click="goToCorrect">去批改</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -92,6 +138,7 @@ import { Search } from "@element-plus/icons-vue";
 export default {
   data() {
     return {
+      loading: false,
       stuTableData: [
         {
           homeworkId: "1",
@@ -105,9 +152,27 @@ export default {
         },
       ],
       teaTableData: [],
+      dialogVisible: false,
+      form: {
+        title: "",
+        courseId: "",
+        content: "",
+        date: "",
+      },
+      courseIdOptions: null,
+      //筛选项
+      termValue: "",
+      collegeValue: "",
+      inputcourseId: "",
+      inputcoursename: "",
+      collegeoptions: [],
+      termoptions: [],
     };
   },
   components: { Search },
+  async mounted() {
+    await this.searchCourseByTeaId();
+  },
   methods: {
     changemode() {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
@@ -125,6 +190,24 @@ export default {
     //去批改页面
     goToCorrect() {
       this.$router.push({ name: "作业批改" });
+    },
+    async searchCourseByTeaId() {
+      this.loading = true;
+      if (!this.courseIdOptions) {
+        let id = this.$store.state.userInfo.id;
+        let res = await this.$request(
+          `/admin/manager/course/list-teacher?id=${id}`,
+          "",
+          "get",
+          "params",
+          "json"
+        );
+        console.log(res);
+      }
+    },
+    handleClose() {
+      console.log("关闭");
+      this.dialogVisible = false;
     },
   },
 

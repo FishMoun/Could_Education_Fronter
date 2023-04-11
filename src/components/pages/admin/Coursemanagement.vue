@@ -408,6 +408,8 @@ export default {
           term: Number(yearandterm[1]),
           beginWeek: this.form.beginweek,
           endWeek: this.form.endweek,
+          coverUrl:
+            "https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com/default.jpg",
         },
 
         //浅拷贝
@@ -425,6 +427,7 @@ export default {
         "json"
       );
       if (res.data.code === 20000) {
+        console.log(res);
         ElMessage({
           message: "添加成功",
           type: "success",

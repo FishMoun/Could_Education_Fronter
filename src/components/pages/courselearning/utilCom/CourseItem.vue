@@ -42,7 +42,7 @@ export default {
   
 <style scoped>
 .box {
-  width: 100%;
+  width: 50%;
 }
 :deep(.el-card__body:hover) {
   background-color: var(--el-color-primary-light-9);

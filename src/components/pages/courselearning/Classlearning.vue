@@ -363,12 +363,29 @@ export default {
       return this.$route.params.classId;
     },
   },
-  mounted() {
+  async mounted() {
     this.initThePDFJSLIB();
-    let url = "/src/assets/ppttest/ppt_test.pdf";
+    let url = await this.getClassPPTUrl();
     this._loadFile(url);
   },
   methods: {
+    //获取小节PPT的url
+    async getClassPPTUrl() {
+      let params = {
+        classId: this.$route.params.classId,
+      };
+      let res = await this.$request(
+        "/manager/course-resource/get-timetable/ppt",
+        params,
+        "get",
+        "resful",
+        "json"
+      );
+      console.log("res", res);
+      let url = res.data.data.files.find((item) => item.type === "pdf").url;
+      if (url) return url;
+      else return null;
+    },
     //文件上传回调
     handleSuccess(res) {
       console.log("suc");

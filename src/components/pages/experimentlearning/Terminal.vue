@@ -8,7 +8,7 @@
 import "xterm/css/xterm.css";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { AttachAddon } from "xterm-addon-attach";
+import { WSSHClient } from "/src/plugins/webssh.js";
 export default {
   name: "terminal",
   data() {
@@ -40,6 +40,8 @@ export default {
   },
   methods: {
     initTerm() {
+      //新建websocket连接
+      const client = new WSSHClient();
       // 1.xterm终端初始化
       const term = new Terminal({
         rendererType: "canvas", //渲染类型
@@ -59,24 +61,40 @@ export default {
         },
       });
       // 2.webSocket初始化
-      if (this.socketUri === "") return;
       console.log(this.token);
-      this.socket = new WebSocket(this.socketUri, this.token);
-      const attachAddon = new AttachAddon(this.socket);
       const fitAddon = new FitAddon(); // 全屏插件
-      term.loadAddon(attachAddon);
       term.loadAddon(fitAddon);
+
       term.open(this.$refs.terminal);
+      term.write("Connecting...");
       fitAddon.fit();
       term.focus();
       this.term = term;
-      this.socket.onopen = () => {
-        console.log(this.socket);
-        this.socket.send(this.Initoption);
-      };
-      term.write("Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ");
-      term.onData((val) => {
-        term.write(val);
+      term.onData((data) => {
+        //键盘输入时的回调函数
+        client.sendClientData(data);
+      });
+
+      //执行连接操作
+      client.connect({
+        onError: (error) => {
+          //连接失败回调
+          term.write("Error: " + error + "\r\n");
+        },
+        onConnect: () => {
+          console.log();
+          //连接成功回调
+          client.sendInitData(this.Initoption);
+          term.write("\nConnect Successful!");
+        },
+        onClose: () => {
+          //连接关闭回调
+          term.write("\rconnection closed");
+        },
+        onData: (data) => {
+          //收到数据时回调
+          term.write(data);
+        },
       });
     },
   },
