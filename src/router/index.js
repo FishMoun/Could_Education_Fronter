@@ -136,7 +136,7 @@ const router = createRouter({
 						},
 						//作业管理下路由
 						{
-							path: "/homeworkdetail",
+							path: "/homeworkdetail/:id",
 							name: "作业详细",
 							component: Homeworkdetail,
 						},

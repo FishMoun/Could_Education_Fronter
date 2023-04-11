@@ -6,84 +6,37 @@
     <!-- 头部筛选部分 -->
     <el-header>
       <div class="searchbox">
-        <el-select
-          v-model="termValue"
-          placeholder="课程选择"
-          style="margin-right: 10px"
-        >
-          <el-option
-            v-for="item in termoptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="termValue" placeholder="课程选择" style="margin-right: 10px">
+          <el-option v-for="item in termoptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-select
-          v-model="collegeValue"
-          placeholder="完成状态选择"
-          style="margin-right: 10px"
-        >
-          <el-option
-            v-for="item in collegeoptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="collegeValue" placeholder="完成状态选择" style="margin-right: 10px">
+          <el-option v-for="item in collegeoptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-input
-          v-model="inputcourseId"
-          placeholder="输入作业名称"
-          style="margin-right: 10px"
-        />
+        <el-input v-model="inputcourseId" placeholder="输入作业名称" style="margin-right: 10px" />
         <el-button @click="reset">重置</el-button>
-        <el-button type="primary"
-          ><el-icon><Search /></el-icon>查询</el-button
-        >
+        <el-button type="primary"><el-icon>
+            <Search />
+          </el-icon>查询</el-button>
       </div>
-      <el-button type="primary" @click="dialogVisible = true"
-        >创建作业</el-button
-      >
+      <el-button type="primary" @click="dialogVisible = true">创建作业</el-button>
       <!-- 布置作业的对话框 -->
-      <el-dialog
-        v-model="dialogVisible"
-        title="创建作业"
-        width="40%"
-        :before-close="handleClose"
-      >
+      <el-dialog v-model="dialogVisible" title="创建作业" width="40%" :before-close="handleClose">
         <!-- 作业主体 -->
         <el-form :model="form" label-width="120px">
           <el-form-item label="选择课程:">
-            <el-select
-              v-model="form.courseId"
-              :loading="loading"
-              placeholder="选择课程"
-            >
-              <el-option
-                v-for="item in courseIdOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
+            <el-select v-model="form.courseId" :loading="loading" placeholder="选择课程">
+              <el-option v-for="item in courseIdOptions" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
           <el-form-item label="截止时间:">
-            <el-date-picker
-              v-model="form.date"
-              type="datetime"
-              placeholder="选择截止时间"
-            />
+            <el-date-picker v-model="form.date" type="datetime" placeholder="选择截止时间" />
           </el-form-item>
 
           <el-form-item label="作业标题:">
             <el-input v-model="form.title" />
           </el-form-item>
           <el-form-item label="主要内容:">
-            <el-input
-              v-model="form.content"
-              :rows="4"
-              type="textarea"
-              resize="none"
-            />
+            <el-input v-model="form.content" :rows="4" type="textarea" resize="none" />
           </el-form-item>
         </el-form>
         <template #footer>
@@ -108,8 +61,8 @@
         <el-table-column prop="deadline" label="截止时间" />
         <el-table-column prop="state" label="完成状态" />
         <el-table-column fixed="right" label="操作" width="200px">
-          <template #default>
-            <el-button type="primary" @click="goToDetail">查看详细</el-button>
+          <template #default="scope">
+            <el-button type="primary" @click="goToDetail(scope.row.homeworkId)">查看详细</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -171,6 +124,23 @@ export default {
   },
   components: { Search },
   async mounted() {
+    const curUser = this.$store.state.userInfo;
+    const homeworkList = await this.$request(
+      `/manager/course-homework/list-student/${curUser.id}`,
+      "",
+      "get",
+      "params",
+      "json"
+    )
+    this.stuTableData = homeworkList.data.data.homeworks
+    const teaHomeworkList = await this.$request(
+      `/manager/course-homework/list-teacher/${curUser.id}`,
+      "",
+      "get",
+      "params",
+      "json"
+    )
+    this.teaTableData = teaHomeworkList.data.data.homeworks
     await this.searchCourseByTeaId();
   },
   methods: {
@@ -184,8 +154,8 @@ export default {
       this.inputcoursename = "";
     },
     //去详情页面
-    goToDetail() {
-      this.$router.push({ name: "作业详细" });
+    async goToDetail(homeworkId) {
+      this.$router.push({ path: `/homeworkdetail/${homeworkId}` });
     },
     //去批改页面
     goToCorrect() {
@@ -225,15 +195,17 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+
 .el-main {
   display: flex;
   justify-items: center;
 }
+
 .el-input {
   width: auto;
 }
-.searchbox {
-}
-.buttonbox {
-}
+
+.searchbox {}
+
+.buttonbox {}
 </style>
