@@ -117,7 +117,6 @@
             :show-checkbox="showeditoutline"
             node-key="id"
             :expand-on-click-node="false"
-            draggable
           >
             <template #default="{ node, data }">
               <span class="custom-tree-node">
@@ -159,7 +158,6 @@ export default {
   name: "Courseview",
   data() {
     return {
-
       //视图
       tabview: "timemode",
       //课程介绍编辑框
@@ -186,43 +184,43 @@ export default {
       ],
       //大纲数据
       treedata: [
-        {
-          id: 1,
-          label: "Level one 1",
-          //控制章节编辑输入框是否出现
-          inputvisible: false,
-          children: [
-            {
-              id: 4,
-              label: "Level two 1-1",
-              //小节信息
-              timetable: [
-                {
-                  //小节id
-                  id: "1",
-                  //下面给小节对应信息，传第几周周几第几节
-                },
-              ],
-              //控制章节编辑输入框是否出现
-              inputvisible: false,
-            },
-          ],
-        },
-        {
-          id: 2,
-          label: "Level one 2",
-          //控制章节编辑输入框是否出现
-          inputvisible: false,
-        },
-        {
-          id: 3,
-          label: "Level one 3",
-          //控制章节编辑输入框是否出现
-          inputvisible: false,
-        },
+        // {
+        //   id: 1,
+        //   label: "Level one 1",
+        //   //控制章节编辑输入框是否出现
+        //   inputvisible: false,
+        //   children: [
+        //     {
+        //       id: 4,
+        //       label: "Level two 1-1",
+        //       //小节信息
+        //       timetable: [
+        //         {
+        //           //小节id
+        //           id: "1",
+        //           //下面给小节对应信息，传第几周周几第几节
+        //         },
+        //       ],
+        //       //控制章节编辑输入框是否出现
+        //       inputvisible: false,
+        //     },
+        //   ],
+        // },
+        // {
+        //   id: 2,
+        //   label: "Level one 2",
+        //   //控制章节编辑输入框是否出现
+        //   inputvisible: false,
+        // },
+        // {
+        //   id: 3,
+        //   label: "Level one 3",
+        //   //控制章节编辑输入框是否出现
+        //   inputvisible: false,
+        // },
       ],
       //节点标识
-      id: 10,
+      id: "",
       //章节编辑内容
       chapterInputValue: "",
     };
@@ -231,12 +229,14 @@ export default {
     isTeacher() {
       return this.$store.state.isTeacher;
     },
-    courseId(){
-      return this.$route.params.id
-    }
+    courseId() {
+      return this.$route.params.id;
+    },
   },
   async mounted() {
     await this.getTimeList();
+    this.id = this.courseId + "0000";
+    await this.getChapterList();
   },
   methods: {
     //获取时序列表
@@ -272,6 +272,34 @@ export default {
       }
       this.activities = JSON.parse(JSON.stringify(newactivity));
     },
+    //获取章节列表
+    async getChapterList() {
+      let res = await this.$request(
+        `/manager/chapter/get/${this.courseId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      let newChapterList = [];
+      if (res?.data.code === 20000) {
+        newChapterList = res.data.data.chapters.map((item) => {
+          return {
+            id: item.chapter.id,
+            label: item.chapter.name,
+            children: item.children.map((item2) => {
+              return {
+                id: item2.subChapter.id,
+                label: item2.subChapter.name,
+                timetable: item2?.timetables || [],
+              };
+            }),
+          };
+        });
+      }
+      this.treedata = JSON.parse(JSON.stringify(newChapterList));
+    },
     //老师和学生切换
     changerole() {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
@@ -293,24 +321,56 @@ export default {
       this.showeditoutline = true;
       this.showeditfinish = true;
     },
-    endEdit() {
+    async endEdit() {
+      let params = this.treedata.map((item, index) => {
+        return {
+          chapter: {
+            courseId: this.courseId,
+            id: item.id,
+            name: item.label,
+            number: index,
+          },
+          children: item.children.map((item2, index2) => {
+            return {
+              subChapter: {
+                chapterId: item.id,
+                courseId: this.courseId,
+                id: item2.id,
+                name: item2.name,
+                number: index2,
+              },
+              timetables: item2?.timetable || [],
+            };
+          }),
+        };
+      });
+      console.log(params);
+      let res = await this.$request(
+        `/manager/chapter/save/${this.$route.params.id}`,
+        params,
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res);
       this.showeditfinish = false;
       this.showeditoutline = false;
     },
     //向后增加章节
     addChapter() {
       const brother = {
-        id: this.id++,
+        id: String(++this.id),
         label: "新章节，点击编辑内容",
         children: [],
         inputvisible: false,
       };
       this.treedata.push(brother);
+      console.log(this.treedata);
     },
     //增加子节点
     append(data) {
       const newChild = {
-        id: this.id++,
+        id: String(++this.id),
         label: "新小节，点击编辑内容",
         children: [],
         inputvisible: false,

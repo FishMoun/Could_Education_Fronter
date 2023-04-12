@@ -10,17 +10,24 @@ export function request(url,//请求地址
     type, //请求类型（params，resful，paramsSerializer）
     header, //请求头（）
 ) {
+    let baseurl = '/api'
+    if (url.includes("https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com")) {
+        url = url.replace("https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com", "/downloadfile")
+        baseurl = ''
+        console.log(url)
+    }
     //创建axios实例
     const instance = axios.create({
-        baseURL: '/api',
+        baseURL: baseurl,
         timeout: 2000,
-        withCredentials: true,
+        withCredentials: false,
     })
 
     // axios request拦截器
     instance.interceptors.request.use(
         config => {
-            if (store.state.token && !url.includes("/ucenter/user/login") && !url.includes("register"))
+
+            if (store.state.token && !url.includes("/ucenter/user/login") && !url.includes("register") && !url.includes("download"))
                 config.headers.token = store.state.token
             return config
         },

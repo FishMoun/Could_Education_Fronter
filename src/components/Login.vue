@@ -161,10 +161,11 @@ export default {
           "json",
           "/ucenter"
         );
+        console.log(res);
         if (res.data.code === 20000) {
           store.state.token = res.data.data.token;
           let info = await getLoginInfo();
-          console.log(info)
+          console.log(info);
           if (info) {
             store.state.userInfo = info;
 
