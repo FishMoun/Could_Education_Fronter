@@ -132,7 +132,7 @@ export default {
       "params",
       "json"
     )
-    // this.stuTableData = homeworkList.data.data.homeworks
+    this.stuTableData = homeworkList.data.data.homeworks
     const teaHomeworkList = await this.$request(
       `/manager/course-homework/list-teacher/${curUser.id}`,
       "",
