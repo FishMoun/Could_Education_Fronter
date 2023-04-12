@@ -4,18 +4,17 @@ import store from '/src/store/index.js'
 import router from '/src/router/index.js'
 import { ElMessage } from 'element-plus';
 //封装好的axios方法
-export function request(url,//请求地址
+export async function request(url,//请求地址
     params, //参数
     method,//请求方法
     type, //请求类型（params，resful，paramsSerializer）
     header, //请求头（）
 ) {
-    let baseurl = '/api'
-    if (url.includes("https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com")) {
-        url = url.replace("https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com", "/downloadfile")
-        baseurl = ''
-        console.log(url)
-    }
+    let baseurl
+    if (import.meta.env.PROD)
+        baseurl = "http://60.204.141.214:30900/"
+    else
+        baseurl = "/api"
     //创建axios实例
     const instance = axios.create({
         baseURL: baseurl,
