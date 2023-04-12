@@ -49,33 +49,52 @@
       </div>
       <!-- 主要资源区，用折叠面板实现 -->
       <div style="margin-left: 10px; height: 70vh">
-        <el-collapse v-model="activeNames" @change="handleChange" accordion>
+        <el-collapse v-model="activeNames" accordion>
           <el-collapse-item name="1">
             <template #title>
               <div class="header">PPT课件</div>
             </template>
-            <el-upload
-              v-model:file-list="fileList"
-              class="upload-demo"
-              :action="uploadPPTUrl"
-              :on-success="handleSuccess"
-              :on-error="handleErr"
-              :on-progress="handleprogress"
-              multiple
-              :limit="1"
-              :headers="{ token: this.$store.state.token }"
-            >
-              <template #trigger>
+            <!-- PPT资源操作 -->
+            <div class="button-wrapper">
+              <el-upload
+                :show-file-list="false"
+                style="display: inline-block"
+                class="upload-demo"
+                :action="uploadPPTUrl"
+                :on-success="handleSuccessPPT"
+                :on-error="handleErr"
+                :on-progress="handleprogress"
+                multiple
+                :limit="1"
+                :headers="{ token: this.$store.state.token }"
+              >
+                <template #trigger>
+                  <el-button
+                    style="margin-left: 10px; margin-top: 10px"
+                    type="primary"
+                    v-show="isTeacher == true"
+                    >上传</el-button
+                  >
+                </template>
+              </el-upload>
+              <a :href="this.PPTUrl">
                 <el-button
                   style="margin-left: 10px; margin-top: 10px"
                   type="primary"
-                  v-show="isTeacher == true"
-                  >上传</el-button
-                >
-              </template>
-            </el-upload>
-
-            <div>
+                  v-show="isPPTExist === true"
+                  @click="downloadPPT"
+                  >下载
+                </el-button>
+              </a>
+              <el-button
+                style="margin-left: 10px; margin-top: 10px"
+                type="danger"
+                v-show="isTeacher === true && isPPTExist === true"
+                @click="deletePPT"
+                >删除</el-button
+              >
+            </div>
+            <div v-show="isPPTExist">
               <div class="pptzone">
                 <canvas :id="'the-canvas' + num"></canvas>
               </div>
@@ -92,34 +111,75 @@
           </el-collapse-item>
           <el-collapse-item name="2">
             <template #title> <div class="header">教学视频</div> </template>
-            <el-button
-              style="margin-left: 10px; margin-top: 10px"
-              type="primary"
-              v-show="isTeacher == true"
-              >上传</el-button
-            >
-            <div class="videozone">
-              <video-player
-                class="vjs-custom-skin videoPlayer"
-                ref="videoplayer"
-                :playsinline="true"
-                width="800px"
-                height="600px"
-                :options="playerOptions"
-                customEventName="changed"
+            <!-- 视频资源操作 -->
+            <div class="button-wrapper">
+              <el-upload
+                :show-file-list="false"
+                style="display: inline-block"
+                v-model:file-list="videofileList"
+                class="upload-demo"
+                :action="uploadVideoUrl"
+                :on-success="handleSuccessVideo"
+                :on-error="handleErr"
+                :on-progress="handleprogress"
+                multiple
+                :limit="1"
+                :headers="{ token: this.$store.state.token }"
               >
-              </video-player>
+                <template #trigger>
+                  <el-button
+                    style="margin-left: 10px; margin-top: 10px"
+                    type="primary"
+                    v-show="isTeacher == true"
+                    >上传</el-button
+                  >
+                </template>
+              </el-upload>
+              <el-button
+                style="margin-left: 10px; margin-top: 10px"
+                type="danger"
+                v-show="isTeacher === true && isPPTExist === true"
+                @click="deletePPT"
+                >删除</el-button
+              >
+            </div>
+            <div class="videozone" v-show="isVideoExist">
+              <video-player
+                :src="videoUrl"
+                @loadeddata="logtime($event)"
+                controls
+                :disablePictureInPicture="true"
+                :playback-rates="[0.5, 1.0, 1.5, 2.0]"
+                :volume="0.6"
+              />
             </div>
           </el-collapse-item>
           <el-collapse-item name="3">
             <template #title>
               <div class="header">共享资源</div>
             </template>
-            <el-button
-              style="margin-left: 10px; margin-top: 10px"
-              type="primary"
-              >上传</el-button
-            >
+            <!-- 共享资源操作 -->
+            <div class="button-wrapper">
+              <el-upload
+                style="display: inline-block"
+                v-model:file-list="sharefileList"
+                class="upload-demo"
+                :action="uploadShareUrl"
+                :on-success="handleSuccessShare"
+                :on-error="handleErr"
+                :on-progress="handleprogress"
+                list-type="picture"
+                :headers="{ token: this.$store.state.token }"
+              >
+                <template #trigger>
+                  <el-button
+                    style="margin-left: 10px; margin-top: 10px"
+                    type="primary"
+                    >上传</el-button
+                  >
+                </template>
+              </el-upload>
+            </div>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -159,7 +219,10 @@
                 >发布</el-button
               >
             </div>
-            <div style="margin-bottom: 5px" v-show="activeNames == '1'">
+            <div
+              style="margin-bottom: 5px"
+              v-show="activeNames == '1' && isPPTExist"
+            >
               <el-button link>全部</el-button>
               <el-divider direction="vertical" />
               <el-button link style="margin-left: 0"
@@ -256,11 +319,13 @@
 
 <script>
 //video引入
-import VideoPlayer from "./utilCom/VideoPlayer.vue";
+import { VideoPlayer } from "@videojs-player/vue";
+import "video.js/dist/video-js.css";
 //pdf引入
 import * as pdfjsLib from "pdfjs-dist";
 import { toRaw } from "vue";
 import { ElMessage } from "element-plus";
+import { Download } from "@element-plus/icons-vue";
 export default {
   name: "Classlearning",
   components: {
@@ -268,7 +333,18 @@ export default {
   },
   data() {
     return {
-      fileList: [],
+      //视频播放时间
+      playingtime: "",
+      isPPTExist: false,
+      isVideoExist: true,
+      isShareExist: true,
+      PPTId: [],
+      PPTUrl: "",
+      videoId: "",
+      videoUrl: "/src/assets/video/output1.mp4",
+      PPTfileList: [],
+      videofileList: [],
+      sharefileList: [],
       title: "查看协议",
       pdfDoc: null,
       pages: 0,
@@ -356,6 +432,14 @@ export default {
     uploadPPTUrl() {
       return `/api/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
+    //视频上传地址
+    uploadVideoUrl() {
+      return `/api/manager/course-resource/upload-timetable/video/${this.$route.params.courseId}/${this.$route.params.classId}`;
+    },
+    //共享资源上传地址
+    uploadShareUrl() {
+      return `/api/manager/course-resource/upload-timetable/share/${this.$route.params.courseId}/${this.$route.params.classId}`;
+    },
     courseId() {
       return this.$route.params.courseId;
     },
@@ -363,12 +447,80 @@ export default {
       return this.$route.params.classId;
     },
   },
+  watch: {
+    isPPTExist(newVal) {
+      if (newVal) this._loadFile(this.PPTUrl);
+    },
+  },
   async mounted() {
     this.initThePDFJSLIB();
-    let url = await this.getClassPPTUrl();
-    this._loadFile(url);
+    let ppturl = await this.getClassPPTUrl();
+    if (ppturl) {
+      this.PPTUrl = ppturl;
+      this.isPPTExist = true;
+    }
+    let videourl = await this.getClassVideoUrl();
+    if (videourl) {
+      this.videoUrl = videourl;
+      this.isVideoExist = true;
+    }
   },
   methods: {
+    //下载PPT
+    async downloadPPT() {},
+    //删除PPT
+    async deletePPT() {
+      let isSuccess = true;
+      for (let i = 0; i < this.PPTId.length; i++) {
+        let res = await this.$request(
+          `/manager/course-resource/delete/${this.courseId}/${this.PPTId[i]}`,
+          "",
+          "delete",
+          "params",
+          "json"
+        );
+        if (res?.data.code !== 20000) isSuccess = false;
+      }
+      if (isSuccess) {
+        this.isPPTExist = false;
+        ElMessage.success("删除成功！");
+      } else {
+        ElMessage.error("删除失败，请稍后重试！");
+      }
+    },
+    //删除视频
+    async deleteVideo() {
+      let res = await this.$request(
+        `/manager/course-resource/delete/${this.courseId}/${this.shareId}`,
+        "",
+        "delete",
+        "params",
+        "json"
+      );
+      if (res?.data.code === 20000) {
+        this.isShareExist = false;
+        ElMessage.success("删除成功！");
+      } else {
+        ElMessage.error("删除失败，请稍后重试！");
+      }
+    },
+    //删除共享资源
+    async deleteShare() {
+      let res = await this.$request(
+        `/manager/course-resource/delete/${this.courseId}/${this.videoId}`,
+        "",
+        "delete",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res?.data.code === 20000) {
+        this.isVideoExist = false;
+        ElMessage.success("删除成功！");
+      } else {
+        ElMessage.error("删除失败，请稍后重试！");
+      }
+    },
     //获取小节PPT的url
     async getClassPPTUrl() {
       let params = {
@@ -381,17 +533,59 @@ export default {
         "resful",
         "json"
       );
-      console.log("res", res);
-      let url = res.data.data.files.find((item) => item.type === "pdf").url;
+      let url;
+      if (res?.data.code === 20000 && res.data.data.files.length !== 0) {
+        let item = res.data.data.files?.find((item) => item.type === "pdf");
+        url = item.url;
+        this.PPTId = res.data.data?.resource.map((item) => item.id);
+      }
+
+      if (url) return url;
+      else return null;
+    },
+    //获取视频的url
+    async getClassVideoUrl() {
+      let params = {
+        classId: this.$route.params.classId,
+      };
+      let res = await this.$request(
+        "/manager/course-resource/get-timetable/video",
+        params,
+        "get",
+        "resful",
+        "json"
+      );
+      console.log("resvideo", res);
+      let url;
+      if (res.data.code === 20000 && res.data.data.urls.length !== 0) {
+        let item = res.data.data.files?.find((item) => item.type === "pdf");
+        url = item?.url;
+        this.videoId = item?.id;
+      }
+
       if (url) return url;
       else return null;
     },
     //文件上传回调
-    handleSuccess(res) {
-      console.log("suc");
+    async handleSuccessPPT(res) {
       console.log(res);
-      if (res.data.code === 20000) ElMessage.success("上传成功!");
-      else ElMessage.success("上传失败，请稍后重试");
+      if (res.code === 20000) {
+        ElMessage.success("上传成功!");
+        this.PPTUrl = await this.getClassPPTUrl();
+        this.isPPTExist = true;
+      } else ElMessage.success("上传失败，请稍后重试");
+    },
+    async handleSuccessVideo(res) {
+      if (res.code === 20000) {
+        ElMessage.success("上传成功!");
+        this.isVideoExist = true;
+      } else ElMessage.success("上传失败，请稍后重试");
+    },
+    async handleSuccessShare(res) {
+      if (res.code === 20000) {
+        ElMessage.success("上传成功!");
+        this.isShareExist = true;
+      } else ElMessage.success("上传失败，请稍后重试");
     },
     handleprogress(p) {
       console.log("p");
@@ -434,7 +628,6 @@ export default {
     _loadFile(url) {
       const loadingTask = pdfjsLib.getDocument(url);
       loadingTask.promise.then((pdf) => {
-        console.log(pdf);
         this.pdfDoc = pdf;
         this.pages = pdf.numPages;
         this.$nextTick(() => {
@@ -487,6 +680,11 @@ export default {
     //折叠讨论区
     collapsediscusszone() {
       this.isDiscusszoneCollapse = !this.isDiscusszoneCollapse;
+    },
+    //视频记录秒数
+    logtime(playingtime) {
+      this.playingtime = playingtime;
+      console.log(playingtime);
     },
   },
 };
@@ -582,5 +780,8 @@ canvas {
 }
 .discussion-card {
   margin-bottom: 10px;
+}
+.button-wrapper {
+  display: flex;
 }
 </style>
