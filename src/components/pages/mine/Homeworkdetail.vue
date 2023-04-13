@@ -4,19 +4,29 @@
     <el-card shadow="never" class="boxcard">
       <template #header>
         <div class="card-header">
-          <span class="homeworktitle">作业标题</span>
+          <span class="homeworktitle">{{ homeworkDetail?.homework?.name }}</span>
           <div v-show="isTeacher">
             <el-button type="primary">编辑作业</el-button>
             <el-button type="primary">批改作业</el-button>
           </div>
         </div>
       </template>
-      <div>作业内容</div>
-      <div>作业附件</div>
+      <el-scrollbar height="60vh">
+        <div>
+          <ul>
+            <li v-for="(item, index) in  homeworkDetail?.contexts">
+              {{ (index + 1) + "、" + item?.context }}
+              <div v-show="isTeacher" style="font-size: 12px;">请在下方填写修改信息：</div>
+              <div>
+                <textarea v-model="answers[index]" cols="45" rows="10" @keypress="handleAnswer"></textarea>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </el-scrollbar>
       <div v-show="!isTeacher">
-        <richEditor />
         <div class="bottom-button">
-          <el-button type="primary">提交作业</el-button>
+          <el-button type="primary" @click="submitHomework">提交作业</el-button>
         </div>
       </div>
     </el-card>
@@ -31,16 +41,39 @@ export default {
   },
   data() {
     return {
-      homeworkDetail: {
-        title: "test",
-        content: "test"
-      }
+      homeworkDetail: {},
+      answers: ""
     };
   },
   methods: {
     changemode() {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
     },
+    async submitHomework() {
+      const curUser = this.$store.state.userInfo;
+      console.log("提交作业")
+      // 调用提交作业的api,这里需要再给后端对一下给的参数以及参数类型
+      const res = await this.$request(`/manager/course-homework/submit/${curUser.id}/${this.homeworkDetail.homework
+        .id}`,
+        this.homeworkDetail.contexts.map((item, index) => {
+          return {
+            ...item,
+            submitAnswer: this.answers[index]
+          }
+        }),
+        "post",
+        "params",
+        "json")
+      console.log(res)
+    },
+    handleAnswer() {
+      console.log(this.homeworkDetail.contexts.map((item, index) => {
+        return {
+          ...item,
+          submitAnswer: this.answers[index]
+        }
+      }))
+    }
   },
   computed: {
     isTeacher() {
@@ -51,14 +84,19 @@ export default {
     // console.log(this.$route.params)
     const homeworkId = this.$route.params.id
     let homeworkdetail = await this.$request(
-      `/manager/course-homework/get-context/${1645806436417368065}`,
+      `/manager/course-homework/get-context/1638550521385598978`,
+      // `/manager/course-homework/get-context/${String(homeworkId)}`,
       "",
       "get",
       "params",
       "json"
     )
-    // this.homeworkDetail = 
     console.log(homeworkdetail)
+    this.homeworkDetail = { contexts: homeworkdetail.data.data.contexts, homework: homeworkdetail.data.data.homework }
+    this.answers = new Array(homeworkdetail.data.data.contexts.length)
+  },
+  updated() {
+    console.log(this.homeworkDetail)
   }
 };
 </script>
