@@ -1,7 +1,19 @@
 <template>
-  <div class="terminal-wrapper">
-    <div ref="terminal" />
-  </div>
+  <el-row>
+    <el-col :span="12" class="experiment-zone">
+      <el-card shadow="never"> 实验标题 </el-card>
+      <el-card shadow="never"> 实验资源 </el-card>
+      <el-card shadow="never" style="height: 70%"> 步骤 </el-card>
+      <el-card shadow="never"> 实验报告提交 </el-card>
+    </el-col>
+    <el-col :span="12" class="terminal-zone">
+      <div class="terminal-header">
+        <span>实验终端</span>
+      </div>
+      <div class="terminal-wrapper">
+        <div ref="terminal" /></div
+    ></el-col>
+  </el-row>
 </template>
 
 <script>
@@ -13,6 +25,7 @@ export default {
   name: "terminal",
   data() {
     return {
+      isTerminalOpen: false,
       term: null,
       socketUri: "ws://60.204.141.214:8005/exp/webssh",
       socket: "",
@@ -45,7 +58,7 @@ export default {
       // 1.xterm终端初始化
       const term = new Terminal({
         rendererType: "canvas", //渲染类型
-        rows: 40, //行数
+        rows: 44, //行数
         cols: 100, // 不指定行数，自动回车后光标从下一行开始
         convertEol: true, //启用时，光标将设置为下一行的开头
         // scrollback: 50, //终端中的回滚量
@@ -103,7 +116,25 @@ export default {
 
 <style>
 .terminal-wrapper {
-  width: 50%;
-  height: 50%;
+  width: 100%;
+}
+.terminal-zone {
+  padding: 10px;
+  height: 100%;
+}
+.terminal-header {
+  width: 100%;
+  background-color: #f1f1f1;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.experiment-zone {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-content: center;
+  padding: 10px;
 }
 </style>
