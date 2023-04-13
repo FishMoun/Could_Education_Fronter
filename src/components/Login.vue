@@ -174,10 +174,14 @@ export default {
             }
             if (info.role === "teacher") store.state.isTeacher = true;
             router.push({
-              path: "/index",
+              path: "/home",
             });
+          } else {
+            ElMessage.error("登录失败！");
           }
-        } else ElMessage.error("登录失败！");
+        } else {
+          ElMessage.error("登录失败！");
+        }
       } else {
         //注册请求
         let register = {
@@ -249,15 +253,17 @@ export default {
       }
     }
     async function getLoginInfo() {
+      let tmpform = {
+        token: store.state.token,
+      };
       let res = await proxy.$request(
         "/ucenter/user/get-login-info",
-        "",
-        "get",
+        tmpform,
+        "post",
         "params",
-        "json",
-        "/ucenter"
+        "json"
       );
-      console.log(res);
+
       return res?.data.data.userInfo;
     }
     async function searchRemoteClass(query) {

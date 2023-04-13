@@ -9,11 +9,7 @@
         @click="goTo(item)"
       >
         {{ item.name }}
-        <el-icon
-          style="vertical-align: middle"
-          v-show="item.name != '首页'"
-          @click.stop="removeTab(item)"
-        >
+        <el-icon style="vertical-align: middle" @click.stop="removeTab(item)">
           <Close />
         </el-icon>
       </span>
@@ -48,7 +44,7 @@ export default {
       return store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
     });
     watch(store.state.tabList, (newValue) => {
-      if (newValue.length === 0) router.replace({ path: "/index" });
+      if (newValue.length === 0) router.replace({ path: "/mycourse" });
     });
     onMounted(() => {
       store.dispatch("saveTab", route);
@@ -68,8 +64,8 @@ export default {
     }
     function closeAllTab() {
       store.commit("resetTab");
-      if (route.path != "/index") {
-        router.push({ path: "/index" });
+      if (route.path != "/mycourse") {
+        router.push({ path: "/mycourse" });
       } else {
         router.go(0);
       }

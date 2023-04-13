@@ -26,7 +26,7 @@ export async function request(url,//请求地址
     instance.interceptors.request.use(
         config => {
 
-            if (store.state.token && !url.includes("/ucenter/user/login") && !url.includes("register") && !url.includes("download"))
+            if (store.state.token && !url.includes("/ucenter/user/login") && !url.includes("register") && !url.includes("download") && !url.includes("get-login-info"))
                 config.headers.token = store.state.token
             return config
         },

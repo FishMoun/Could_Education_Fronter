@@ -3,7 +3,6 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 // 导入需要进行路由的组件
 import Home from "../components/Home.vue"
 import Login from "../components/Login.vue"
-import Index from "../components/pages/index/Index.vue"
 
 import Courselearning from "../components/pages/courselearning/Courselearning.vue"
 import Mycourse from "../components/pages/courselearning/Mycourse.vue"
@@ -16,13 +15,11 @@ import Onlineexperiment from "../components/pages/experimentlearning/Onlineexper
 
 import Message from "../components/pages/message/Message.vue"
 import Coursemessage from "../components/pages/message/Coursemessage.vue"
-import Interactivemessage from "../components/pages/message/Interactivemessage.vue"
 
 import Mine from "../components/pages/mine/Mine.vue"
 import MyCloudSpace from "../components/pages/mine/MyCloudSpace.vue"
 import Accountmanagement from "../components/pages/mine/Accountmanagement.vue"
 import Homeworkmanagement from "../components/pages/mine/Homeworkmanagement.vue"
-import Studysituation from "../components/pages/mine/Studysituation.vue"
 import Homeworkdetail from "../components/pages/mine/Homeworkdetail.vue"
 import Homeworkcorrect from "../components/pages/mine/Homeworkcorrect.vue"
 
@@ -48,14 +45,9 @@ const router = createRouter({
 			path: "/home",
 			name: "教学管理系统",
 			component: Home,
-			redirect: '/index',
+			redirect: '/courselearning',
 			children: [
 				// #region 学生路由 
-				{
-					path: "/index",
-					name: "首页",
-					component: Index,
-				},
 				{
 					path: "/courselearning",
 					name: "课程学习",
@@ -64,7 +56,7 @@ const router = createRouter({
 					children: [
 						{
 							path: "/mycourse",
-							name: "我的课程",
+							name: "课程学习",
 							component: Mycourse,
 						}, {
 							path: "/courseview/:id",
@@ -85,7 +77,7 @@ const router = createRouter({
 					children: [
 						{
 							path: "/myexperiment",
-							name: "我的实验",
+							name: "实验学习",
 							component: Myexperiment,
 						}, {
 							path: "/onlineexperiment",
@@ -110,12 +102,8 @@ const router = createRouter({
 					children: [
 						{
 							path: "/coursemessage",
-							name: "课程消息",
+							name: "消息",
 							component: Coursemessage,
-						}, {
-							path: "/interactivemessage",
-							name: "互动消息",
-							component: Interactivemessage,
 						}
 					],
 				},
@@ -147,10 +135,6 @@ const router = createRouter({
 							component: Homeworkcorrect,
 						},
 						{
-							path: "/studysituation",
-							name: "学习情况",
-							component: Studysituation,
-						}, {
 							path: "/mycloudspace",
 							component: MyCloudSpace,
 							name: '个人云盘',

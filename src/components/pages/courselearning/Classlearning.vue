@@ -138,10 +138,19 @@
               <el-button
                 style="margin-left: 10px; margin-top: 10px"
                 type="danger"
-                v-show="isTeacher === true && isPPTExist === true"
-                @click="deletePPT"
+                v-show="isTeacher === true && isVideoExist === true"
+                @click="deleteVideo"
                 >删除</el-button
               >
+              <a :href="videoUrl">
+                <el-button
+                  style="margin-left: 10px; margin-top: 10px"
+                  type="primary"
+                  v-show="isVideoExist === true"
+                  @click="downloadPPT"
+                  >下载
+                </el-button>
+              </a>
             </div>
             <div class="videozone" v-show="isVideoExist">
               <video-player
@@ -161,7 +170,6 @@
             <!-- 共享资源操作 -->
             <div class="button-wrapper">
               <el-upload
-                style="display: inline-block"
                 v-model:file-list="sharefileList"
                 class="upload-demo"
                 :action="uploadShareUrl"
@@ -336,12 +344,14 @@ export default {
       //视频播放时间
       playingtime: "",
       isPPTExist: false,
-      isVideoExist: true,
-      isShareExist: true,
+      isVideoExist: false,
+      isShareExist: false,
       PPTId: [],
       PPTUrl: "",
       videoId: "",
-      videoUrl: "/src/assets/video/output1.mp4",
+      videoUrl: "",
+      shareId: [],
+      shareUrl: [],
       PPTfileList: [],
       videofileList: [],
       sharefileList: [],
@@ -430,15 +440,15 @@ export default {
     },
     //PPT上传地址
     uploadPPTUrl() {
-      return `/api/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     //视频上传地址
     uploadVideoUrl() {
-      return `/api/manager/course-resource/upload-timetable/video/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/video/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     //共享资源上传地址
     uploadShareUrl() {
-      return `/api/manager/course-resource/upload-timetable/share/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/share/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     courseId() {
       return this.$route.params.courseId;
@@ -463,6 +473,11 @@ export default {
     if (videourl) {
       this.videoUrl = videourl;
       this.isVideoExist = true;
+    }
+    let shareurl = await this.getClassShareUrl();
+    if (shareurl) {
+      this.shareUrl = shareurl;
+      this.isShareExist = true;
     }
   },
   methods: {
@@ -491,14 +506,14 @@ export default {
     //删除视频
     async deleteVideo() {
       let res = await this.$request(
-        `/manager/course-resource/delete/${this.courseId}/${this.shareId}`,
+        `/manager/course-resource/delete/${this.courseId}/${this.videoId}`,
         "",
         "delete",
         "params",
         "json"
       );
-      if (res?.data.code === 20000) {
-        this.isShareExist = false;
+      if (res && res?.data.code === 20000) {
+        this.isVideoExist = false;
         ElMessage.success("删除成功！");
       } else {
         ElMessage.error("删除失败，请稍后重试！");
@@ -507,15 +522,14 @@ export default {
     //删除共享资源
     async deleteShare() {
       let res = await this.$request(
-        `/manager/course-resource/delete/${this.courseId}/${this.videoId}`,
+        `/manager/course-resource/delete/${this.courseId}/${this.shareId}`,
         "",
         "delete",
         "params",
         "json"
       );
-      console.log(res);
-      if (res?.data.code === 20000) {
-        this.isVideoExist = false;
+      if (res && res?.data.code === 20000) {
+        this.isShareExist = false;
         ElMessage.success("删除成功！");
       } else {
         ElMessage.error("删除失败，请稍后重试！");
@@ -557,12 +571,37 @@ export default {
       );
       console.log("resvideo", res);
       let url;
-      if (res.data.code === 20000 && res.data.data.urls.length !== 0) {
-        let item = res.data.data.files?.find((item) => item.type === "pdf");
-        url = item?.url;
-        this.videoId = item?.id;
+      if (res) {
+        if (res.data.code === 20000 && res.data.data.urls.length !== 0) {
+          let item = res.data.data.urls;
+          url = item[0];
+          this.videoId = res.data.data.resources[0].id;
+        }
       }
-
+      if (url) return url;
+      else return null;
+    },
+    //获取共享资源的url
+    async getClassShareUrl() {
+      let params = {
+        classId: this.$route.params.classId,
+      };
+      let res = await this.$request(
+        "/manager/course-resource/get-timetable/share",
+        params,
+        "get",
+        "resful",
+        "json"
+      );
+      console.log("resshare", res);
+      let url;
+      if (res) {
+        if (res.data.code === 20000 && res.data.data.files.length !== 0) {
+          let item = res.data.data.urls;
+          url = item[0];
+          this.videoId = res.data.data.resources[0].id;
+        }
+      }
       if (url) return url;
       else return null;
     },

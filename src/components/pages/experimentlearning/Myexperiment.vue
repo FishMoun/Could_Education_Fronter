@@ -1,23 +1,27 @@
 <template>
   <div class="head">
-    <el-button @click="goToEditFlow" style="position: absolute; right: 0"
-      >去编辑节点</el-button
-    >
     请选择当前学期：
-    <el-select v-model="curSemesterTime" class="m-2" placeholder="Select">
+    <el-select
+      v-model="termValue"
+      class="m-2"
+      placeholder="Select"
+      @change="changeTerm"
+    >
       <el-option
-        v-for="semester in semesters"
-        :key="semester.id"
-        :label="semester.time"
-        :value="semester.time"
-        @click="changeSem(semester)"
+        v-for="item in termoptions"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
       />
     </el-select>
+    <el-button style="position: absolute; right: 0; top: 0" @click="goToEdit"
+      >去编辑节点</el-button
+    >
   </div>
   <el-scrollbar>
     <div class="body">
       <ul v-for="course in courses" :key="course.id">
-        <li @click="goto(course.id)" class="courseItem">
+        <li @click="goto(course.courseId)" class="courseItem">
           <CourseItem :course="course" />
         </li>
       </ul>
@@ -28,6 +32,7 @@
 <script>
 import { onMounted, reactive, ref } from "vue";
 import { computed } from "vue";
+import axios from "axios";
 import CourseItem from "./utilCom/CourseItem.vue";
 import {
   getCoursesById,
@@ -39,10 +44,10 @@ export default {
     CourseItem,
   },
   computed: {
-    curSemesterTime() {
-      console.log(this.curSemester, "11");
-      return this.curSemester ? this.curSemester.time : "";
-    },
+    // curSemesterTime() {
+    //   console.log(this.curSemester, "11");
+    //   return this.curSemester ? this.curSemester.time : "";
+    // },
   },
   data() {
     const curSemesterTime = "全部";
@@ -50,56 +55,7 @@ export default {
       id: "-1",
       time: "全部",
     };
-    const courses = [
-      {
-        id: "1",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-      {
-        id: "2",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-      {
-        id: "3",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-      {
-        id: "4",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-      {
-        id: "5",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-      {
-        id: "6",
-        avatar: "图片",
-        name: "数学",
-        school: "河海大学",
-        teacher: "王老师",
-        class: "高三",
-      },
-    ];
+    const courses = [];
     const semesters = [
       {
         id: "-1",
@@ -109,35 +65,48 @@ export default {
     return {
       semesters,
       courses,
-      curSemester,
-      curSemesterTime,
+      // curSemester,
+      // curSemesterTime,
+      termValue: "all",
+      termoptions: [
+        {
+          value: "all",
+          label: "全部",
+        },
+        {
+          value: "2022-1",
+          label: "2022~2023第1学期",
+        },
+        {
+          value: "2022-2",
+          label: "2022~2023第2学期",
+        },
+      ],
     };
   },
   async mounted() {
     // api：通过用户id获取到用户的课程信息
     try {
-      let res = await getCoursesById();
-      this.courses = res.data;
+      let userid = this.$store.state.userInfo.id;
+      let res = await getCoursesById(userid);
+      let courses = JSON.parse(JSON.stringify(res.data.data.courses));
+      this.courses = courses.map((item) => {
+        return {
+          courseId: item.courseId,
+          courseName: item.courseName,
+          beginWeek: item.beginWeek,
+          endWeek: item.endWeek,
+          teachers: item.teachers.map((item) => item.name),
+          coverUrl: item.coverUrl,
+        };
+      });
+      console.log(courses);
     } catch (e) {
       console.log(e);
     }
-    // api：通过用户id获取到用户的学期信息
-    try {
-      let res = await getSemestersById();
-      this.semesters = [
-        {
-          id: "-1",
-          time: "全部",
-        },
-      ].concat(res.data);
-    } catch (e) {
-      console.log(e);
-    }
-    this.curSemester = this.semesters && this.semesters[0];
-    this.curSemesterTime = this.curSemester?.time;
   },
   methods: {
-    goToEditFlow() {
+    goToEdit() {
       this.$router.push({ path: "/editflow" });
     },
     async changeSem(semester) {
@@ -153,19 +122,43 @@ export default {
       }
     },
     goto(courseId) {
-      this.$router.push("/courseview?course=" + courseId);
+      this.$router.push(`/courseview/${courseId}`);
+    },
+    async changeTerm(val) {
+      let userid = this.$store.state.userInfo.id;
+      let res = await getCoursesById(userid);
+      let courses;
+      console.log(res);
+      if (val === "all") {
+        courses = JSON.parse(JSON.stringify(res.data.data.courses));
+      } else if (val === "2022-1") {
+        courses = res.data.data.courses.filter((item) => item.term === 1);
+      } else {
+        courses = res.data.data.courses.filter((item) => item.term === 2);
+      }
+      this.courses = courses.map((item) => {
+        return {
+          courseId: item.courseId,
+          courseName: item.courseName,
+          beginWeek: item.beginWeek,
+          endWeek: item.endWeek,
+          teachers: item.teachers.map((item) => item.name),
+          coverUrl: item.coverUrl,
+        };
+      });
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .head {
   margin: 20px 0 20px 15px;
   font-size: 14px;
 }
 
 .body {
+  margin-left: 40px;
   width: 100%;
   display: flex;
   flex-wrap: wrap;

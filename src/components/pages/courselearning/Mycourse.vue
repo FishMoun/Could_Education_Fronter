@@ -14,6 +14,9 @@
         :value="item.value"
       />
     </el-select>
+    <el-button style="position: absolute; right: 0; top: 0" @click="goToAdmin"
+      >切换管理员</el-button
+    >
   </div>
   <el-scrollbar>
     <div class="body">
@@ -41,10 +44,10 @@ export default {
     CourseItem,
   },
   computed: {
-    curSemesterTime() {
-      console.log(this.curSemester, "11");
-      return this.curSemester ? this.curSemester.time : "";
-    },
+    // curSemesterTime() {
+    //   console.log(this.curSemester, "11");
+    //   return this.curSemester ? this.curSemester.time : "";
+    // },
   },
   data() {
     const curSemesterTime = "全部";
@@ -62,8 +65,8 @@ export default {
     return {
       semesters,
       courses,
-      curSemester,
-      curSemesterTime,
+      // curSemester,
+      // curSemesterTime,
       termValue: "all",
       termoptions: [
         {
@@ -101,23 +104,11 @@ export default {
     } catch (e) {
       console.log(e);
     }
-
-    // api：通过用户id获取到用户的学期信息
-    // try {
-    //   let res = await getSemestersById();
-    //   this.semesters = [
-    //     {
-    //       id: "-1",
-    //       time: "全部",
-    //     },
-    //   ].concat(res.data);
-    // } catch (e) {
-    //   console.log(e);
-    // }
-    // this.curSemester = this.semesters && this.semesters[0];
-    // this.curSemesterTime = this.curSemester?.time;
   },
   methods: {
+    goToAdmin() {
+      this.$store.state.isAdmin = !this.$store.state.isAdmin;
+    },
     async changeSem(semester) {
       console.log(semester);
       this.curSemester = semester;
@@ -167,6 +158,7 @@ export default {
 }
 
 .body {
+  margin-left: 40px;
   width: 100%;
   display: flex;
   flex-wrap: wrap;

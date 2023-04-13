@@ -55,9 +55,10 @@
         <el-table-column prop="coursename" label="课程名" />
         <el-table-column label="课程封面">
           <template #default="{ row }">
-            <div style="display: flex; align-items: center">
-              <el-image :src="row.coversrc" />
-            </div> </template
+            <el-image
+              :src="row.coversrc"
+              style="width: 100px; height: 100px"
+            /> </template
         ></el-table-column>
         <el-table-column prop="classhours" label="学时" />
         <el-table-column prop="credit" label="学分" />
@@ -177,6 +178,18 @@
           <el-form-item label="结束周次：">
             <el-input v-model="form.endweek" type="number" />
           </el-form-item>
+          <el-form-item label="上传封面：">
+            <el-upload
+              v-model:file-list="fileList"
+              class="upload-demo"
+              action="http://60.204.141.214:30801/eduoss/fileoss/upload-cover"
+              style="width: 150px"
+              :on-progress="onProgressCover"
+              :on-success="onCoverSuccess"
+            >
+              <el-button type="primary">点击上传</el-button>
+            </el-upload>
+          </el-form-item>
         </div>
         <div class="right-form" v-else>
           <div class="right-form-item">
@@ -258,6 +271,8 @@ import { ElMessage } from "element-plus";
 export default {
   data() {
     return {
+      //课程上传封面
+      fileList: [],
       //教师远程搜索加载项
       teacherloading: false,
       //班级远程搜索加载项
@@ -336,6 +351,7 @@ export default {
         teacher: [],
         class: [],
         term: "",
+        coverUrl: "",
         //排课信息
         beginclass: "",
         endclass: "",
@@ -371,8 +387,20 @@ export default {
   methods: {
     //按下提交基本信息的按钮
     // PressSubmitBasicButton(){
-
+    onProgressCover(res) {
+      console.log(res);
+    },
     // }
+    //上传课程封面的接口
+    onCoverSuccess(res) {
+      console.log(res);
+      if (res && res.code === 20000) {
+        this.form.coverUrl = res.data.url;
+        ElMessage.success("上传成功！");
+      } else {
+        ElMessage.error("上传失败，请稍后重试！");
+      }
+    },
     //新增课程
     addNewCourse() {
       this.isCreate = true;
@@ -408,8 +436,7 @@ export default {
           term: Number(yearandterm[1]),
           beginWeek: this.form.beginweek,
           endWeek: this.form.endweek,
-          coverUrl:
-            "https://cloud-file-230201-1.oss-cn-hangzhou.aliyuncs.com/default.jpg",
+          coverUrl: this.form.coverUrl,
         },
 
         //浅拷贝
@@ -535,6 +562,9 @@ export default {
         "params",
         "json"
       );
+      if (res && res.data.code === 20000) {
+        ElMessage.success("删除成功！");
+      } else ElMessage.error("删除失败，请稍后重试");
       this.selectallcourse();
     },
     //教师选择（搜索数据库）

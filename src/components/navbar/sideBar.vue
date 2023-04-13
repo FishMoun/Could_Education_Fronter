@@ -87,10 +87,16 @@ export default {
     //学生侧边栏
     const asideMenuStudent = reactive([
       {
-        path: "/index",
-        name: "index",
-        label: "首页",
-        icon: "shouye-shouye",
+        path: "/mycourse",
+        name: "mycourse",
+        label: "课程学习",
+        icon: "kecheng",
+      },
+      {
+        path: "/myexperiment",
+        label: "实验学习",
+        name: "myexperiment",
+        icon: "shiyani",
       },
       {
         path: "/mine",
@@ -109,65 +115,18 @@ export default {
             name: "homeworkmanagement",
           },
           {
-            path: "/studysituation",
-            label: "学习情况",
-            name: "studysituation",
-          },
-          {
             path: "/mycloudspace",
             label: "个人云盘",
             name: "mycloudspace",
           },
         ],
       },
+
       {
-        path: "/courselearning",
-        name: "courselearning",
-        label: "课程学习",
-        icon: "kecheng",
-        submenu: [
-          {
-            path: "/mycourse",
-            name: "mycourse",
-            label: "我的课程",
-          },
-        ],
-      },
-      {
-        path: "/experimentlearning",
-        name: "experimentlearning",
-        label: "实验学习",
-        icon: "shiyani",
-        submenu: [
-          {
-            path: "/myexperiment",
-            label: "我的实验",
-            name: "myexperiment",
-          },
-          {
-            path: "/onlineexperiment",
-            label: "在线实验",
-            name: "onlineexperiment",
-          },
-        ],
-      },
-      {
-        path: "/message",
-        name: "message",
+        path: "/coursemessage",
         label: "消息",
+        name: "coursemessage",
         icon: "xiaoxi",
-        submenu: [
-          {
-            path: "/coursemessage",
-            label: "课程消息",
-            name: "coursemessage",
-          },
-          {
-            path: "/interactivemessage",
-            label: "互动消息",
-            name: "interactivemessage",
-          },
-        ],
       },
     ]);
     //根据身份状态渲染对应的侧边栏
