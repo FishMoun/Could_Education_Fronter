@@ -45,67 +45,61 @@ const router = createRouter({
 			path: "/home",
 			name: "教学管理系统",
 			component: Home,
-			redirect: '/courselearning',
+			redirect: '/mycourse',
 			children: [
 				// #region 学生路由 
 				{
-					path: "/courselearning",
+					path: "/mycourse",
 					name: "课程学习",
-					component: Courselearning,
-					redirect: "/mycourse",
-					children: [
-						{
-							path: "/mycourse",
-							name: "课程学习",
-							component: Mycourse,
-						}, {
-							path: "/courseview/:id",
-							name: "课程概览",
-							component: Courseview,
-						}, {
-							path: "/classlearning/:courseId/:classId",
-							name: "节次学习",
-							component: Classlearning,
-						},
-					]
+					component: Mycourse,
+
 				},
 				{
-					path: "/experimentlearning",
+					path: "/courseview/:id",
+					name: "课程概览",
+					component: Courseview,
+				}, {
+					path: "/classlearning/:courseId/:classId",
+					name: "节次学习",
+					component: Classlearning,
+				},
+				{
+					path: "/myexperiment",
 					name: "实验学习",
-					component: Experimentlearning,
-					redirect: "/myexperiment",
-					children: [
-						{
-							path: "/myexperiment",
-							name: "实验学习",
-							component: Myexperiment,
-						}, {
-							path: "/onlineexperiment",
-							name: "在线实验",
-							component: Onlineexperiment,
-						}, {
-							path: "/editflow",
-							name: "实验流程",
-							component: EditFlow,
-						}, {
-							path: "/terminal",
-							name: "命令行",
-							component: Terminal,
-						}
-					],
+					component: Myexperiment,
 				},
 				{
-					path: "/message",
+					path: "/experimentflow/:expId",
+					name: "实验流程",
+					component: EditFlow,
+				}, {
+					path: "/experimentspace/:nodeId",
+					name: "实验空间",
+					component: Terminal,
+				},
+				{
+					path: "/coursemessage",
 					name: "消息",
-					component: Message,
-					redirect: "/coursemessage",
-					children: [
-						{
-							path: "/coursemessage",
-							name: "消息",
-							component: Coursemessage,
-						}
-					],
+					component: Coursemessage,
+
+
+				},
+				{
+					path: "/homeworkmanagement",
+					name: "作业管理",
+					component: Homeworkmanagement,
+				},
+				//作业管理下路由
+				{
+					path: "/homeworkdetail/:id",
+					name: "作业详细",
+					component: Homeworkdetail,
+				},
+				//作业批改
+				{
+					path: "/homeworkcorrect",
+					name: "作业批改",
+					component: Homeworkcorrect,
 				},
 				{
 					path: "/mine",
@@ -117,23 +111,8 @@ const router = createRouter({
 							path: "/accountmanagement",
 							name: "账号管理",
 							component: Accountmanagement,
-						}, {
-							path: "/homeworkmanagement",
-							name: "作业管理",
-							component: Homeworkmanagement,
 						},
-						//作业管理下路由
-						{
-							path: "/homeworkdetail/:id",
-							name: "作业详细",
-							component: Homeworkdetail,
-						},
-						//作业批改
-						{
-							path: "/homeworkcorrect",
-							name: "作业批改",
-							component: Homeworkcorrect,
-						},
+
 						{
 							path: "/mycloudspace",
 							component: MyCloudSpace,

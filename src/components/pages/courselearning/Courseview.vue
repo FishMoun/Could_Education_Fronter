@@ -5,6 +5,10 @@
   <!-- 内容区 -->
   <div class="main">
     <div class="mainleft">
+      <div style="margin-top: 10px; display: flex; justify-content: right">
+        <el-button type="primary">创建课程实验</el-button>
+        <el-button type="primary">布置课程作业</el-button>
+      </div>
       <el-card shadow="never" class="introduction-card">
         <div style="font-size: 20px">课程介绍</div>
         <p>{{ introduction }}</p>
@@ -65,12 +69,12 @@
                 <div class="card-main">
                   <h2>{{ activity.title }}</h2>
                   <span style="color: #909399"
-                    >{{ activity.teacher }} {{ activity.weekth }}</span
+                    >{{ activity.teacher }} {{ activity.week
+                    }}{{ activity.weekth }}</span
                   >
-                  <p v-if="isTeacher" style="color: #909399">
-                    尚无内容，进入学习空间编辑
-                  </p>
-                  <p v-else>本节概要：</p>
+                  <div class="subchapter">
+                    <el-tag type="success" size="large">Tag 1</el-tag>
+                  </div>
                 </div>
                 <div class="card-button">
                   <el-tooltip
@@ -251,7 +255,8 @@ export default {
       );
       let weekday = ["一", "二", "三", "四", "五", "六", "日"];
       let timeinfo = res.data.data.time;
-
+      let state = ["info", "primary", "success"];
+      let iconfill = ["", "MoreFilled", "Check"];
       let newactivity = [];
       console.log(timeinfo);
       for (let i = 0; i < timeinfo.length; i++) {
@@ -261,10 +266,12 @@ export default {
           id: item.id,
           timestamp: item.date.split(" ")[0],
           size: "large",
-          type: "primary",
+          icon: iconfill[item.status],
+          type: state[item.status],
           title: item.courseName + `第${i + 1}大节`,
           teacher: item.teacherName,
-          weekth: `周${weekday[item.dayOfWeek]}第${item.beginIndex}~${
+          week: `第${item.week}周`,
+          weekth: `周${weekday[item.dayOfWeek - 1]}第${item.beginIndex}~${
             item.endIndex
           }节`,
           overview: "",
@@ -336,7 +343,7 @@ export default {
                 chapterId: item.id,
                 courseId: this.courseId,
                 id: item2.id,
-                name: item2.name,
+                label: item2.name,
                 number: index2,
               },
               timetables: item2?.timetable || [],
@@ -468,5 +475,8 @@ export default {
 .mainright {
   position: relative;
   left: 5vw;
+}
+.subchapter {
+  margin-top: 10px;
 }
 </style>

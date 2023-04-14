@@ -1,14 +1,38 @@
 <template>
-  <el-row>
+  <el-row style="height: 100%; justify-content: center">
     <el-col :span="12" class="experiment-zone">
-      <el-card shadow="never"> 实验标题 </el-card>
-      <el-card shadow="never"> 实验资源 </el-card>
-      <el-card shadow="never" style="height: 70%"> 步骤 </el-card>
-      <el-card shadow="never"> 实验报告提交 </el-card>
+      <el-card shadow="never" class="node-title">
+        {{ monidata.title }}
+        <el-button
+          link
+          type="primary"
+          style="position: relative; left: 10vw"
+          @click="isTerminalOpen = true"
+          >打开实验终端</el-button
+        >
+      </el-card>
+      <el-card shadow="never" style="font-size: 25px; height: 15%">
+        <div>实验资源</div>
+        <el-button type="primary">上传</el-button>
+      </el-card>
+      <el-card shadow="never" style="height: 60%; font-size: 25px">
+        <div>实验步骤</div>
+        <p style="font-size: 20px">{{ monidata.stepconten }}</p>
+        <el-button link type="primary">编辑</el-button>
+      </el-card>
+      <el-card shadow="never" class="node-report">
+        <el-button type="primary">提交报告</el-button>
+      </el-card>
     </el-col>
-    <el-col :span="12" class="terminal-zone">
+    <el-col :span="12" class="terminal-zone" v-show="isTerminalOpen">
       <div class="terminal-header">
         <span>实验终端</span>
+        <el-button
+          link
+          style="position: absolute; right: 20px"
+          @click="isTerminalOpen = false"
+          ><el-icon><Close /></el-icon>
+        </el-button>
       </div>
       <div class="terminal-wrapper">
         <div ref="terminal" /></div
@@ -37,15 +61,32 @@ export default {
         password: "gocubsgo", //密码
       },
       dataoption: { operate: "command", command: "" },
+      monidata: {
+        title: "基本实验1-初识Linux",
+        res: {},
+        stepconten:
+          "1、使用shutdown命令设定在30分钟之后关闭计算机。\n2、使用init命令实现图形界面到字符界面及字符界面到图形界面的切换。\n3、分别使用命令man和help查看ls命令的帮助文档。\n4、使用命令将当前计算机的主机名显示为IT。\n5、使用命令显示公元2008年8月的月历。\n6、显示当前计算机上的日期和时间。",
+      },
     };
   },
   computed: {
     token() {
       return this.$store.state.token;
     },
+    nodeId() {
+      return this.$route.params.nodeId;
+    },
   },
-  mounted() {
-    this.initTerm();
+  mounted() {},
+  watch: {
+    isTerminalOpen(newval) {
+      if (newval) {
+        this.initTerm();
+      } else {
+        this.socket && this.socket.close();
+        this.term && this.term.dispose();
+      }
+    },
   },
   beforeDestroy() {
     this.socket && this.socket.close();
@@ -58,7 +99,7 @@ export default {
       // 1.xterm终端初始化
       const term = new Terminal({
         rendererType: "canvas", //渲染类型
-        rows: 44, //行数
+        rows: 43, //行数
         cols: 100, // 不指定行数，自动回车后光标从下一行开始
         convertEol: true, //启用时，光标将设置为下一行的开头
         // scrollback: 50, //终端中的回滚量
@@ -114,18 +155,20 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .terminal-wrapper {
   width: 100%;
+  height: 95%;
 }
 .terminal-zone {
   padding: 10px;
   height: 100%;
 }
 .terminal-header {
+  font-size: 25px;
   width: 100%;
   background-color: #f1f1f1;
-  height: 50px;
+  height: 5%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -134,7 +177,19 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-content: center;
+
   padding: 10px;
+  height: 100%;
+}
+.node-title {
+  text-align: center;
+  font-size: 25px;
+}
+.node-report {
+  height: 10%;
+}
+p {
+  margin-top: 10px;
+  white-space: pre-line;
 }
 </style>

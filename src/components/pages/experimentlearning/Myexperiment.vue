@@ -20,9 +20,9 @@
   </div>
   <el-scrollbar>
     <div class="body">
-      <ul v-for="course in courses" :key="course.id">
-        <li @click="goto(course.courseId)" class="courseItem">
-          <CourseItem :course="course" />
+      <ul v-for="experiment in experiments" :key="experiment.id">
+        <li class="courseItem">
+          <ExpItem :experiment="experiment" @click="goto(experiment.id)" />
         </li>
       </ul>
     </div>
@@ -30,32 +30,20 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
-import { computed } from "vue";
-import axios from "axios";
-import CourseItem from "./utilCom/CourseItem.vue";
-import {
-  getCoursesById,
-  getSemestersById,
-  getCoursesBySem,
-} from "../../../network/api";
+import ExpItem from "./utilCom/ExpItem.vue";
+import { getCoursesById, getCoursesBySem } from "../../../network/api";
 export default {
   components: {
-    CourseItem,
+    ExpItem,
   },
-  computed: {
-    // curSemesterTime() {
-    //   console.log(this.curSemester, "11");
-    //   return this.curSemester ? this.curSemester.time : "";
-    // },
-  },
+  computed: {},
   data() {
     const curSemesterTime = "全部";
     const curSemester = {
       id: "-1",
       time: "全部",
     };
-    const courses = [];
+    const experiments = [];
     const semesters = [
       {
         id: "-1",
@@ -64,9 +52,7 @@ export default {
     ];
     return {
       semesters,
-      courses,
-      // curSemester,
-      // curSemesterTime,
+      experiments,
       termValue: "all",
       termoptions: [
         {
@@ -80,6 +66,38 @@ export default {
         {
           value: "2022-2",
           label: "2022~2023第2学期",
+        },
+      ],
+      monidata: [
+        {
+          id: "1",
+          courseName: "数据库原理",
+          expName: "Mysql数据库实操",
+          teachers: ["毛清"],
+        },
+        {
+          id: "2",
+          courseName: "操作系统",
+          expName: "Linux系统实践",
+          teachers: ["许飞"],
+        },
+        {
+          id: "3",
+          courseName: "软件开发环境",
+          expName: "Web项目开发实践",
+          teachers: ["赵燕"],
+        },
+        {
+          id: "4",
+          courseName: "软件工程",
+          expName: "软件开发实践",
+          teachers: ["毛清"],
+        },
+        {
+          id: "5",
+          courseName: "算法设计与分析",
+          expName: "算法大作业实践",
+          teachers: ["周仁", "李德"],
         },
       ],
     };
@@ -100,14 +118,19 @@ export default {
           coverUrl: item.coverUrl,
         };
       });
-      console.log(courses);
+
+      for (let i = 0; i < courses.length; ++i) {
+        this.monidata[i].coverUrl = courses[i].coverUrl;
+      }
     } catch (e) {
       console.log(e);
     }
+
+    this.experiments = JSON.parse(JSON.stringify(this.monidata));
   },
   methods: {
     goToEdit() {
-      this.$router.push({ path: "/editflow" });
+      this.$router.push({ path: "/experimentflow" });
     },
     async changeSem(semester) {
       console.log(semester);
@@ -121,8 +144,9 @@ export default {
         console.log(e);
       }
     },
-    goto(courseId) {
-      this.$router.push(`/courseview/${courseId}`);
+    goto(expId) {
+      console.log(123);
+      this.$router.push({ path: `/experimentflow/${expId}` });
     },
     async changeTerm(val) {
       let userid = this.$store.state.userInfo.id;

@@ -1,14 +1,14 @@
 <template>
   <el-card :body-style="{ padding: '0px' }">
-    <img :src="course.coverUrl" alt="尚无封面" class="image" />
+    <img :src="experiment.coverUrl" alt="尚无封面" class="image" />
     <div style="padding: 14px">
-      <span class="overElpSingle" :title="course.name">{{ course.name }}</span>
+      <span class="overElpSingle" :title="experiment.name">{{
+        experiment.name
+      }}</span>
       <ul class="bottom">
-        <li class="overElpSingle">课程名：{{ course.courseName }}</li>
-        <li class="overElpSingle">老师：{{ course.teachers?.join(",") }}</li>
-        <li class="overElpSingle">
-          上课周次：{{ course.beginWeek }}到{{ course.endWeek }}周
-        </li>
+        <li class="overElpSingle">来源课程: {{ experiment.courseName }}</li>
+        <li class="overElpSingle">实验名称: {{ experiment.expName }}</li>
+        <li class="overElpSingle">老师: {{ experiment.teachers.join(",") }}</li>
       </ul>
     </div>
   </el-card>
@@ -17,7 +17,7 @@
 <script>
 export default {
   props: {
-    course: {
+    experiment: {
       type: Object,
       default() {
         return {};

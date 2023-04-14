@@ -99,6 +99,18 @@ export default {
         icon: "shiyani",
       },
       {
+        path: "/homeworkmanagement",
+        label: "作业管理",
+        name: "homeworkmanagement",
+        icon: "wode",
+      },
+      {
+        path: "/coursemessage",
+        label: "消息",
+        name: "coursemessage",
+        icon: "xiaoxi",
+      },
+      {
         path: "/mine",
         name: "mine",
         label: "我的",
@@ -109,24 +121,13 @@ export default {
             label: "账号管理",
             name: "accountmanagement",
           },
-          {
-            path: "/homeworkmanagement",
-            label: "作业管理",
-            name: "homeworkmanagement",
-          },
+
           {
             path: "/mycloudspace",
             label: "个人云盘",
             name: "mycloudspace",
           },
         ],
-      },
-
-      {
-        path: "/coursemessage",
-        label: "消息",
-        name: "coursemessage",
-        icon: "xiaoxi",
       },
     ]);
     //根据身份状态渲染对应的侧边栏

@@ -30,7 +30,7 @@
             </flow-node>
           </template>
           <!-- 给画布一个默认的宽度和高度 -->
-          <div style="position: absolute; top: 2000px; left: 2000px">
+          <div style="position: absolute; top: 2000px; left: 1500px">
             &nbsp;
           </div>
         </div>
@@ -51,12 +51,85 @@
               <el-button type="danger" @click="deletenode">删除</el-button>
             </el-form-item>
           </el-form>
-          <el-card shadow="never">实验资源</el-card>
-          <el-card shadow="never">实验要求</el-card>
-          <el-card shadow="never">实验评价</el-card>
-        </div>
-      </div></el-col
-    >
+          <div class="main-zone">
+            <el-card shadow="never" class="exp-base"
+              ><div class="exp-header">
+                <span style="font-size: 22px; font-weight: bold">实验要求</span>
+                <el-button type="primary" @click="goToSpace"
+                  >进入实验空间</el-button
+                >
+              </div>
+              <div style="font-size: 20px; margin-top: 10px">
+                <p>1、阅读实验手册，了解Linux</p>
+                <p>2、借助实验终端，在实验终端上安装jdk</p>
+                <p>3、完成实验手册上的习题</p>
+              </div>
+              <el-button link type="primary" v-show="isTeacher">编辑</el-button>
+            </el-card>
+            <el-card shadow="never" class="exp-res"
+              ><div class="exp-header">
+                <span style="font-size: 22px; font-weight: bold">实验资源</span>
+                <el-button type="primary">上传</el-button>
+              </div>
+              <div style="overflow: auto">
+                <el-card
+                  shadow="never"
+                  v-for="item in fileList"
+                  :key="item.id"
+                  v-show="fileList.length !== 0"
+                  style="margin-top: 10px; border: none"
+                >
+                  <div class="filelist">
+                    <div style="display: flex; align-items: center">
+                      <img
+                        style="width: 50px; height: 50px"
+                        :src="getFileImage(item.name)"
+                        alt=""
+                      />
+
+                      <span>{{ item.name }}</span>
+                    </div>
+                    <div class="fileicon">
+                      <el-icon
+                        size="20px"
+                        v-show="isTeacher"
+                        @click="deleteShare(item.id)"
+                        style="cursor: pointer"
+                        ><Delete
+                      /></el-icon>
+                      <a :href="item.url"
+                        ><el-icon size="20px" color=""><Download /></el-icon
+                      ></a>
+                    </div>
+                  </div>
+                </el-card></div
+            ></el-card>
+            <el-card shadow="never" class="exp-rate"
+              ><div>
+                <span style="font-size: 22px; font-weight: bold">实验评价</span>
+              </div>
+              <div
+                style="display: flex; flex-direction: column; margin-top: 10px"
+              >
+                <el-rate
+                  v-model="readOnlyRate"
+                  disabled
+                  show-score
+                  text-color="#ff9900"
+                  score-template="当前难度系数：{value} "
+                />
+                <div>
+                  去评价：<el-rate
+                    v-model="userrate"
+                    :texts="['很简单', '简单', '中等', '难', '非常难']"
+                    show-text
+                    allow-half
+                  />
+                </div></div
+            ></el-card>
+          </div>
+        </div></div
+    ></el-col>
     <el-dialog v-model="addDialogVisible" title="新增节点" width="20%">
       <el-radio-group v-model="radio" class="ml-4">
         <el-radio label="1" size="large">一般节点</el-radio>
@@ -92,6 +165,17 @@ import flowNode from "./utilCom/node.vue";
 export default {
   data() {
     return {
+      //节点文件列表
+      fileList: [
+        {
+          id: "1",
+          name: "基本实验1-初识Linux实验手册.pdf",
+        },
+        {
+          id: "2",
+          name: "jdk1.8033.tar.gz",
+        },
+      ],
       isEditMode: false,
       //jsPlumb的实例
       jsPlumb: null,
@@ -151,6 +235,8 @@ export default {
         sourceId: undefined,
         targetId: undefined,
       },
+      userrate: 0,
+      readOnlyRate: 3.7,
       //节点分类，1是一般节点，2是并行节点
       radio: "1",
       mutiNodeVisible: true,
@@ -165,6 +251,164 @@ export default {
       nodeinfo: {
         id: "",
         name: "",
+      },
+      monidata: {
+        lineList: [
+          {
+            from: "1",
+            to: "3",
+            type: 0,
+          },
+          {
+            from: "3",
+            to: "10",
+            type: 0,
+          },
+          {
+            from: "10",
+            to: "4",
+            type: 0,
+          },
+          {
+            from: "4",
+            to: "8",
+            type: 1,
+          },
+          {
+            from: "8",
+            to: "9",
+            type: 2,
+          },
+          {
+            from: "4",
+            to: "7",
+            type: 1,
+          },
+          {
+            from: "7",
+            to: "9",
+            type: 2,
+          },
+          {
+            from: "9",
+            to: "2",
+            type: 0,
+          },
+          {
+            from: "4",
+            to: "6",
+            type: 1,
+          },
+          {
+            from: "6",
+            to: "9",
+            type: 2,
+          },
+          {
+            from: "4",
+            to: "5",
+            type: 1,
+          },
+          {
+            from: "5",
+            to: "9",
+            type: 2,
+          },
+        ],
+        nodeList: [
+          {
+            id: "1",
+            name: "Start",
+            left: "16px",
+            top: "371px",
+            type: 0,
+          },
+          {
+            id: "3",
+            name: "基本实验1-初识Linux",
+            left: "172px",
+            top: "359px",
+            type: 1,
+          },
+          {
+            id: "10",
+            name: "基本实验2-Linux常用命令",
+            left: "441px",
+            top: "355px",
+            type: 1,
+          },
+          {
+            id: "4",
+            name: "综合实验1-内存管理",
+            left: "704px",
+            top: "377px",
+            type: 2,
+          },
+          {
+            id: "5",
+            name: "综合实验2-中断与异常",
+            left: "886px",
+            top: "141px",
+            type: 3,
+          },
+          {
+            id: "6",
+            name: "综合实验3-内核时间管理",
+            left: "886px",
+            top: "350px",
+            type: 3,
+          },
+          {
+            id: "7",
+            name: "综合实验4-设备管理",
+            left: "883px",
+            top: "489px",
+            type: 3,
+          },
+          {
+            id: "8",
+            name: "综合实验5-文件系统",
+            left: "862px",
+            top: "701px",
+            type: 3,
+          },
+          {
+            id: "9",
+            name: "",
+            left: "1232px",
+            top: "368px",
+            type: 4,
+          },
+          {
+            id: "2",
+            name: "End",
+            left: "1368px",
+            top: "359px",
+            type: 5,
+          },
+        ],
+        branchList: [
+          {
+            branchid: "4",
+            toid: "5",
+            length: 1,
+          },
+          {
+            branchid: "4",
+            toid: "6",
+            length: 1,
+          },
+          {
+            branchid: "4",
+            toid: "7",
+            length: 1,
+          },
+          {
+            branchid: "4",
+            toid: "8",
+            length: 1,
+          },
+        ],
       },
     };
   },
@@ -196,6 +440,14 @@ export default {
     };
   },
   mounted() {
+    if (this.$route.params.expId === "2") {
+      this.data = {
+        nodeList: JSON.parse(JSON.stringify(this.monidata.nodeList)),
+        lineList: JSON.parse(JSON.stringify(this.monidata.lineList)),
+      };
+      this.branchList = JSON.parse(JSON.stringify(this.monidata.branchList));
+    }
+
     this.$nextTick(() => {
       this.dataReload();
     });
@@ -205,6 +457,10 @@ export default {
     });
   },
   methods: {
+    //进入实验空间
+    goToSpace() {
+      this.$router.push({ path: `/experimentspace/${this.nodeinfo.id}` });
+    },
     jsPlumbInit() {
       this.jsPlumb.ready(() => {
         // 会使整个jsPlumb立即重绘。
@@ -309,6 +565,7 @@ export default {
           });
         });
       });
+      console.log("数据", this.data, this.branchList);
     },
     //确定提交新增节点
     confirmAddNewNode() {
@@ -762,6 +1019,15 @@ export default {
       this.isEditMode = false;
       this.dataReload();
     },
+    //资源缩略图
+    getFileImage(name) {
+      if (name.includes("pdf")) return "/src/assets/img/pdf.png";
+      else if (name.includes("ppt")) return "/src/assets/img/ppt.png";
+      else if (name.includes("txt")) return "/src/assets/img/txt.png";
+      else if (name.includes("zip")) return "/src/assets/img/zip.png";
+      else if (name.includes("doc")) return "/src/assets/img/word.png";
+      else return "/src/assets/img/unknown.png";
+    },
   },
 };
 </script>
@@ -883,5 +1149,31 @@ export default {
   display: flex;
   padding: 5px 5px 0 0;
   justify-content: flex-end;
+}
+.main-zone {
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.exp-base {
+  height: 30%;
+}
+.exp-res {
+  height: 35%;
+  overflow: auto;
+}
+.exp-rate {
+  height: 20%;
+}
+.exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.filelist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

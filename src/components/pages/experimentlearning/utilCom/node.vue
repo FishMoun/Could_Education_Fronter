@@ -18,6 +18,9 @@
       <!-- 节点名称 -->
       <div class="ef-node-text">{{ node.name }}</div>
     </template>
+    <template v-if="node.type === 0 || node.type === 5">
+      <div class="ef-node-se">{{ node.name }}</div>
+    </template>
   </div>
 </template>
  
@@ -102,10 +105,10 @@ export default {
 /*节点显示的文字*/
 .ef-node-text {
   color: #565758;
-  font-size: 12px;
+  font-size: 20px;
   line-height: 28px;
   /* 设置超出宽度文本显示方式*/
-  white-space: nowrap;
+  white-space: wrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
@@ -114,8 +117,8 @@ export default {
 .ef-node-container {
   position: absolute;
   display: flex;
-  width: 4vw;
-  height: 3vh;
+  width: 8vw;
+  height: 6vh;
   border: 1px solid #e0e3e7;
   border-radius: 5px;
   background-color: #fff;
@@ -138,23 +141,35 @@ export default {
   position: absolute;
   display: flex;
   background-color: #409eff;
-  height: 3vh;
-  width: 2.5vw;
+  height: 4vh;
+  width: 3vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50px;
 }
 .ef-node-end {
   position: absolute;
   display: flex;
   background-color: #67c23a;
-  height: 3vh;
-  width: 2.5vw;
+  height: 4vh;
+  width: 3vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50px;
 }
 .ef-node-branch {
   position: absolute;
   display: flex;
   background-color: #e6a23c;
-  height: 3vh;
-  width: 3vh;
+  height: 2vh;
+  width: 2vh;
+}
+.ef-node-se {
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  font-size: 20px;
 }
 </style>

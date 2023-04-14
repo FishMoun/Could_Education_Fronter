@@ -21,8 +21,8 @@
   <el-scrollbar>
     <div class="body">
       <ul v-for="course in courses" :key="course.id">
-        <li @click="goto(course.courseId)" class="courseItem">
-          <CourseItem :course="course" />
+        <li class="courseItem">
+          <CourseItem :course="course" @click="goto(course.courseId)" />
         </li>
       </ul>
     </div>
@@ -65,8 +65,6 @@ export default {
     return {
       semesters,
       courses,
-      // curSemester,
-      // curSemesterTime,
       termValue: "all",
       termoptions: [
         {
@@ -104,6 +102,7 @@ export default {
     } catch (e) {
       console.log(e);
     }
+    //模拟数据
   },
   methods: {
     goToAdmin() {

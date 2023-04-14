@@ -52,21 +52,19 @@
         <el-collapse v-model="activeNames" accordion>
           <el-collapse-item name="1">
             <template #title>
-              <div class="header">PPT课件</div>
+              <div class="header">课堂课件</div>
             </template>
             <!-- PPT资源操作 -->
             <div class="button-wrapper">
               <el-upload
-                :show-file-list="false"
                 style="display: inline-block"
                 class="upload-demo"
                 :action="uploadPPTUrl"
                 :on-success="handleSuccessPPT"
                 :on-error="handleErr"
                 :on-progress="handleprogress"
-                multiple
-                :limit="1"
                 :headers="{ token: this.$store.state.token }"
+                :show-file-list="false"
               >
                 <template #trigger>
                   <el-button
@@ -116,14 +114,11 @@
               <el-upload
                 :show-file-list="false"
                 style="display: inline-block"
-                v-model:file-list="videofileList"
                 class="upload-demo"
                 :action="uploadVideoUrl"
                 :on-success="handleSuccessVideo"
                 :on-error="handleErr"
                 :on-progress="handleprogress"
-                multiple
-                :limit="1"
                 :headers="{ token: this.$store.state.token }"
               >
                 <template #trigger>
@@ -168,26 +163,80 @@
               <div class="header">共享资源</div>
             </template>
             <!-- 共享资源操作 -->
-            <div class="button-wrapper">
-              <el-upload
-                v-model:file-list="sharefileList"
-                class="upload-demo"
-                :action="uploadShareUrl"
-                :on-success="handleSuccessShare"
-                :on-error="handleErr"
-                :on-progress="handleprogress"
-                list-type="picture"
-                :headers="{ token: this.$store.state.token }"
-              >
-                <template #trigger>
-                  <el-button
-                    style="margin-left: 10px; margin-top: 10px"
-                    type="primary"
-                    >上传</el-button
-                  >
-                </template>
-              </el-upload>
-            </div>
+
+            <el-upload
+              class="upload-demo"
+              :action="uploadShareUrl"
+              :on-success="handleSuccessShare"
+              :on-error="handleErr"
+              :on-progress="handleprogress"
+              list-type="picture"
+              :show-file-list="false"
+              :headers="{ token: this.$store.state.token }"
+            >
+              <template #trigger>
+                <el-button
+                  style="margin-left: 10px; margin-top: 10px"
+                  type="primary"
+                  >上传</el-button
+                >
+              </template>
+              <template #file="{ file }">
+                <img
+                  class="el-upload-list__item-thumbnail"
+                  :src="getFileImage(file.name)"
+                  alt=""
+                />
+
+                <span class="el-upload-list__item-file-name">{{
+                  file.name
+                }}</span>
+                <div class="fileicon">
+                  <el-icon
+                    size="20px"
+                    v-show="isTeacher"
+                    @click="deleteShare(file.id)"
+                    style="cursor: pointer"
+                    ><Delete
+                  /></el-icon>
+                  <a :href="file.url"
+                    ><el-icon size="20px" color=""><Download /></el-icon
+                  ></a>
+                </div>
+              </template>
+            </el-upload>
+
+            <el-card
+              shadow="never"
+              v-for="item in sharefileList"
+              :key="item.id"
+              v-show="sharefileList.length !== 0"
+              style="margin: 10px"
+            >
+              <div class="filelist">
+                <div style="display: flex; align-items: center">
+                  <img
+                    style="width: 70px; height: 70px"
+                    :src="getFileImage(item.name)"
+                    alt=""
+                  />
+
+                  <span>{{ item.name }}</span>
+                </div>
+                <div class="fileicon">
+                  <el-icon
+                    size="20px"
+                    v-show="isTeacher"
+                    @click="deleteShare(item.id)"
+                    style="cursor: pointer"
+                    ><Delete
+                  /></el-icon>
+                  <a :href="item.url"
+                    ><el-icon size="20px" color=""><Download /></el-icon
+                  ></a>
+                </div>
+              </div>
+            </el-card>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -223,7 +272,10 @@
                 placeholder="发布讨论"
                 resize="none"
               />
-              <el-button type="primary" style="margin-left: 10px"
+              <el-button
+                type="primary"
+                style="margin-left: 10px"
+                @click="submitcurrentPPTdiscussion"
                 >发布</el-button
               >
             </div>
@@ -284,7 +336,10 @@
                     ><el-icon><CloseBold /></el-icon
                   ></el-button>
                 </div>
-                <el-divider style="margin: 5px" />
+                <el-divider
+                  style="margin: 5px"
+                  v-show="item.replycard.length !== 0"
+                />
                 <div
                   class="userrelpy"
                   v-for="(subitem, subvalue) in item.replycard"
@@ -374,63 +429,63 @@ export default {
       activeNames: "",
       //评论卡片
       discusslist: [
-        {
-          name: "秦岭",
-          content: "你好",
-          date: "两天前",
-          creditnum: "2",
-          replyvisible: false,
-          replycard: [
-            {
-              name: "葛天辰",
-              content: "你也好",
-              date: "一天前",
-              creditnum: "1",
-            },
-            {
-              name: "韩耀杰",
-              content: "你也好",
-              date: "一天前",
-              creditnum: "1",
-            },
-          ],
-        },
-        {
-          name: "李锴凌",
-          content: "你好",
-          date: "两天前",
-          creditnum: "2",
-          replyvisible: false,
-          replycard: [
-            {
-              name: "陈佩沛",
-              content: "你也好",
-              date: "一天前",
-              creditnum: "1",
-            },
-          ],
-        },
-        {
-          name: "秦岭",
-          content: "你好",
-          date: "两天前",
-          creditnum: "2",
-          replyvisible: false,
-          replycard: [
-            {
-              name: "葛天辰",
-              content: "你也好",
-              date: "一天前",
-              creditnum: "1",
-            },
-            {
-              name: "韩耀杰",
-              content: "你也好",
-              date: "一天前",
-              creditnum: "1",
-            },
-          ],
-        },
+        // {
+        //   name: "秦岭",
+        //   content: "你好",
+        //   date: "两天前",
+        //   creditnum: "2",
+        //   replyvisible: false,
+        //   replycard: [
+        //     {
+        //       name: "葛天辰",
+        //       content: "你也好",
+        //       date: "一天前",
+        //       creditnum: "1",
+        //     },
+        //     {
+        //       name: "韩耀杰",
+        //       content: "你也好",
+        //       date: "一天前",
+        //       creditnum: "1",
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "李锴凌",
+        //   content: "你好",
+        //   date: "两天前",
+        //   creditnum: "2",
+        //   replyvisible: false,
+        //   replycard: [
+        //     {
+        //       name: "陈佩沛",
+        //       content: "你也好",
+        //       date: "一天前",
+        //       creditnum: "1",
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: "秦岭",
+        //   content: "你好",
+        //   date: "两天前",
+        //   creditnum: "2",
+        //   replyvisible: false,
+        //   replycard: [
+        //     {
+        //       name: "葛天辰",
+        //       content: "你也好",
+        //       date: "一天前",
+        //       creditnum: "1",
+        //     },
+        //     {
+        //       name: "韩耀杰",
+        //       content: "你也好",
+        //       date: "一天前",
+        //       creditnum: "1",
+        //     },
+        //   ],
+        // },
       ],
     };
   },
@@ -456,6 +511,9 @@ export default {
     classId() {
       return this.$route.params.classId;
     },
+    userId() {
+      return this.$store.state.userInfo.id;
+    },
   },
   watch: {
     isPPTExist(newVal) {
@@ -468,17 +526,19 @@ export default {
     if (ppturl) {
       this.PPTUrl = ppturl;
       this.isPPTExist = true;
+      await this.getDiscussionById(this.PPTId[0]);
     }
+
+    this.$nextTick(() => {
+      this.activeNames = "1";
+    });
+
     let videourl = await this.getClassVideoUrl();
     if (videourl) {
       this.videoUrl = videourl;
       this.isVideoExist = true;
     }
-    let shareurl = await this.getClassShareUrl();
-    if (shareurl) {
-      this.shareUrl = shareurl;
-      this.isShareExist = true;
-    }
+    await this.getClassShareUrl();
   },
   methods: {
     //下载PPT
@@ -520,9 +580,9 @@ export default {
       }
     },
     //删除共享资源
-    async deleteShare() {
+    async deleteShare(id) {
       let res = await this.$request(
-        `/manager/course-resource/delete/${this.courseId}/${this.shareId}`,
+        `/manager/course-resource/delete/${this.courseId}/${id}`,
         "",
         "delete",
         "params",
@@ -530,6 +590,8 @@ export default {
       );
       if (res && res?.data.code === 20000) {
         this.isShareExist = false;
+        await this.getClassShareUrl();
+        console.log(this.sharefileList);
         ElMessage.success("删除成功！");
       } else {
         ElMessage.error("删除失败，请稍后重试！");
@@ -547,6 +609,7 @@ export default {
         "resful",
         "json"
       );
+      console.log(res);
       let url;
       if (res?.data.code === 20000 && res.data.data.files.length !== 0) {
         let item = res.data.data.files?.find((item) => item.type === "pdf");
@@ -594,35 +657,41 @@ export default {
         "json"
       );
       console.log("resshare", res);
-      let url;
       if (res) {
         if (res.data.code === 20000 && res.data.data.files.length !== 0) {
-          let item = res.data.data.urls;
-          url = item[0];
-          this.videoId = res.data.data.resources[0].id;
+          this.sharefileList = res.data.data.files.map((item, index) => {
+            return {
+              url: item.url,
+              name: item.name + "." + item.type,
+              type: item.type,
+              id: res.data.data.resources[index].id,
+            };
+          });
+          this.shareId = res.data.data.resources.map((item) => item.id);
+        } else {
+          this.sharefileList = [];
         }
       }
-      if (url) return url;
-      else return null;
     },
     //文件上传回调
     async handleSuccessPPT(res) {
       console.log(res);
-      if (res.code === 20000) {
+      if (res && res.code === 20000) {
         ElMessage.success("上传成功!");
         this.PPTUrl = await this.getClassPPTUrl();
         this.isPPTExist = true;
       } else ElMessage.success("上传失败，请稍后重试");
     },
     async handleSuccessVideo(res) {
-      if (res.code === 20000) {
+      if (res && res.code === 20000) {
         ElMessage.success("上传成功!");
         this.isVideoExist = true;
       } else ElMessage.success("上传失败，请稍后重试");
     },
     async handleSuccessShare(res) {
-      if (res.code === 20000) {
+      if (res && res.code === 20000) {
         ElMessage.success("上传成功!");
+        await this.getClassShareUrl();
         this.isShareExist = true;
       } else ElMessage.success("上传失败，请稍后重试");
     },
@@ -725,6 +794,90 @@ export default {
       this.playingtime = playingtime;
       console.log(playingtime);
     },
+    //对资源的某一页发表评论
+    async submitcurrentPPTdiscussion() {
+      if (this.mydiscussion) {
+        let params = {
+          content: this.mydiscussion,
+          page: this.num,
+          resourceId: this.PPTId[0],
+          userId: this.userId,
+        };
+        let res = await this.$request(
+          "/manager/course-discussion/issue",
+          params,
+          "post",
+          "params",
+          "json"
+        );
+
+        console.log("sumbit", res);
+        if (res && res.data.code === 20000) {
+          ElMessage.success("发布成功！");
+          this.mydiscussion = "";
+        }
+        this.getDiscussionById(this.PPTId[0]);
+      } else {
+        ElMessage.error("输入内容不能为空！");
+      }
+    },
+    //根据资源Id查询讨论
+    async getDiscussionById(resourceId) {
+      let res = await this.$request(
+        `/manager/course-discussion/list-all/${resourceId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      let tmpdiscusslist;
+      if (res && res.data.code === 20000) {
+        if (res.data.data.discussions.length !== 0) {
+          tmpdiscusslist = res.data.data.discussions.map((item) => {
+            return {
+              name: item.userName,
+              content: item.content,
+              creditnum: item.likes,
+              replyvisible: false,
+              date: item.sendTime,
+              replycard: item.replies.map((item) => item),
+            };
+          });
+          this.discusslist = JSON.parse(JSON.stringify(tmpdiscusslist));
+        }
+      }
+      // {
+      //   name: "秦岭",
+      //   content: "你好",
+      //   date: "两天前",
+      //   creditnum: "2",
+      //   replyvisible: false,
+      //   replycard: [
+      //     {
+      //       name: "葛天辰",
+      //       content: "你也好",
+      //       date: "一天前",
+      //       creditnum: "1",
+      //     },
+      //     {
+      //       name: "韩耀杰",
+      //       content: "你也好",
+      //       date: "一天前",
+      //       creditnum: "1",
+      //     },
+      //   ],
+      // },
+    },
+    //资源缩略图
+    getFileImage(name) {
+      if (name.includes("pdf")) return "/src/assets/img/pdf.png";
+      else if (name.includes("ppt")) return "/src/assets/img/ppt.png";
+      else if (name.includes("txt")) return "/src/assets/img/txt.png";
+      else if (name.includes("zip")) return "/src/assets/img/zip.png";
+      else if (name.includes("doc")) return "/src/assets/img/word.png";
+      else return "/src/assets/img/word.png";
+    },
   },
 };
 </script>
@@ -822,5 +975,16 @@ canvas {
 }
 .button-wrapper {
   display: flex;
+}
+.fileicon {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-around;
+}
+.filelist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
