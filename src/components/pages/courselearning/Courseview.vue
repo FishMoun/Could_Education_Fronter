@@ -129,11 +129,10 @@
                   ref="InputRef"
                   v-model="chapterInputValue"
                   class="ml-1 w-20"
-                  size="small"
                   @keyup.enter="handleInputConfirm(data, $event)"
                   @blur="handleInputConfirm(data, $event)"
                 />
-                <span v-else @click="showInput(data)" style="font-size: 25px">{{
+                <span v-else @click="showInput(data)" style="font-size: 20px">{{
                   node.label
                 }}</span>
                 <span style="color: #409eff" v-show="showeditoutline">
@@ -162,6 +161,8 @@ export default {
   name: "Courseview",
   data() {
     return {
+      //判断现在是新增章节还是修改章节
+      isCreateChapter: true,
       //视图
       tabview: "timemode",
       //课程介绍编辑框
@@ -291,6 +292,7 @@ export default {
       console.log(res);
       let newChapterList = [];
       if (res?.data.code === 20000) {
+        if (res.data.data.chapters.length !== 0) this.isCreateChapter = false;
         newChapterList = res.data.data.chapters.map((item) => {
           return {
             id: item.chapter.id,
@@ -329,37 +331,40 @@ export default {
       this.showeditfinish = true;
     },
     async endEdit() {
-      let params = this.treedata.map((item, index) => {
-        return {
-          chapter: {
-            courseId: this.courseId,
-            id: item.id,
-            name: item.label,
-            number: index,
-          },
-          children: item.children.map((item2, index2) => {
-            return {
-              subChapter: {
-                chapterId: item.id,
-                courseId: this.courseId,
-                id: item2.id,
-                label: item2.name,
-                number: index2,
-              },
-              timetables: item2?.timetable || [],
-            };
-          }),
-        };
-      });
-      console.log(params);
-      let res = await this.$request(
-        `/manager/chapter/save/${this.$route.params.id}`,
-        params,
-        "post",
-        "params",
-        "json"
-      );
-      console.log(res);
+      if (this.isCreateChapter) {
+        let params = this.treedata.map((item, index) => {
+          return {
+            chapter: {
+              courseId: this.courseId,
+              id: item.id,
+              name: item.label,
+              number: index,
+            },
+            children: item.children.map((item2, index2) => {
+              return {
+                subChapter: {
+                  chapterId: item.id,
+                  courseId: this.courseId,
+                  id: item2.id,
+                  label: item2.label,
+                  number: index2,
+                },
+                timetables: item2?.timetable || [],
+              };
+            }),
+          };
+        });
+        console.log(params);
+        let res = await this.$request(
+          `/manager/chapter/save/${this.$route.params.id}`,
+          params,
+          "post",
+          "params",
+          "json"
+        );
+        console.log(res);
+      }
+
       this.showeditfinish = false;
       this.showeditoutline = false;
     },
@@ -398,6 +403,7 @@ export default {
     showInput(data) {
       if (this.isTeacher && this.showeditoutline) {
         data.inputvisible = true;
+        this.chapterInputValue = data.label;
         this.$nextTick(() => {
           this.$refs.InputRef.focus();
         });
