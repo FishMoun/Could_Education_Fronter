@@ -15,8 +15,8 @@
         </div>
         <div class="right">
             <ul>
-                <el-scrollbar height="450px">
-                    <li v-for="message in messages" :key="message.id" class="msgItem">
+                <el-scrollbar height="80vh">
+                    <li v-for="message in messages" :key="message.id" class="msgItem" @click="checkMsg(message)" >
                         <CourseMessageItem :message="message" />
                     </li>
                     <li v-if="messages.length === 0" class="msgItem">
@@ -39,18 +39,33 @@ export default {
     components: { SemesterSelect, CourseItem, CourseMessageItem },
     methods: {
         async changeMessageCallback(course) {
-            if (this.curCourse.courseId === course.courseId) {
-                return
-            }
             this.curCourse = course
             try {
-                let res = await getMessagesByCourseId(course.id)
+                let res = await getMessagesByCourseId(course.courseId)
                 this.messages = res.data.data.list
             } catch (e) {
                 console.log(e)
             }
         },
+        async getCourses() {
+            const curUser = this.$store.state.userInfo;
+            this.userInfo = curUser;
+            // api：通过用户id获取到用户的课程信息
+            try {
+                let userid = this.$store.state.userInfo.id;
+                let res = await getCoursesById(userid);
+                this.courses = res.data.data.courses
+                this.curCourse = res.data.data.courses[0]
+                this.allCourses = res.data.data.courses
+                console.log(res)
+            } catch (e) {
+                console.log(e)
+            }
+        },
         async changeSemCallback(semester) {
+            if(!this.allCourses.length){
+                await this.getCourses()
+            }
             const val = semester.value
             let courses = this.allCourses
             this.curSemester = semester
@@ -73,6 +88,18 @@ export default {
             this.courses = courses
             this.curCourse = courses[0]
             this.changeMessageCallback(courses[0])
+        },
+        async checkMsg(msg){
+            // 没什么意义，已经有完整数据了
+            // this.$request(`/msg/check/${msg.id}`)
+            //     .then(
+            //         res=>{
+            //             console.log(res)
+            //         }
+            //     )
+
+            // 有条件的话可以改成elementplus弹窗，懒得改了现在
+            alert(msg.content)
         }
     },
     data() {
@@ -118,42 +145,15 @@ export default {
             curCourse,
             messages,
             userinfo,
-            allCourses:[]
+            allCourses: []
         }
     },
     async mounted() {
-        const curUser = this.$store.state.userInfo;
-        this.userInfo = curUser;
-        // api：通过用户id获取到用户的课程信息
-        try {
-            let userid = this.$store.state.userInfo.id;
-            let res = await getCoursesById(userid);
-            this.courses = res.data.data.courses
-            this.curCourse = res.data.data.courses[0]
-            this.allCourses = res.data.data.courses
-            console.log(res)
-        } catch (e) {
-            console.log(e)
-        }
-        // api：通过用户id获取到用户的学期信息
-        // try {
-        //     let res = await getSemestersById()
-        //     this.semesters = [{
-        //         id: '-1',
-        //         time: '全部'
-        //     }].concat(res.data)
-        // } catch (e) {
-        //     console.log(e)
-        // }
-        // api：获取用户所有消息
-        try {
-            let res = await getAllMessages(curUser.id)
-            this.messages = res.data.data.list
-        } catch (e) {
-            console.log(e)
-        }
-        this.curSemester = this.semesters && this.semesters[0]
-        this.curSemesterTime = this.curSemester?.time
+        await this.getCourses()
+        this.changeSemCallback({
+            value: "all",
+            label: "全部",
+        })
     },
 };
 </script>
