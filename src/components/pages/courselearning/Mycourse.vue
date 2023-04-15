@@ -108,18 +108,6 @@ export default {
     goToAdmin() {
       this.$store.state.isAdmin = !this.$store.state.isAdmin;
     },
-    async changeSem(semester) {
-      console.log(semester);
-      this.curSemester = semester;
-      this.curSemesterTime = semester.time;
-      try {
-        // api：通过学期信息获取课程列表
-        let res = await getCoursesBySem(semester.id);
-        this.courses = res.data;
-      } catch (e) {
-        console.log(e);
-      }
-    },
     goto(courseId) {
       this.$router.push(`/courseview/${courseId}`);
     },

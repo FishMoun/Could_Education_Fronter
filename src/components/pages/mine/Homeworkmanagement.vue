@@ -18,7 +18,7 @@
             <Search />
           </el-icon>查询</el-button>
       </div>
-      <el-button type="primary" @click="dialogVisible = true">创建作业</el-button>
+      <el-button type="primary" v-if="isTeacher" @click="dialogVisible = true">创建作业</el-button>
       <!-- 布置作业的对话框 -->
       <el-dialog v-model="dialogVisible" title="创建作业" width="40%" :before-close="handleClose">
         <!-- 作业主体 -->
@@ -42,7 +42,7 @@
         <template #footer>
           <span class="dialog-footer">
             <el-button @click="dialogVisible = false">取消</el-button>
-            <el-button type="primary" @click="dialogVisible = false">
+            <el-button type="primary" @click="addHomeWork">
               确认布置
             </el-button>
           </span>
@@ -88,6 +88,11 @@
 
 <script>
 import { Search } from "@element-plus/icons-vue";
+import {
+  getCoursesById,
+  getSemestersById,
+  getCoursesBySem,
+} from "../../../network/api";
 export default {
   data() {
     return {
@@ -120,10 +125,41 @@ export default {
       inputcoursename: "",
       collegeoptions: [],
       termoptions: [],
+      //课程信息，用于创建作业
+      courses:[]
     };
   },
   components: { Search },
   async mounted() {
+    // 获取教师端的课程信息
+    try {
+      let userid = this.$store.state.userInfo.id;
+      let res = await getCoursesById(userid);
+      let courses = JSON.parse(JSON.stringify(res.data.data.courses));
+      this.courses = courses.map((item) => {
+        return {
+          courseId: item.courseId,
+          courseName: item.courseName,
+          beginWeek: item.beginWeek,
+          endWeek: item.endWeek,
+          teachers: item.teachers.map((item) => item.name),
+          coverUrl: item.coverUrl,
+        };
+      });
+      console.log(courses);
+    } catch (e) {
+      console.log(e);
+    }
+    const courseOptions = this.courses.map(item=>{
+      return {
+        value:item.courseId,
+        label:item.courseName
+      }
+    })
+    this.courseIdOptions = courseOptions
+    this.loading = false
+    console.log(courseOptions)
+    // 获取学生端的作业信息
     const curUser = this.$store.state.userInfo;
     const homeworkList = await this.$request(
       `/manager/course-homework/list-student/${curUser.id}`,
@@ -133,6 +169,8 @@ export default {
       "json"
     )
     this.stuTableData = homeworkList.data.data.homeworks
+    console.log(homeworkList)
+    // 获取教师端的作业信息
     const teaHomeworkList = await this.$request(
       `/manager/course-homework/list-teacher/${curUser.id}`,
       "",
@@ -141,7 +179,6 @@ export default {
       "json"
     )
     this.teaTableData = teaHomeworkList.data.data.homeworks
-    await this.searchCourseByTeaId();
   },
   methods: {
     changemode() {
@@ -161,26 +198,31 @@ export default {
     goToCorrect() {
       this.$router.push({ name: "作业批改" });
     },
-    async searchCourseByTeaId() {
-      this.loading = true;
-      if (!this.courseIdOptions) {
-        let id = this.$store.state.userInfo.id;
-        let res = await this.$request(
-          `/admin/manager/course/list-teacher?id=${id}`,
-          "",
-          "get",
-          "params",
-          "json"
-        );
-        console.log(res);
-      }
-    },
     handleClose() {
       console.log("关闭");
       this.dialogVisible = false;
     },
+    addHomeWork(){ //布置作业
+      this.$request(
+        "/manager/course-homework/save",
+        {
+          endTime:this.form.date,
+          courseId:this.form.courseId,
+          title:this.form.title,
+          content:this.form.content
+        }
+      )
+          .then(
+            res=>{
+              this.dialogVisible = false
+              console.log(res)
+            },
+            err=>{
+              console.log(err)
+            }
+          )
+    }
   },
-
   computed: {
     isTeacher() {
       return this.$store.state.isTeacher;
