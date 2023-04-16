@@ -53,7 +53,7 @@ export const getCoursesBySem = (sem) => {
  * }]
  */
 export const getMessagesByCourseId = (courseId) => {
-  // return request("/msg/list/msg/" + courseId);
+  return request("/msg/list/msg/" + courseId);
   // 测试用
   return request("/msg/list/msg/" + 1001);
 };

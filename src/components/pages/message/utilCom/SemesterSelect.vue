@@ -2,7 +2,7 @@
     <div class="select">
         <div class="font">请选择当前学期：</div>
         <el-select v-model="curSemesterTime" placeholder="Select" size="small">
-            <el-option v-for="semester in  semesters" :key="semester?.id" :label="semester?.time" :value="semester?.time"
+            <el-option v-for="semester in  semesters" :key="semester?.value" :label="semester?.label" :value="semester?.value"
                 @click="changeSem(semester)" />
         </el-select>
     </div>
@@ -13,7 +13,7 @@
 export default {
     computed: {
         curSemesterTime() {
-            return this.curSemester ? this.curSemester.time : ''
+            return this.curSemester ? this.curSemester.value : ''
         }
     },
     props: {

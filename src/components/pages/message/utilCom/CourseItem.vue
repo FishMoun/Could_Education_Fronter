@@ -1,7 +1,7 @@
 <template>
     <div class="box" @click="changeMessageCallback">
         <img
-          :src="course.avatar"
+          :src="course.coverUrl"
           @error="
             (e) => {
               e.target.src =
@@ -11,11 +11,11 @@
           class="img"
         />
         <div style="padding: 5px" class="content">
-          <span class="overElpSingle" :title="course.name">{{
-            course.name
+          <span class="overElpSingle" :title="course.courseName">{{
+            course.courseName
           }}</span>
           <ul class="bottom">
-            <li class="overElpSingle">{{ course.teacher }}</li>
+            <li class="overElpSingle">{{ course.teachers.map(item=>item.name).join(",") }}</li>
           </ul>
         </div>
     </div>
