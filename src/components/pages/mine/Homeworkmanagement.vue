@@ -64,7 +64,7 @@
     </el-header>
     <el-main>
       <!-- 主体表格部分 学生-->
-      <el-table :data="stuTableData" table-layout="fixed" v-if="!isTeacher">
+      <el-table :data="stuTableData" class="tableBox" table-layout="fixed" v-if="!isTeacher">
         <el-table-column prop="homeworkId" label="作业编号" />
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="srccourse" label="来源课程" />
@@ -79,7 +79,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-table :data="teaTableData" table-layout="fixed" v-else>
+      <el-table :data="teaTableData" class="tableBox" table-layout="fixed" v-else>
         <el-table-column prop="homeworkId" label="作业编号" />
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="courseName" label="来源课程" />
@@ -88,8 +88,8 @@
         <el-table-column prop="endTime" label="截止时间" />
         <el-table-column prop="status" label="状态" />
         <el-table-column fixed="right" label="操作" width="200px">
-          <template #default>
-            <el-button type="primary" @click="goToDetail">查看详细</el-button>
+          <template #default="scope">
+            <el-button type="primary" @click="goToDetail(scope.row.homeworkId)">查看详细</el-button>
             <el-button type="primary" @click="goToCorrect">去批改</el-button>
           </template>
         </el-table-column>
@@ -207,6 +207,7 @@ export default {
     async getStuHomeworks() {
       const curUser = this.$store.state.userInfo;
       const homeworkList = await this.$request(
+        // 需要学生id而不是用户id
         `/manager/course-homework/list-student/${curUser.id}`,
         "",
         "get",
@@ -219,7 +220,9 @@ export default {
     async getTeaHomeworks() {
       const curUser = this.$store.state.userInfo;
       let teaHomeworkList = await this.$request(
-        `/manager/course-homework/list-teacher/${curUser.id}`,
+        // 需要教师id而不是用户id
+        // `/manager/course-homework/list-teacher/${curUser.id}`,
+        `/manager/course-homework/list-teacher/1647228743251623938`,
         "",
         "get",
         "params",
@@ -236,6 +239,7 @@ export default {
       const userinfo = this.$store.state.userInfo
       const { name, startTime, endTime, courseId, homeworks } = this.form
       const curCourse = this.courses.filter(item => item.courseId === courseId)[0]
+      console.log(curCourse)
       const teacherId = curCourse.teachers.filter(item => item.userId === userinfo.id)[0].id
       if (!name || !startTime || !endTime || !courseId || !teacherId) {
         alert("请完整填写作业相关信息！")
@@ -286,6 +290,10 @@ export default {
 .addHomework {
   max-height: 400px;
   overflow-y: scroll;
+}
+.tableBox {
+  height: 70vh;
+  overflow-y:scroll ;
 }
 
 // .searchbox {}
