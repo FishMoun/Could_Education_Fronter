@@ -6,7 +6,7 @@
         <div class="card-header">
           <span class="homeworktitle">{{ homeworkDetail?.homework?.name }}</span>
           <div v-show="isTeacher">
-            <el-button type="primary">编辑作业</el-button>
+            <el-button type="primary" @click="editHomework" >编辑作业</el-button>
             <el-button type="primary">批改作业</el-button>
           </div>
         </div>
@@ -18,7 +18,10 @@
               {{ (index + 1) + "、" + item?.context }}
               <div v-show="isTeacher" style="font-size: 12px;">请在下方填写修改信息：</div>
               <div>
-                <textarea v-model="answers[index]" cols="45" rows="10" @keypress="handleAnswer"></textarea>
+                <!-- <el-form-item label="参考答案:">
+                  <el-input v-model="item.refAnswer" :rows="2" type="textarea" resize="none" />
+                </el-form-item> -->
+                <textarea v-model="answers[index]" cols="45" rows="19" @keypress="handleAnswer"></textarea>
               </div>
             </li>
           </ul>
@@ -67,12 +70,15 @@ export default {
       console.log(res)
     },
     handleAnswer() {
-      console.log(this.homeworkDetail.contexts.map((item, index) => {
+      this.homeworkDetail = this.homeworkDetail.contexts.map((item, index) => {
         return {
           ...item,
           submitAnswer: this.answers[index]
         }
-      }))
+      })
+    },
+    editHomework(){
+      console.log("bjzy")
     }
   },
   computed: {
@@ -84,7 +90,7 @@ export default {
     // console.log(this.$route.params)
     const homeworkId = this.$route.params.id
     let homeworkdetail = await this.$request(
-      `/manager/course-homework/get-context/1638550521385598978`,
+      `/manager/course-homework/get-context/${homeworkId}`,
       // `/manager/course-homework/get-context/${String(homeworkId)}`,
       "",
       "get",
