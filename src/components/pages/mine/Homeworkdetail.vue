@@ -7,14 +7,16 @@
           <span class="homeworktitle">{{ homeworkDetail?.homework?.name }}</span>
         </div>
       </template>
-      <hr/>
+
       <div v-show="!isTeacher && homeworkRes?.studentRes?.length">
+        <hr/>
         <h6>分数：</h6>
         <p>{{ homeworkRes?.studentScore?.score }}</p>
         <h6>评语：</h6>
         <p>{{ homeworkRes?.studentScore?.remark }}</p>
+        <hr>
       </div>
-      <hr>
+
       <el-scrollbar height="60vh">
         <div>
           <ul>
@@ -24,7 +26,7 @@
                 <el-form-item v-show="!isTeacher && !homeworkRes.studentRes?.length" label="答案： ">
                   <el-input v-model="answers[index]" :rows="18" type="textarea" resize="none" />
                 </el-form-item>
-                {{ homeworkRes.studentRes.length && homeworkRes.studentRes[index].submitAnswer }}
+                {{ homeworkRes.studentRes.length ? homeworkRes.studentRes[index].submitAnswer : "" }}
               </div>
             </li>
           </ul>
