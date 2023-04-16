@@ -38,11 +38,6 @@ export default {
   },
   computed: {},
   data() {
-    const curSemesterTime = "全部";
-    const curSemester = {
-      id: "-1",
-      time: "全部",
-    };
     const experiments = [];
     const semesters = [
       {
@@ -103,32 +98,88 @@ export default {
     };
   },
   async mounted() {
-    // api：通过用户id获取到用户的课程信息
-    try {
-      let userid = this.$store.state.userInfo.id;
-      let res = await getCoursesById(userid);
-      let courses = JSON.parse(JSON.stringify(res.data.data.courses));
-      this.courses = courses.map((item) => {
+    // api：通过用户id获取到用户的实验信息
+    await this.getUserExp();
+    //#region
+    // try {
+    //   let userid = this.$store.state.userInfo.id;
+    //   let res = await getCoursesById(userid);
+    //   let courses = JSON.parse(JSON.stringify(res.data.data.courses));
+    //   this.courses = courses.map((item) => {
+    //     return {
+    //       courseId: item.courseId,
+    //       courseName: item.courseName,
+    //       beginWeek: item.beginWeek,
+    //       endWeek: item.endWeek,
+    //       teachers: item.teachers.map((item) => item.name),
+    //       coverUrl: item.coverUrl,
+    //     };
+    //   });
+
+    //   for (let i = 0; i < courses.length; ++i) {
+    //     this.monidata[i].coverUrl = courses[i].coverUrl;
+    //   }
+    // } catch (e) {
+    //   console.log(e);
+    // }
+    //#endregion
+    // this.experiments = JSON.parse(JSON.stringify(this.monidata));
+    console.log(this.monidata);
+  },
+  methods: {
+    //查询用户的所有实验
+    async getUserExp() {
+      let userId = this.$store.state.userInfo.id;
+      let res = await this.$request(
+        `exp/course/list-all/${userId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      let tmpList = [];
+      if (res && res.data.code === 20000) {
+        for (let i = 0; i < res.data.data.list.length; i++) {
+          let item = res.data.data.list[i];
+          let courseItem = await this.getCourseInfoById(item.courseId);
+          console.log(courseItem);
+          if (courseItem) {
+            tmpList.push({
+              id: item.id,
+              courseId: item.courseId,
+              courseName: courseItem.courseName,
+              teachers: courseItem.teachers,
+              coverUrl: courseItem.coverUrl,
+              expName: item.name,
+            });
+          }
+        }
+      }
+
+      this.experiments = JSON.parse(JSON.stringify(tmpList));
+      console.log(this.experiments);
+    },
+    //根据课程Id查询课程信息
+    async getCourseInfoById(courseId) {
+      let res = await this.$request(
+        `/admin/manager/course/get/${courseId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res, "课程");
+      if (res && res.data.code === 20000) {
+        let item = res.data.data.course;
         return {
-          courseId: item.courseId,
           courseName: item.courseName,
-          beginWeek: item.beginWeek,
-          endWeek: item.endWeek,
           teachers: item.teachers.map((item) => item.name),
           coverUrl: item.coverUrl,
         };
-      });
-
-      for (let i = 0; i < courses.length; ++i) {
-        this.monidata[i].coverUrl = courses[i].coverUrl;
       }
-    } catch (e) {
-      console.log(e);
-    }
-
-    this.experiments = JSON.parse(JSON.stringify(this.monidata));
-  },
-  methods: {
+      return "";
+    },
     goToEdit() {
       this.$router.push({ path: "/experimentflow" });
     },

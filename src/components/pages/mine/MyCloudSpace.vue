@@ -82,7 +82,7 @@ export default {
           id: this.$store.state.userInfo.id,
         });
         if (res.data.data.dir == null) {
-          this.$router.replace("/login");
+          // this.$router.replace("/");
           return;
         }
         // console.log(res);
@@ -142,6 +142,7 @@ export default {
         console.log(131);
       }
       console.log(path);
+      console.log("进来了吗");
       this.$router.push({
         name: "mycloudspace",
         params: {

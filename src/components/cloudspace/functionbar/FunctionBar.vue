@@ -14,14 +14,13 @@
           :before-upload="beforeUpload"
           v-if="barType == 'file' && $route.params.path.search('search') == -1"
         >
-          <el-button type="primary" size="middle" class="upload">
+          <el-button type="primary" class="upload">
             <el-icon><UploadFilled /></el-icon>&nbsp;上传</el-button
           >
         </el-upload>
         <!-- 新建按钮 -->
         <el-button
           v-if="barType == 'file' && $route.params.path.search('search') == -1"
-          size="middle"
           class="create"
           @click="createFolder"
           :disabled="!isCreateAble"
@@ -30,7 +29,6 @@
         >
         <!-- 全选按钮 -->
         <el-button
-          size="middle"
           class="selectAll"
           :class="isSelectAll ? 'select' : ''"
           @click="selectAll"

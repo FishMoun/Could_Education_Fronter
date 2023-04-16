@@ -8,7 +8,9 @@
       <ul class="bottom">
         <li class="overElpSingle">来源课程: {{ experiment.courseName }}</li>
         <li class="overElpSingle">实验名称: {{ experiment.expName }}</li>
-        <li class="overElpSingle">老师: {{ experiment.teachers.join(",") }}</li>
+        <li class="overElpSingle">
+          老师: {{ experiment.teachers?.join(",") }}
+        </li>
       </ul>
     </div>
   </el-card>
