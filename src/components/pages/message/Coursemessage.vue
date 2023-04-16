@@ -14,9 +14,31 @@
             </ul>
         </div>
         <div class="right">
+            <el-dialog v-model="dialogVisible" title="创建作业" width="60%" :before-close="handleClose">
+                <el-form :model="form" label-width="50px">
+                        <el-form-item label="标题:">
+                            <el-input v-model="form.title" />
+                        </el-form-item>
+                        <el-form-item label="内容:">
+                                <el-input v-model="form.content" :rows="6" type="textarea" resize="none" />
+                            </el-form-item>
+                </el-form>
+                <template #footer>
+                    <span class="dialog-footer">
+                        <el-button @click="dialogVisible = false">取消</el-button>
+                        <el-button type="primary" @click="addMsg">
+                            发送消息
+                        </el-button>
+                    </span>
+                </template>
+            </el-dialog>
             <ul>
                 <el-scrollbar height="80vh">
-                    <li v-for="message in messages" :key="message.id" class="msgItem" @click="checkMsg(message)" >
+                    <div class="msgListHeader">
+                        <span>消息列表：</span>
+                        <el-button @click="dialogVisible=true">+发送课程消息</el-button>
+                    </div>
+                    <li v-for="message in messages" :key="message.id" class="msgItem" @click="checkMsg(message)">
                         <CourseMessageItem :message="message" />
                     </li>
                     <li v-if="messages.length === 0" class="msgItem">
@@ -63,7 +85,7 @@ export default {
             }
         },
         async changeSemCallback(semester) {
-            if(!this.allCourses.length){
+            if (!this.allCourses.length) {
                 await this.getCourses()
             }
             const val = semester.value
@@ -89,7 +111,7 @@ export default {
             this.curCourse = courses[0]
             this.changeMessageCallback(courses[0])
         },
-        async checkMsg(msg){
+        async checkMsg(msg) {
             // 没什么意义，已经有完整数据了
             // this.$request(`/msg/check/${msg.id}`)
             //     .then(
@@ -100,6 +122,30 @@ export default {
 
             // 有条件的话可以改成elementplus弹窗，懒得改了现在
             alert(msg.content)
+        },
+        addMsg() {
+            this.$request(
+                `/msg/send`,
+                {
+                    content: this.form.title,
+                    courseId: this.curCourse.courseId,
+                    teacherUserId: this.$store.state.userInfo.id,
+                    title: this.form.content
+                },
+                "post",
+                "params",
+                "json"
+            ).then(
+                res => {
+                    console.log(res)
+                    this.changeMessageCallback(this.curCourse)
+                    this.dialogVisible=false
+                    alert("发送消息成功！")
+                },
+                err => {
+                    console.log("发送消息失败！")
+                }
+            )
         }
     },
     data() {
@@ -145,7 +191,13 @@ export default {
             curCourse,
             messages,
             userinfo,
-            allCourses: []
+            allCourses: [],
+            isTeacher: this.$store.state.isTeacher,
+            dialogVisible:false,
+            form:{
+                title:"",
+                content:""
+            }
         }
     },
     async mounted() {
@@ -199,5 +251,13 @@ export default {
 
 .msgItem:last-of-type {
     margin-bottom: 0px;
+}
+
+.msgListHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 10px;
 }
 </style>

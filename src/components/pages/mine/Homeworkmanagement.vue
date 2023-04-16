@@ -236,6 +236,7 @@ export default {
       const userinfo = this.$store.state.userInfo
       const { name, startTime, endTime, courseId, homeworks } = this.form
       const curCourse = this.courses.filter(item => item.courseId === courseId)[0]
+      console.log(curCourse)
       const teacherId = curCourse.teachers.filter(item => item.userId === userinfo.id)[0].id
       if (!name || !startTime || !endTime || !courseId || !teacherId) {
         alert("请完整填写作业相关信息！")
