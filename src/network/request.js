@@ -13,6 +13,8 @@ export async function request(url,//请求地址
     let baseurl
     if (import.meta.env.PROD)
         baseurl = "http://60.204.141.214:30900/"
+    else if (url.includes('/eduoss/fileoss'))
+        baseurl = "http://60.204.141.214:30801"
     else
         baseurl = "/api"
     //创建axios实例
@@ -55,8 +57,8 @@ export async function request(url,//请求地址
     if (method && method == 'post') {
         if (type && type == "params") {
             if (params) {
+                // return instance.post(url, params)
                 if (header == 'json') {
-
                     return instance.request({
                         url,
                         data: params,
@@ -64,11 +66,24 @@ export async function request(url,//请求地址
                         headers: {
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
-                    }).catch(err => { console.log(err) })
+                    })
+                } else if (type == 'paramsSerializer') {
+                    return instance.request({
+                        url,
+                        data: qs.stringify(params, { arrayFormat: 'repeat' }),
+                        method: 'post',
+                    })
+                }
+                else {
+                    return instance.request({
+                        url,
+                        data: params,
+                        method: 'post',
+                    })
                 }
             }
             else {
-                return instance.post(url).catch(err => { console.log(err) })
+                return instance.post(url)
             }
         }
         else if (type == 'paramsSerializer') {
@@ -76,9 +91,7 @@ export async function request(url,//请求地址
                 url,
                 data: qs.stringify(params, { arrayFormat: 'repeat' }),
                 method: 'post',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+
             }).catch(err => { console.log(err) })
         }
         else {

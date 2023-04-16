@@ -8,7 +8,7 @@
         :key="item.path"
         @click="goTo(item)"
       >
-        {{ item.name }}
+        {{ item.name === "mycloudspace" ? "个人云盘" : item.name }}
         <el-icon style="vertical-align: middle" @click.stop="removeTab(item)">
           <Close />
         </el-icon>

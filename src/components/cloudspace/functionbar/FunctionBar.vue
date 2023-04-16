@@ -5,13 +5,14 @@
         <!-- 上传按钮 -->
         <el-upload
           multiple
-          :action="`/api/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
+          :action="`http://60.204.141.214:30801/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
           class="uploadButton"
           :show-file-list="false"
           :on-success="upload"
           :on-error="onError"
           :on-progress="onProgress"
           :before-upload="beforeUpload"
+          :headers="{ token: this.$store.state.token }"
           v-if="barType == 'file' && $route.params.path.search('search') == -1"
         >
           <el-button type="primary" class="upload">
@@ -24,6 +25,7 @@
           class="create"
           @click="createFolder"
           :disabled="!isCreateAble"
+          v-show="false"
         >
           <el-icon><Plus /></el-icon>&nbsp;新建</el-button
         >
@@ -43,19 +45,16 @@
             <div @click="$emit('multDownload')">
               <el-icon><Download /></el-icon> 下载
             </div>
-            <div
-              @click="$emit('multCollect', true)"
-              v-if="!$store.state.isAllFileCollect"
-            >
+            <div @click="$emit('multCollect', true)" v-show="false">
               <el-icon><Star /></el-icon> 收藏
             </div>
-            <div @click="$emit('multCollect', false)" v-else>
+            <div @click="$emit('multCollect', false)" v-show="false">
               <el-icon><StarFilled /></el-icon> 取消收藏
             </div>
             <div @click="$emit('multDelete')">
               <el-icon><Delete /></el-icon> 删除
             </div>
-            <div v-if="barType == 'file'" @click="$emit('multMove')">
+            <div v-show="false">
               <el-icon><Right /></el-icon>
               移动到
             </div>
@@ -64,7 +63,7 @@
       </div>
 
       <!-- 右边 -->
-      <div class="right">
+      <div class="right" v-show="false">
         <!-- 搜索框 -->
         <el-input
           placeholder="请输入内容"
@@ -137,7 +136,7 @@
     </div>
     <div class="tableHead" v-if="$store.state.showType == 'table'">
       <div class="tableName tableHeadName">文件名</div>
-      <div class="tableCollect">收藏</div>
+      <!-- <div class="tableCollect">收藏</div> -->
       <div class="tableItemSize">大小</div>
       <div class="tableItemCreateTime">修改日期</div>
     </div>
@@ -210,6 +209,7 @@ export default {
         fdir: response.data.file.fdir,
         size: response.data.file.size,
       };
+      console.log("data", data, this.$store.state.userInfo.id);
       // 调用此接口以通知后端将上传的文件存入数据库
       let res = await this.$request(
         "/educenter/file/addFile",
@@ -466,12 +466,12 @@ export default {
 
 .tableItemSize {
   width: 20%;
-  padding-left: 80px;
+  padding-left: 160px;
   box-sizing: border-box;
 }
 
 .tableItemCreateTime {
-  padding-left: 60px;
+  padding-left: 120px;
   box-sizing: border-box;
   width: 25%;
 }

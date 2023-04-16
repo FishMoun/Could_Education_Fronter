@@ -6,10 +6,13 @@
   <div class="main">
     <div class="mainleft">
       <div style="margin-top: 10px; display: flex; justify-content: right">
-        <el-button type="primary" @click="expDialogVisible = true"
+        <el-button
+          type="primary"
+          @click="expDialogVisible = true"
+          v-show="isTeacher"
           >创建课程实验</el-button
         >
-        <el-button type="primary">布置课程作业</el-button>
+        <el-button type="primary" v-show="isTeacher">布置课程作业</el-button>
       </div>
       <!-- 实验的对话框 -->
       <el-dialog
@@ -122,7 +125,16 @@
                       >{{ item.name }}</el-tag
                     >
                   </div>
+                  <el-button
+                    style="margin-top: 10px; position: absolute; bottom: 10px"
+                    link
+                    type="primary"
+                    v-show="isTeacher === true"
+                    @click="addChapterTab(activity.id)"
+                    >添加章节标签</el-button
+                  >
                 </div>
+
                 <div class="card-button">
                   <el-tooltip
                     content="进入学习空间"
@@ -163,52 +175,94 @@
               >完成编辑</el-button
             >
           </div>
-          <el-tree
-            :data="treedata"
-            :show-checkbox="showeditoutline"
-            node-key="id"
-            :expand-on-click-node="false"
-          >
-            <template #default="{ node, data }">
-              <span class="custom-tree-node">
-                <el-input
-                  v-if="isTeacher && showeditoutline && data.inputvisible"
-                  ref="InputRef"
-                  v-model="chapterInputValue"
-                  class="ml-1 w-20"
-                  @keyup.enter="handleInputConfirm(data, $event)"
-                  @blur="handleInputConfirm(data, $event)"
-                />
-                <span v-else @click="showInput(data)" style="font-size: 20px">{{
-                  node.label
-                }}</span>
-                <span style="color: #409eff" v-show="showeditoutline">
-                  <a
-                    @click="append(data)"
-                    v-show="node.parent.parent == undefined"
+          <el-card shadow="never" style="height: 70vh">
+            <el-tree
+              :data="treedata"
+              :show-checkbox="showeditoutline"
+              node-key="id"
+              :expand-on-click-node="false"
+            >
+              <template #default="{ node, data }">
+                <span class="custom-tree-node">
+                  <el-input
+                    v-if="isTeacher && showeditoutline && data.inputvisible"
+                    ref="InputRef"
+                    v-model="chapterInputValue"
+                    class="ml-1 w-20"
+                    @keyup.enter="handleInputConfirm(data, $event)"
+                    @blur="handleInputConfirm(data, $event)"
+                  />
+                  <span
+                    v-else
+                    @click="showInput(data)"
+                    style="font-size: 20px"
+                    >{{ node.label }}</span
                   >
-                    增加小节
-                  </a>
-                  <a style="margin-left: 8px" @click="remove(node, data)">
-                    删除
-                  </a>
+                  <span style="color: #409eff" v-show="showeditoutline">
+                    <a
+                      @click="append(data)"
+                      v-show="node.parent.parent == undefined"
+                    >
+                      增加小节
+                    </a>
+                    <a style="margin-left: 8px" @click="remove(node, data)">
+                      删除
+                    </a>
+                  </span>
                 </span>
-              </span>
-            </template>
-          </el-tree>
+              </template>
+            </el-tree>
+          </el-card>
         </div>
+        <el-dialog
+          v-model="subChapterDialogVisible"
+          title="添加章节标签"
+          width="15%"
+          center
+        >
+          <el-select
+            v-model="subChapterList"
+            class="m-2"
+            placeholder="选择章节"
+            size="large"
+            multiple
+            :loading="chapterloading"
+            @visible-change="searchRemoteChapter"
+          >
+            <el-option
+              v-for="item in subChapter"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <template #footer>
+            <span class="dialog-footer">
+              <el-button @click="subChapterDialogVisible = false"
+                >取消</el-button
+              >
+              <el-button type="primary" @click="submitChapterAdd">
+                确定
+              </el-button>
+            </span>
+          </template>
+        </el-dialog>
       </el-scrollbar>
     </div>
   </div>
 </template>
 
 <script>
-import { reactive } from "vue";
 import { ElMessage } from "element-plus";
 export default {
   name: "Courseview",
   data() {
     return {
+      subChapter: [],
+      subChapterList: [],
+      chapterloading: false,
+      //二级章节标签
+      subChapterDialogVisible: false,
       //实验创建按钮
       expDialogVisible: false,
       //判断现在是新增章节还是修改章节
@@ -283,6 +337,7 @@ export default {
         introduction: "",
         date: null,
       },
+      curclassId: "",
     };
   },
 
@@ -301,6 +356,46 @@ export default {
   },
 
   methods: {
+    //搜索章节Id
+    async searchRemoteChapter(val) {
+      this.chapterloading = true;
+      if (val) {
+        let res = await this.$request(
+          `/manager/chapter/get/${this.courseId}`,
+          "",
+          "get",
+          "params",
+          "json"
+        );
+        console.log(res);
+        console.log(
+          res && res.data.code === 20000 && res.data.data.chapters.length !== 0
+        );
+        if (
+          res &&
+          res.data.code === 20000 &&
+          res.data.data.chapters.length !== 0
+        ) {
+          let newSubChapterList = [];
+          for (let i = 0; i < res.data.data.chapters.length; i++) {
+            let children = res.data.data.chapters[i].children;
+            for (let j = 0; j < children.length; j++) {
+              console.log(children[j]);
+              newSubChapterList.push(children[j].subChapter);
+            }
+          }
+          this.subChapter = newSubChapterList.map((item) => {
+            return {
+              value: item.id,
+              label: item.name,
+            };
+          });
+          console.log(res);
+          this.chapterloading = false;
+        }
+        console.log(this.subChapter);
+      }
+    },
     //创建一个新的课程实验
     async createExp() {
       let params = {
@@ -537,6 +632,11 @@ export default {
         });
       }
     },
+    //章节添加框
+    addChapterTab(id) {
+      this.subChapterDialogVisible = true;
+      this.curclassId = id;
+    },
     //输入框确认
     async handleInputConfirm(data, $event) {
       if (
@@ -584,6 +684,22 @@ export default {
         this.chapterInputValue = "";
       }
       data.inputvisible = false;
+    },
+    //提交内容
+    async submitChapterAdd() {
+      let tmpparams = this.subChapterList;
+      let res = await this.$request(
+        `/admin/manager/timetable/add-chapter/${this.curclassId}`,
+        tmpparams,
+        "post",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        ElMessage.success("添加成功！");
+        this.editcontentdialogVisible = false;
+      } else ElMessage.error("添加失败，请稍后重试！");
+      await getTimeList();
     },
   },
 };

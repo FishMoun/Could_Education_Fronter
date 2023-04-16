@@ -12,49 +12,17 @@
           <div style="font-size: 20px; text-align: center">
             {{ courseName }} {{ classtitle }}
           </div>
-
-          <el-button
-            style="margin-top: 10px"
-            link
-            type="primary"
-            v-show="isTeacher == true"
-            @click="editcontent"
-            >添加章节标签</el-button
-          >
-          <!-- 编辑内容的对话框 -->
-          <el-dialog
-            v-model="editcontentdialogVisible"
-            title="添加章节标签"
-            width="15%"
-            center
-          >
-            <el-select
-              v-model="subChapterList"
-              class="m-2"
-              placeholder="选择章节"
+          <div class="subchapter">
+            <el-tag
+              v-for="item in subChapterList"
+              type="success"
               size="large"
-              multiple
-              :loading="chapterloading"
-              @visible-change="searchRemoteChapter"
+              :key="item.id"
+              style="margin: 10px"
+              >{{ item.name }}</el-tag
             >
-              <el-option
-                v-for="item in subChapter"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-            <template #footer>
-              <span class="dialog-footer">
-                <el-button @click="editcontentdialogVisible = false"
-                  >取消</el-button
-                >
-                <el-button type="primary" @click="submitIntroduction">
-                  确定
-                </el-button>
-              </span>
-            </template>
-          </el-dialog>
+          </div>
+          <!-- 编辑内容的对话框 -->
         </el-card>
       </div>
       <!-- 主要资源区，用折叠面板实现 -->
@@ -453,7 +421,6 @@ export default {
         id: "",
         name: "",
       },
-      subChapter: [],
       subChapterList: [],
       //视频播放时间
       playingtime: 0,
@@ -591,9 +558,9 @@ export default {
     },
     classtitle() {
       let weekday = ["一", "二", "三", "四", "五", "六", "日"];
-      return `第${this.classinfo.week}周周${
-        weekday[this.classinfo.dayOfWeek - 1]
-      }第${this.classinfo.beginIndex}~${this.classinfo.endIndex}节`;
+      return `第${this.classinfo?.week}周周${
+        weekday[this.classinfo?.dayOfWeek - 1]
+      }第${this.classinfo?.beginIndex}~${this.classinfo?.endIndex}节`;
     },
     currentResourceId() {
       if (this.activeNames === "1") return this.PPTId[0];
@@ -612,6 +579,8 @@ export default {
     },
   },
   async mounted() {
+    //获取章节标签
+    await this.getClassSubChapterTab();
     //获取小节信息
     let res = await this.$request(
       `/admin/manager/timetable/get/${this.classId}`,
@@ -641,7 +610,6 @@ export default {
       this.isVideoExist = true;
     }
     await this.getClassShareUrl();
-    await this.getClassSubChapterTab();
     this.getCourseName();
   },
   methods: {
@@ -893,22 +861,6 @@ export default {
     editcontent() {
       this.editcontentdialogVisible = true;
     },
-    //提交内容
-    async submitIntroduction() {
-      let tmpparams = this.subChapterList;
-      let res = await this.$request(
-        `/admin/manager/timetable/add-chapter/${this.classId}`,
-        tmpparams,
-        "post",
-        "params",
-        "json"
-      );
-      console.log(res);
-      if (res && res.data.code === 20000) {
-        ElMessage.success("添加成功！");
-        this.editcontentdialogVisible = false;
-      } else ElMessage.error("添加失败，请稍后重试！");
-    },
     //折叠讨论区
     collapsediscusszone() {
       this.isDiscusszoneCollapse = !this.isDiscusszoneCollapse;
@@ -1147,16 +1099,20 @@ export default {
     //查找小节对应的章节标签
     async getClassSubChapterTab() {
       let res = await this.$request(
-        `/admin/manager/timetable/get/${this.classId}`,
+        `/admin/manager/timetable/get-chapter/${this.classId}`,
         "",
         "get",
         "params",
         "json"
       );
       if (res && res.data.code === 20000) {
-        console.log(res);
+        this.subChapterList = res.data.data.subchapters.map((item) => {
+          return {
+            id: item.id,
+            name: item.name,
+          };
+        });
       }
-      console.log(res);
     },
     //当改变折叠面板的时候触发
     async changeResource() {

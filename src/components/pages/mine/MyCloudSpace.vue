@@ -23,11 +23,18 @@
     @getFolderList="getFolderList"
     ref="iconTypeList"
   ></icon-type-list>
+  <a
+    :href="downloadFileInfo.url"
+    :download="downloadFileInfo.name"
+    target="_blank"
+    id="downloadCurrentFile"
+  ></a>
 </template>
 
 <script>
 import FunctionBar from "@/components/cloudspace/functionbar/FunctionBar.vue";
 import IconTypeList from "@/components/cloudspace/icontypelist/IconTypeList.vue";
+import axios from "axios";
 export default {
   name: "MyCloudSpace",
   data() {
@@ -39,9 +46,13 @@ export default {
       // 排序方式
       sortType: "time",
       // 展示方式 icon table
-      showType: "icon",
+      showType: "table",
       // 搜索的文件夹
       searchFolder: [],
+      downloadFileInfo: {
+        name: "",
+        url: "",
+      },
     };
   },
   components: {
@@ -150,6 +161,26 @@ export default {
         },
       });
     },
+
+    // 点击下载文件的回调
+    downloadCurrentFile(name, url) {
+      axios.get(url, { responseType: "blob" }).then((res) => {
+        let blob = res.data;
+        let url = URL.createObjectURL(blob);
+        // download(url);
+        console.log(url);
+        let a = document.querySelector("#downloadCurrentFile");
+        this.downloadFileInfo.name = name;
+        this.downloadFileInfo.url = url;
+        // console.log(a);
+        //   console.log(this.downloadFileInfo.url.split("com")[1]);
+        this.$nextTick(() => {
+          a.click();
+          // 用完释放URL对象
+          URL.revokeObjectURL(url);
+        });
+      });
+    },
   },
 
   // 注意：在子文件夹中刷新会导致子文件夹的key变为vuex的初始currentFolder 也就是空
@@ -187,7 +218,11 @@ export default {
       await this.getVideoList(this.listData);
     }
   },
-  watch: {},
+  watch: {
+    "$store.state.currentDownloadFileInfo"(current) {
+      this.downloadCurrentFile(current.name, current.url);
+    },
+  },
 };
 </script>
 

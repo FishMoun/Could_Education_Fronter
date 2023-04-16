@@ -94,7 +94,7 @@
             </div>
           </div>
           <img
-            :src="require(`assets/img/${computeType(item.type)}.png`)"
+            :src="getFileImage(item.type)"
             alt=""
             v-else
             :draggable="false"
@@ -200,7 +200,7 @@
             ></video>
           </div>
           <img
-            :src="require(`assets/img/${computeType(item.type)}.png`)"
+            :src="getFileImage(item.type)"
             alt=""
             v-else
             :draggable="false"
@@ -228,11 +228,7 @@
           <img src="@/assets/img/collect.png" alt="" v-if="item.collection" />
         </div>
         <div class="tableItemSize">
-          {{
-            item.size == null
-              ? "未知大小"
-              : (item.size / 1048576).toFixed(2) + " MB"
-          }}
+          {{ item.size == null ? "未知大小" : getByte(item.size) }}
         </div>
         <div class="tableItemCreateTime">
           {{ item.gmtCreate.substr(0, 16) }}
@@ -342,13 +338,19 @@
 let isClickSelectAll = true;
 
 import { getTypeIcon } from "@/plugins/utils.js";
-
 import Attribute from "@/components/cloudspace/attribute/Attribute.vue";
 import ImagePlayer from "@/components/cloudspace/imagePlayer/ImagePlayer.vue";
 import RightClickMenu from "@/components/cloudspace/rightClickMenu/RightClickMenu.vue";
 import FolderDialog from "@/components/cloudspace/folderDialog/FolderDialog.vue";
 import GoTop from "@/components/cloudspace/goTop/GoTop.vue";
 import ShareDialog from "@/components/cloudspace/shareDialog/ShareDialog.vue";
+
+import pdfUrl from "/src/assets/img/pdf.png";
+import pptUrl from "/src/assets/img/ppt.png";
+import txtUrl from "/src/assets/img/txt.png";
+import wordUrl from "/src/assets/img/word.png";
+import zipUrl from "/src/assets/img/zip.png";
+import unknownUrl from "/src/assets/img/unknown.png";
 
 export default {
   components: {
@@ -467,6 +469,11 @@ export default {
   },
 
   methods: {
+    getByte(size) {
+      if (size < 1024) return size + "B";
+      else if (size / 1024 < 1024) return (size / 1024).toFixed(2) + "KB";
+      else return (size / 1048576).toFixed(2) + "MB";
+    },
     // 单击item的回调
     selectCurrentItem(item) {
       // 操作dom  直接操作dom可以减少循环，提高性能
@@ -709,11 +716,13 @@ export default {
       if (filetype == "video") {
         this.$store.commit("updateIsVideoPlayerShow", true);
         this.$store.commit("updateCurrentVideoInfo", item);
+        this.$message.warning("该文件暂时不能直接打开哦,可以下载后在本地打开!");
       }
       // 打开的是音频文件
       else if (filetype == "audio") {
         this.$store.commit("updateIsMusicPlayerShow", true);
         this.$store.commit("updateCurrentMusicInfo", item);
+        this.$message.warning("该文件暂时不能直接打开哦,可以下载后在本地打开!");
       }
       // 打开的是图片文件
       else if (filetype == "image") {
@@ -870,6 +879,7 @@ export default {
 
     // 点击下载文件的回调
     downloadCurrentFile(type, item) {
+      console.log("你好");
       let url;
       // 循环的数组，里面的item是索引
       let arr = [];
@@ -878,6 +888,8 @@ export default {
       } else if (type == "mult") {
         arr = this.selectFiles;
       }
+      console.log(type, item, "test");
+      console.log(arr, "arr");
       arr.forEach((i) => {
         // 循环执行的速度太快，watch来不及监听 这里通过定时器放到异步执行
         setTimeout(async () => {
@@ -889,7 +901,7 @@ export default {
               "",
               "post"
             );
-            console.log(res);
+            console.log("下载", res);
             url = res.data.data.urlList[0].url;
           } else {
             url = "/downloadfile/" + i.url.split("com/")[1];
@@ -1120,7 +1132,6 @@ export default {
             return true;
           }
           if (i.id != item.id) {
-            // console.log(i.url);
             if (i.filetype != "video") {
               let img = document.createElement("img");
               // 图片
@@ -1128,10 +1139,7 @@ export default {
                 img.setAttribute("src", i.url);
               } else {
                 let typeIcon = getTypeIcon(i.filetype);
-                img.setAttribute(
-                  "src",
-                  require(`/src/assets/img/${typeIcon}.png`)
-                );
+                img.setAttribute("src", this.getFileImage(typeIcon));
               }
               imgContainer.appendChild(img);
             } else if (i.filetype == "video") {
@@ -1174,7 +1182,15 @@ export default {
     // this.dragImgContainerPosition.x = e.clientX + 5;
     // this.dragImgContainerPosition.y = e.clientY + 5;
     // },
-
+    //资源缩略图
+    getFileImage(name) {
+      if (name.includes("pdf")) return pdfUrl;
+      else if (name.includes("ppt")) return pptUrl;
+      else if (name.includes("txt")) return txtUrl;
+      else if (name.includes("zip")) return zipUrl;
+      else if (name.includes("doc")) return wordUrl;
+      else return unknownUrl;
+    },
     onDragEndItem() {
       document.ondragover = null;
       this.showDragImgContainer = false;

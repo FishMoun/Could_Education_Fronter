@@ -14,7 +14,7 @@
         <div class="open" @click="$emit('openCurrentFile')">打开</div>
         <div class="download" @click="$emit('downloadCurrentFile')">下载</div>
       </div>
-      <div class="group">
+      <div class="group" v-show="false">
         <div
           @click="$emit('collectCurrentFile', true)"
           v-if="!isCurrentFileCollected"
@@ -24,14 +24,14 @@
         <div @click="$emit('collectCurrentFile', false)" v-else>取消收藏</div>
         <div class="share" @click="$emit('shareCurrentFile')">分享</div>
       </div>
-      <div class="group">
+      <div class="group" v-show="false">
         <div @click="$emit('moveFile')">移动到</div>
       </div>
       <div class="group">
         <div class="rename" @click="$emit('rename')">重命名</div>
         <div @click="$emit('deleteCurrentFile')">删除</div>
       </div>
-      <div class="group">
+      <div class="group" v-show="false">
         <div class="rename" @click="$emit('showAttribute')">属性</div>
       </div>
     </div>

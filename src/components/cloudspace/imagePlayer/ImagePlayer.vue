@@ -30,7 +30,7 @@
           <use xlink:href="#icon-xuanzhuan"></use>
         </svg>
       </el-icon>
-      <el-icon
+      <!-- <el-icon
         v-if="currentImg.collection == 0 || currentImg.collection == null"
         @click="$emit('collectCurrentImg', { flag: true, item: currentImg })"
         ><Star
@@ -40,7 +40,7 @@
         alt=""
         @click="$emit('collectCurrentImg', { flag: false, item: currentImg })"
         v-else-if="currentImg.collection == 1"
-      />
+      /> -->
       <el-icon @click="$emit('shareCurrentFile', currentImg)"
         ><Share
       /></el-icon>
