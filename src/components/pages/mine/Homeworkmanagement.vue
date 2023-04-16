@@ -67,12 +67,11 @@
       <el-table :data="stuTableData" class="tableBox" table-layout="fixed" v-if="!isTeacher">
         <el-table-column prop="homeworkId" label="作业编号" />
         <el-table-column prop="name" label="名称" />
-        <el-table-column prop="srccourse" label="来源课程" />
-        <el-table-column prop="srcclass" label="来源小节" />
-        <el-table-column prop="teacher" label="布置老师" />
-        <el-table-column prop="begintime" label="发布时间" />
-        <el-table-column prop="deadline" label="截止时间" />
-        <el-table-column prop="state" label="完成状态" />
+        <el-table-column prop="courseName" label="来源课程" />
+        <!-- <el-table-column prop="srcclass" label="来源小节" /> -->
+        <el-table-column prop="beginTime" label="发布时间" />
+        <el-table-column prop="endTime" label="截止时间" />
+        <el-table-column prop="status" label="完成状态" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="scope">
             <el-button type="primary" @click="goToDetail(scope.row.homeworkId)">查看详细</el-button>
@@ -83,14 +82,14 @@
         <el-table-column prop="homeworkId" label="作业编号" />
         <el-table-column prop="name" label="名称" />
         <el-table-column prop="courseName" label="来源课程" />
-        <el-table-column prop="srcclass" label="来源小节" />
+        <!-- <el-table-column prop="srcclass" label="来源小节" /> -->
         <el-table-column prop="beginTime" label="发布时间" />
         <el-table-column prop="endTime" label="截止时间" />
         <el-table-column prop="status" label="状态" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="scope">
             <el-button type="primary" @click="goToDetail(scope.row.homeworkId)">查看详细</el-button>
-            <el-button type="primary" @click="goToCorrect">去批改</el-button>
+            <el-button type="primary" @click="goToCorrect(scope.row.homeworkId)">去批改</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -170,8 +169,8 @@ export default {
       this.$router.push({ path: `/homeworkdetail/${homeworkId}` });
     },
     //去批改页面
-    goToCorrect() {
-      this.$router.push({ name: "作业批改" });
+    goToCorrect(homeworkId) {
+      this.$router.push({ path: `/homeworkcorrect/${homeworkId}` });
     },
     handleClose() {
       console.log("关闭");
@@ -205,24 +204,28 @@ export default {
       console.log(courseOptions)
     },
     async getStuHomeworks() {
-      const curUser = this.$store.state.userInfo;
-      const homeworkList = await this.$request(
+      const curUser = await this.getRoleId()
+      let homeworkList = await this.$request(
         // 需要学生id而不是用户id
-        `/manager/course-homework/list-student/${curUser.id}`,
+        `/manager/course-homework/list-student/${curUser}`,
         "",
         "get",
         "params",
         "json"
       )
-      this.stuTableData = homeworkList.data.data.homeworks
+      homeworkList = homeworkList.data.data.homeworks.map(item => ({
+        ...item,
+        status: item.marked ? "已完成" : "未完成"
+      }))
+      this.stuTableData = homeworkList
       console.log(homeworkList)
     },
     async getTeaHomeworks() {
-      const curUser = this.$store.state.userInfo;
+      const curUser = await this.getRoleId()
       let teaHomeworkList = await this.$request(
         // 需要教师id而不是用户id
         // `/manager/course-homework/list-teacher/${curUser.id}`,
-        `/manager/course-homework/list-teacher/1647228743251623938`,
+        `/manager/course-homework/list-teacher/${curUser}`,
         "",
         "get",
         "params",
@@ -234,6 +237,22 @@ export default {
       }))
       console.log(teaHomeworkList)
       this.teaTableData = teaHomeworkList
+    },
+    async getRoleId(){
+      const curUser = this.$store.state.userInfo;
+      console.log(curUser.id)
+      try {
+        let userRoleId = await this.$request(
+          `/api/manager/user/user-role-id/${curUser.id}`,
+          "",
+          "get"
+        )
+        userRoleId = userRoleId.data.data?.teacherId || userRoleId.data.data?.studentId
+        console.log(userRoleId)
+        return userRoleId
+      } catch (e) {
+        console.log(e)
+      }
     },
     addHomeWork() { //布置作业
       const userinfo = this.$store.state.userInfo
@@ -291,9 +310,10 @@ export default {
   max-height: 400px;
   overflow-y: scroll;
 }
+
 .tableBox {
   height: 70vh;
-  overflow-y:scroll ;
+  overflow-y: scroll;
 }
 
 // .searchbox {}
