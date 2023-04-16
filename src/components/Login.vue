@@ -168,14 +168,22 @@ export default {
           console.log(info);
           if (info) {
             store.state.userInfo = info;
-
+            ElMessage.success("登录成功！");
             if (info.role === "admin") {
               store.state.isAdmin = true;
             }
-            if (info.role === "teacher") store.state.isTeacher = true;
-            router.push({
-              path: "/home",
-            });
+            if (info.role === "teacher") {
+              store.state.isTeacher = true;
+            }
+            if (info.role === "admin") {
+              router.push({
+                path: "/coursemanagement",
+              });
+            } else {
+              router.push({
+                path: "/home",
+              });
+            }
           } else {
             ElMessage.error("登录失败！");
           }

@@ -1,7 +1,43 @@
 <template>
   <el-container>
     <!-- 头部筛选区 -->
-    <el-header> </el-header>
+    <el-header>
+      <div>
+        <el-select
+          v-model="collegeValue"
+          placeholder="院系选择"
+          style="margin-right: 10px"
+        >
+          <el-option
+            v-for="item in collegeoptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-select
+          v-model="collegeValue"
+          placeholder="专业选择"
+          style="margin-right: 10px"
+        >
+          <el-option
+            v-for="item in collegeoptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-button @click="reset">重置</el-button>
+        <el-button type="primary" @click="selectPartCourseByCondition"
+          ><el-icon><Search /></el-icon>查询</el-button
+        >
+      </div>
+      <div class="buttonbox">
+        <el-button type="primary"
+          ><el-icon><Plus /></el-icon>新增班级</el-button
+        >
+      </div></el-header
+    >
     <!-- 主体表格区 -->
     <el-main>
       <el-table v-loading="loading" :data="tableData" table-layout="fixed">
@@ -28,6 +64,17 @@ export default {
     return {
       loading: false,
       tableData: [],
+      collegeValue: "",
+      collegeoptions: [
+        {
+          value: "计算机与信息学院",
+          label: "计算机与信息学院",
+        },
+        {
+          value: "人工智能学院",
+          label: "人工智能学院",
+        },
+      ],
     };
   },
   methods: {
@@ -71,5 +118,12 @@ export default {
 };
 </script>
   
-  <style>
+  <style scoped>
+.buttonbox {
+}
+.el-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>
