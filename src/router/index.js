@@ -97,7 +97,7 @@ const router = createRouter({
 				},
 				//作业批改
 				{
-					path: "/homeworkcorrect",
+					path: "/homeworkcorrect/:id",
 					name: "作业批改",
 					component: Homeworkcorrect,
 				},

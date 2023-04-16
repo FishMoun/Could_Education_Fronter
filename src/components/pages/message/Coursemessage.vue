@@ -14,7 +14,7 @@
             </ul>
         </div>
         <div class="right">
-            <el-dialog v-model="dialogVisible" title="创建作业" width="60%" :before-close="handleClose">
+            <el-dialog v-model="dialogVisible" title="课程消息" width="60%" :before-close="handleClose">
                 <el-form :model="form" label-width="50px">
                         <el-form-item label="标题:">
                             <el-input v-model="form.title" />
