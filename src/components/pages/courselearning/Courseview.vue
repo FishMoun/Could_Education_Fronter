@@ -6,9 +6,49 @@
   <div class="main">
     <div class="mainleft">
       <div style="margin-top: 10px; display: flex; justify-content: right">
-        <el-button type="primary">创建课程实验</el-button>
+        <el-button type="primary" @click="expDialogVisible = true"
+          >创建课程实验</el-button
+        >
         <el-button type="primary">布置课程作业</el-button>
       </div>
+      <!-- 实验的对话框 -->
+      <el-dialog
+        v-model="expDialogVisible"
+        title="创建课程实验"
+        width="25%"
+        center
+      >
+        <span style="font-size: 20px">实验名称：</span>
+        <el-input
+          v-model="expInfo.name"
+          placeholder="输入实验名称"
+          style="margin-bottom: 10px"
+        />
+        <span style="font-size: 20px">实验介绍：</span>
+
+        <el-input
+          v-model="expInfo.introduction"
+          :rows="4"
+          type="textarea"
+          placeholder="输入实验介绍"
+          :resize="'none'"
+          style="margin-bottom: 10px"
+        />
+        <!-- <span style="font-size: 20px">选择截止日期：</span>
+        <div>
+          <el-date-picker
+            v-model="expInfo.date"
+            type="datetime"
+            placeholder="选择截止日期"
+          />
+        </div> -->
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="expDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="createExp"> 确定 </el-button>
+          </span>
+        </template>
+      </el-dialog>
       <el-card shadow="never" class="introduction-card">
         <div style="font-size: 20px">课程介绍</div>
         <p>{{ introduction }}</p>
@@ -64,7 +104,7 @@
             :timestamp="activity.timestamp"
             placement="top"
           >
-            <el-card :body-style="{ padding: '0px' }">
+            <el-card :body-style="{ padding: '0px', width: '100%' }">
               <div class="card-content">
                 <div class="card-main">
                   <h2>{{ activity.title }}</h2>
@@ -73,7 +113,14 @@
                     }}{{ activity.weekth }}</span
                   >
                   <div class="subchapter">
-                    <el-tag type="success" size="large">Tag 1</el-tag>
+                    <el-tag
+                      v-for="item in activity.subChapter"
+                      type="success"
+                      size="large"
+                      :key="item.id"
+                      style="margin: 10px"
+                      >{{ item.name }}</el-tag
+                    >
                   </div>
                 </div>
                 <div class="card-button">
@@ -157,10 +204,13 @@
 
 <script>
 import { reactive } from "vue";
+import { ElMessage } from "element-plus";
 export default {
   name: "Courseview",
   data() {
     return {
+      //实验创建按钮
+      expDialogVisible: false,
       //判断现在是新增章节还是修改章节
       isCreateChapter: true,
       //视图
@@ -228,8 +278,14 @@ export default {
       id: "",
       //章节编辑内容
       chapterInputValue: "",
+      expInfo: {
+        name: "",
+        introduction: "",
+        date: null,
+      },
     };
   },
+
   computed: {
     isTeacher() {
       return this.$store.state.isTeacher;
@@ -243,7 +299,31 @@ export default {
     this.id = this.courseId + "0000";
     await this.getChapterList();
   },
+
   methods: {
+    //创建一个新的课程实验
+    async createExp() {
+      let params = {
+        courseId: this.courseId,
+        // endTime: this.expInfo.date,
+        introduction: this.expInfo.introduction,
+        name: this.expInfo.name,
+      };
+      let res = await this.$request(
+        "exp/course/create-exp",
+        params,
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res && res.data.code === 20000) {
+        ElMessage.success("创建成功！");
+        this.expDialogVisible = false;
+      } else {
+        ElMessage.error("创建失败，请稍后重试！");
+      }
+    },
     //获取时序列表
     async getTimeList() {
       let param = { id: this.$route.params.id };
@@ -276,6 +356,12 @@ export default {
             item.endIndex
           }节`,
           overview: "",
+          subChapter: item.subChapters.map((item) => {
+            return {
+              name: item.name,
+              id: item.id,
+            };
+          }),
         });
       }
       this.activities = JSON.parse(JSON.stringify(newactivity));
@@ -291,14 +377,21 @@ export default {
       );
       console.log(res);
       let newChapterList = [];
-      if (res?.data.code === 20000) {
+
+      //计算章节和子章节的个数
+      let count = 0;
+      if (res && res?.data.code === 20000) {
         if (res.data.data.chapters.length !== 0) this.isCreateChapter = false;
         newChapterList = res.data.data.chapters.map((item) => {
+          count++;
           return {
             id: item.chapter.id,
             label: item.chapter.name,
+            type: 1,
             children: item.children.map((item2) => {
+              count++;
               return {
+                type: 2,
                 id: item2.subChapter.id,
                 label: item2.subChapter.name,
                 timetable: item2?.timetables || [],
@@ -307,6 +400,8 @@ export default {
           };
         });
       }
+
+      this.id = String(parseInt(this.id + "0000") + count + 50);
       this.treedata = JSON.parse(JSON.stringify(newChapterList));
     },
     //老师和学生切换
@@ -331,7 +426,7 @@ export default {
       this.showeditfinish = true;
     },
     async endEdit() {
-      if (this.isCreateChapter) {
+      if (this.treedata.length !== 0) {
         let params = this.treedata.map((item, index) => {
           return {
             chapter: {
@@ -346,7 +441,7 @@ export default {
                   chapterId: item.id,
                   courseId: this.courseId,
                   id: item2.id,
-                  label: item2.label,
+                  name: item2.label,
                   number: index2,
                 },
                 timetables: item2?.timetable || [],
@@ -354,7 +449,6 @@ export default {
             }),
           };
         });
-        console.log(params);
         let res = await this.$request(
           `/manager/chapter/save/${this.$route.params.id}`,
           params,
@@ -362,11 +456,17 @@ export default {
           "params",
           "json"
         );
-        console.log(res);
+        if (res && res.data.code === 20000) {
+          ElMessage.success("编辑成功！");
+        } else {
+          ElMessage.error("编辑失败，请稍后重试！");
+        }
       }
 
       this.showeditfinish = false;
       this.showeditoutline = false;
+      if (this.treedata.length === 0) this.isCreateChapter = true;
+      else this.isCreateChapter = false;
     },
     //向后增加章节
     addChapter() {
@@ -375,6 +475,7 @@ export default {
         label: "新章节，点击编辑内容",
         children: [],
         inputvisible: false,
+        type: 1,
       };
       this.treedata.push(brother);
       console.log(this.treedata);
@@ -386,6 +487,7 @@ export default {
         label: "新小节，点击编辑内容",
         children: [],
         inputvisible: false,
+        type: 2,
       };
       if (!data.children) {
         data.children = [];
@@ -393,7 +495,33 @@ export default {
       data.children.push(newChild);
     },
     //删除节点
-    remove(node, data) {
+    async remove(node, data) {
+      let res;
+      if (!this.isCreateChapter && !data.label.includes("点击编辑内容")) {
+        if (data.type === 1) {
+          res = await this.$request(
+            `/manager/chapter/remove-chapter/${data.id}`,
+            "",
+            "delete",
+            "params",
+            "json"
+          );
+        } else {
+          res = await this.$request(
+            `/manager/chapter/remove-sub/${data.id}`,
+            "",
+            "delete",
+            "params",
+            "json"
+          );
+        }
+        console.log("delete", res);
+        if (res && res.data.code === 20000) {
+          ElMessage.success("删除成功！");
+        } else {
+          ElMessage.error("删除失败,请稍后重试!");
+        }
+      }
       const parent = node.parent;
       const children = parent.data.children || parent.data;
       const index = children.findIndex((d) => d.id === data.id);
@@ -410,13 +538,52 @@ export default {
       }
     },
     //输入框确认
-    handleInputConfirm(data, $event) {
-      console.log($event);
-      if (this.chapterInputValue) data.label = this.chapterInputValue;
-      console.log(data.label);
+    async handleInputConfirm(data, $event) {
+      if (
+        !this.isCreateChapter &&
+        this.chapterInputValue &&
+        this.chapterInputValue !== data.label &&
+        !data.label.includes("点击编辑内容")
+      ) {
+        //这里进行单个标签的修改
+        let res;
+        if (data.type === 1) {
+          res = await this.$request(
+            `/manager/chapter/update-chapter/${data.id}/${this.chapterInputValue}`,
+            "",
+            "put",
+            "params",
+            "json"
+          );
+          if (res && res.data.code === 20000) {
+            ElMessage.success("修改成功！");
+            data.label = this.chapterInputValue;
+            this.chapterInputValue = "";
+          } else {
+            ElMessage.error("修改失败，请稍后重试!");
+          }
+        } else {
+          res = await this.$request(
+            `/manager/chapter/update-sub/${data.id}/${this.chapterInputValue}`,
+            "",
+            "put",
+            "params",
+            "json"
+          );
+          if (res && res.data.code === 20000) {
+            ElMessage.success("修改成功！");
+            data.label = this.chapterInputValue;
+            this.chapterInputValue = "";
+          } else {
+            ElMessage.error("修改失败，请稍后重试!");
+          }
+        }
+        console.log(res);
+      } else {
+        data.label = this.chapterInputValue;
+        this.chapterInputValue = "";
+      }
       data.inputvisible = false;
-      this.chapterInputValue = "";
-      console.log(data.label);
     },
   },
 };
@@ -443,7 +610,6 @@ export default {
 }
 .card-main {
   margin: 10px 10px 10px 20px;
-  width: 300px;
   height: 100px;
 }
 .card-button {
