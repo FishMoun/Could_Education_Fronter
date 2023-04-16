@@ -5,21 +5,17 @@
       <template #header>
         <div class="card-header">
           <span class="homeworktitle">{{ homeworkDetail?.homework?.name }}</span>
-          <div v-show="isTeacher">
-            <el-button type="primary">批改作业</el-button>
-          </div>
         </div>
       </template>
       <el-scrollbar height="60vh">
         <div>
           <ul>
             <li v-for="(item, index) in  homeworkDetail?.contexts">
-              {{ (index + 1) + "、" + item?.context }}
+              {{ "作业"+(index + 1) + "：" + item?.context }}
               <div>
-                <!-- <el-form-item label="参考答案:">
-                  <el-input v-model="item.refAnswer" :rows="2" type="textarea" resize="none" />
-                </el-form-item> -->
-                <textarea v-show="!isTeacher" v-model="answers[index]" cols="45" rows="19" @keypress="handleAnswer"></textarea>
+                <el-form-item v-show="!isTeacher" label="答案： ">
+                  <el-input v-model="answers[index]" :rows="18" type="textarea" resize="none" />
+                </el-form-item>
               </div>
             </li>
           </ul>
@@ -51,33 +47,41 @@ export default {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
     },
     async submitHomework() {
-      const curUser = this.$store.state.userInfo;
       console.log("提交作业")
+      console.log(this.homeworkDetail,this.answers)
       // 调用提交作业的api,这里需要再给后端对一下给的参数以及参数类型
-      const res = await this.$request(`/manager/course-homework/submit/${curUser.id}/${this.homeworkDetail.homework
+      // 这里需要使用学生id而不是用户id
+      const curUser = await this.getRoleId()
+      const res = await this.$request(`/manager/course-homework/submit/${curUser}/${this.homeworkDetail.homework
         .id}`,
         this.homeworkDetail.contexts.map((item, index) => {
           return {
-            ...item,
-            submitAnswer: this.answers[index]
+            contextId:item.id,
+            submitAnswer: this.answers[index],
           }
         }),
         "post",
         "params",
         "json")
       console.log(res)
+      alert("提交成功！")
     },
-    handleAnswer() {
-      this.homeworkDetail = this.homeworkDetail.contexts.map((item, index) => {
-        return {
-          ...item,
-          submitAnswer: this.answers[index]
-        }
-      })
+    async getRoleId(){
+      const curUser = this.$store.state.userInfo;
+      console.log(curUser.id)
+      try {
+        let userRoleId = await this.$request(
+          `/api/manager/user/user-role-id/${curUser.id}`,
+          "",
+          "get"
+        )
+        userRoleId = userRoleId.data.data?.teacherId || userRoleId.data.data?.studentId
+        console.log(userRoleId)
+        return userRoleId
+      } catch (e) {
+        console.log(e)
+      }
     },
-    editHomework(){
-      console.log("bjzy")
-    }
   },
   computed: {
     isTeacher() {
