@@ -53,6 +53,7 @@ export default createStore({
     // #endregion 
     //token处理
     //用户标识
+    isLogin: false,
     userInfo: {
       avatar: '',
       id: '',

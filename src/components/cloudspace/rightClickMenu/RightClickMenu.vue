@@ -179,7 +179,7 @@ export default {
 }
 
 .group > div:hover {
-  background-color: #696bcc;
+  background-color: #3d8cf8;
   color: white;
 }
 </style>

@@ -14,7 +14,10 @@
         :value="item.value"
       />
     </el-select>
-    <el-button style="position: absolute; right: 0; top: 0" @click="goToAdmin"
+    <el-button
+      style="position: absolute; right: 0; top: 0"
+      @click="goToAdmin"
+      v-show="false"
       >切换管理员</el-button
     >
   </div>

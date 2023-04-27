@@ -224,7 +224,7 @@
         <div class="tableName" v-else>
           {{ item.name == null ? "NoNameFile" : item.name + "." + item.type }}
         </div>
-        <div class="tableCollect">
+        <div class="tableCollect" v-show="false">
           <img src="@/assets/img/collect.png" alt="" v-if="item.collection" />
         </div>
         <div class="tableItemSize">
@@ -1396,15 +1396,15 @@ export default {
 }
 
 .listItem:hover {
-  background-color: rgba(105, 107, 204, 0.2);
+  background-color: #9cc8f9;
 }
 
 .listItem:hover i {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: #9cc8f9;
 }
 
 .selectFile {
-  background-color: rgba(105, 107, 204, 0.4) !important;
+  background-color: #9ecaf8 !important;
 }
 
 .renameInput {
@@ -1473,7 +1473,7 @@ export default {
 }
 
 .tableListItem:hover {
-  background-color: #e1e1f5;
+  background-color: #ecf5fd;
 }
 
 .tableImgContainer {
@@ -1507,12 +1507,12 @@ export default {
 
 .tableItemSize {
   width: 20%;
-  padding-left: 80px;
+  padding-left: 150px;
   box-sizing: border-box;
 }
 
 .tableItemCreateTime {
-  padding-left: 60px;
+  padding-left: 100px;
   box-sizing: border-box;
   width: 25%;
 }

@@ -14,7 +14,10 @@
         :value="item.value"
       />
     </el-select>
-    <el-button style="position: absolute; right: 0; top: 0" @click="goToEdit"
+    <el-button
+      style="position: absolute; right: 0; top: 0"
+      @click="goToEdit"
+      v-show="false"
       >去编辑节点</el-button
     >
   </div>
@@ -22,7 +25,7 @@
     <div class="body">
       <ul v-for="experiment in experiments" :key="experiment.id">
         <li class="courseItem">
-          <ExpItem :experiment="experiment" @click="goto(experiment.id)" />
+          <ExpItem :experiment="experiment" @click="goto(experiment)" />
         </li>
       </ul>
     </div>
@@ -100,30 +103,6 @@ export default {
   async mounted() {
     // api：通过用户id获取到用户的实验信息
     await this.getUserExp();
-    //#region
-    // try {
-    //   let userid = this.$store.state.userInfo.id;
-    //   let res = await getCoursesById(userid);
-    //   let courses = JSON.parse(JSON.stringify(res.data.data.courses));
-    //   this.courses = courses.map((item) => {
-    //     return {
-    //       courseId: item.courseId,
-    //       courseName: item.courseName,
-    //       beginWeek: item.beginWeek,
-    //       endWeek: item.endWeek,
-    //       teachers: item.teachers.map((item) => item.name),
-    //       coverUrl: item.coverUrl,
-    //     };
-    //   });
-
-    //   for (let i = 0; i < courses.length; ++i) {
-    //     this.monidata[i].coverUrl = courses[i].coverUrl;
-    //   }
-    // } catch (e) {
-    //   console.log(e);
-    // }
-    //#endregion
-    // this.experiments = JSON.parse(JSON.stringify(this.monidata));
     console.log(this.monidata);
   },
   methods: {
@@ -195,9 +174,11 @@ export default {
         console.log(e);
       }
     },
-    goto(expId) {
+    goto(experiment) {
       console.log(123);
-      this.$router.push({ path: `/experimentflow/${expId}` });
+      this.$router.push({
+        path: `/experimentflow/${experiment.courseId}/${experiment.id}`,
+      });
     },
     async changeTerm(val) {
       let userid = this.$store.state.userInfo.id;

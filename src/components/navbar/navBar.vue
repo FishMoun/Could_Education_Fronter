@@ -46,6 +46,7 @@ import { useStore, mapMutations } from "vuex";
 import bread from "./bread.vue";
 import { ref, computed, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 export default {
   name: "navBar",
   components: {
@@ -98,8 +99,10 @@ export default {
         "params",
         "json"
       );
-      console.log(res);
-      if (res.data.code === 20000) {
+
+      if (res && res.data.code === 20000) {
+        ElMessage.success("登出成功！");
+        store.state.isLogin = false;
         router.push({ path: "/" });
       }
     }
