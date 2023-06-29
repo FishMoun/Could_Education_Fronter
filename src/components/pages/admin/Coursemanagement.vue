@@ -182,7 +182,7 @@
             <el-upload
               v-model:file-list="fileList"
               class="upload-demo"
-              action="http://60.204.141.214:30801/eduoss/fileoss/upload-cover"
+              action="http://10.195.12.78:9000/eduoss/fileoss/upload-cover"
               style="width: 150px"
               :on-progress="onProgressCover"
               :on-success="onCoverSuccess"

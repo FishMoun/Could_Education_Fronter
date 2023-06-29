@@ -5,7 +5,7 @@
         <!-- 上传按钮 -->
         <el-upload
           multiple
-          :action="`http://60.204.141.214:30801/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
+          :action="`http://10.195.12.78:9000/eduoss/fileoss/upload/${$store.state.userInfo.id}?catalogue=${$store.state.currentFolder}`"
           class="uploadButton"
           :show-file-list="false"
           :on-success="upload"

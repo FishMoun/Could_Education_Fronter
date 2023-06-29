@@ -8,7 +8,7 @@ WSSHClient.prototype._generateEndpoint = function () {
     } else {
         var protocol = 'ws://';
     }
-    var endpoint = protocol + '60.204.141.214:30805/exp/webssh';
+    var endpoint = protocol + '10.195.12.78:9000/exp/webssh';
     return endpoint;
 };
 

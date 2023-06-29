@@ -12,9 +12,9 @@ export async function request(url,//请求地址
 ) {
     let baseurl
     if (import.meta.env.PROD)
-        baseurl = "http://60.204.141.214:30900/"
+        baseurl = "http://10.195.12.78:9000/"
     else if (url.includes('/eduoss/fileoss'))
-        baseurl = "http://60.204.141.214:30801"
+        baseurl = "http://10.195.12.78:9000"
     else
         baseurl = "/api"
     //创建axios实例

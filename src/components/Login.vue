@@ -29,10 +29,18 @@
       <div class="boxBody">
         <el-row :gutter="0">
           <el-input
+            v-model="boxStatus.id"
+            size="large"
+            class="w-50 m-2"
+            placeholder="学号或工号"
+            :prefix-icon="User"
+            v-show="!boxStatus.isLogin && boxStatus.accountType !== 'admin'"
+          />
+          <el-input
             v-model="boxStatus.nickname"
             size="large"
             class="w-50 m-2"
-            placeholder="昵称"
+            placeholder="姓名"
             :prefix-icon="Cherry"
             v-show="!boxStatus.isLogin"
           />
@@ -143,6 +151,7 @@ export default {
       confirmPassword: "",
       accountType: "student",
       nickname: "",
+      id:""
     });
     function changeStatus() {
       boxStatus.isLogin = !boxStatus.isLogin;
@@ -197,6 +206,7 @@ export default {
           password: boxStatus.password,
           role: boxStatus.accountType,
           username: boxStatus.username,
+
         };
         let res = await proxy.$request(
           "/ucenter/user/register",
@@ -212,6 +222,7 @@ export default {
           if (boxStatus.accountType === "student") {
             let name = boxStatus.nickname;
             let stuinfo = {
+              id:boxStatus.id,
               classId: classId.value,
               department: classes.value.find(
                 (item) => item.id === classId.value
@@ -229,6 +240,7 @@ export default {
               "post",
               "params",
               "json"
+
             );
             console.log(res1);
             if (res1.data.code === 20000) {
@@ -238,6 +250,7 @@ export default {
           } else if (boxStatus.accountType === "teacher") {
             let name = boxStatus.nickname;
             let teainfo = {
+              id:boxStatus.id,
               department: departmentValue.value,
               userId: id,
               name: name,

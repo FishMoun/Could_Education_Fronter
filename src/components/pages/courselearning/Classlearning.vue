@@ -537,15 +537,15 @@ export default {
     },
     //PPT上传地址
     uploadPPTUrl() {
-      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://10.195.12.78:9000/manager/course-resource/upload-timetable/ppt/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     //视频上传地址
     uploadVideoUrl() {
-      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/video/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://10.195.12.78:9000/manager/course-resource/upload-timetable/video/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     //共享资源上传地址
     uploadShareUrl() {
-      return `http://60.204.141.214:30900/manager/course-resource/upload-timetable/share/${this.$route.params.courseId}/${this.$route.params.classId}`;
+      return `http://10.195.12.78:9000/manager/course-resource/upload-timetable/share/${this.$route.params.courseId}/${this.$route.params.classId}`;
     },
     courseId() {
       return this.$route.params.courseId;

@@ -22,7 +22,7 @@ export default defineConfig({
 		proxy: {
 			//后端网关地址
 			'/api': {
-				target: 'http://60.204.141.214:30900/',
+				target: 'http://10.195.12.78:9000/',
 				changeOrigin: true,
 				ws: true,
 				rewrite: (path) => path.replace(/^\/api/, '')
