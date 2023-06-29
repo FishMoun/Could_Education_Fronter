@@ -31,6 +31,7 @@ export default {
   props: {
     node: Object,
     activeElement: Object,
+    isEditMode: Boolean,
   },
   data() {
     return {};
@@ -41,6 +42,8 @@ export default {
       if (this.node.type === 0) return { "ef-node-start": true };
       else if (this.node.type === 1 || this.node.type === 3) {
         return {
+          "ef-node-container-edit": this.isEditMode,
+          "ef-node-container-normal": !this.isEditMode,
           "ef-node-container": true,
           "ef-node-active":
             this.activeElement?.type == "node"
@@ -117,15 +120,21 @@ export default {
 .ef-node-container {
   position: absolute;
   display: flex;
-  width: 8vw;
+  width: 9vw;
   height: 6vh;
   border: 1px solid #e0e3e7;
   border-radius: 5px;
   background-color: #fff;
 }
 
-.ef-node-container:hover {
+.ef-node-container-edit:hover {
   cursor: move;
+  background-color: #f0f7ff;
+  background-color: #f0f7ff;
+  border: 1px dashed #1879ff;
+}
+.ef-node-container-normal:hover {
+  cursor: pointer;
   background-color: #f0f7ff;
   background-color: #f0f7ff;
   border: 1px dashed #1879ff;
@@ -141,23 +150,23 @@ export default {
   position: absolute;
   display: flex;
   background-color: #409eff;
-  height: 4vh;
+  height: 5vh;
   width: 3vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 50px;
+  border-radius: 15px;
 }
 .ef-node-end {
   position: absolute;
   display: flex;
   background-color: #67c23a;
-  height: 4vh;
+  height: 5vh;
   width: 3vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 50px;
+  border-radius: 15px;
 }
 .ef-node-branch {
   position: absolute;

@@ -1,7 +1,10 @@
 <template>
-  <el-button @click="changerole" style="position: absolute; left: 0">{{
-    isTeacher ? "老师" : "学生"
-  }}</el-button>
+  <el-button
+    @click="changerole"
+    style="position: absolute; left: 0"
+    v-show="false"
+    >{{ isTeacher ? "老师" : "学生" }}</el-button
+  >
   <!-- 内容区 -->
   <div class="main">
     <div class="mainleft">
@@ -12,7 +15,9 @@
           v-show="isTeacher"
           >创建课程实验</el-button
         >
-        <el-button type="primary" v-show="isTeacher">布置课程作业</el-button>
+        <el-button type="primary" v-show="isTeacher" @click="goToHomework"
+          >布置课程作业</el-button
+        >
       </div>
       <!-- 实验的对话框 -->
       <el-dialog
@@ -22,12 +27,15 @@
         center
       >
         <span style="font-size: 20px">实验名称：</span>
+        <div style="height: 10px"></div>
         <el-input
           v-model="expInfo.name"
           placeholder="输入实验名称"
           style="margin-bottom: 10px"
         />
-        <span style="font-size: 20px">实验介绍：</span>
+        <span style="font-size: 20px; margin-bottom: 10px" v-show="false"
+          >实验介绍：</span
+        >
 
         <el-input
           v-model="expInfo.introduction"
@@ -35,7 +43,8 @@
           type="textarea"
           placeholder="输入实验介绍"
           :resize="'none'"
-          style="margin-bottom: 10px"
+          style="margin-top: 10px"
+          v-show="false"
         />
         <!-- <span style="font-size: 20px">选择截止日期：</span>
         <div>
@@ -54,7 +63,9 @@
       </el-dialog>
       <el-card shadow="never" class="introduction-card">
         <div style="font-size: 20px">课程介绍</div>
-        <p>{{ introduction }}</p>
+        <p>
+          {{ introduction }}
+        </p>
         <div v-show="isTeacher">
           <el-button link type="primary" @click="editcontent">编辑</el-button>
         </div>
@@ -353,9 +364,24 @@ export default {
     await this.getTimeList();
     this.id = this.courseId + "0000";
     await this.getChapterList();
+    //获得课程描述信息
+    await this.getCourseIntroduction();
   },
 
   methods: {
+    //获得课程描述信息
+    async getCourseIntroduction() {
+      let res = await this.$request(
+        `/admin/manager/course/get-desc/${this.courseId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        this.introduction = res.data.data.description.description;
+      }
+    },
     //搜索章节Id
     async searchRemoteChapter(val) {
       this.chapterloading = true;
@@ -510,9 +536,26 @@ export default {
     editcontent() {
       this.editcontentdialogVisible = true;
     },
-    //提交内容
-    submitIntroduction() {
-      this.introduction = this.editintroduction;
+    //提交课程简介
+    async submitIntroduction() {
+      let params = {
+        courseId: this.courseId,
+        description: this.editintroduction,
+      };
+      let res = await this.$request(
+        "/admin/manager/course/add-desc",
+        params,
+        "post",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        ElMessage.success("简介更新成功！");
+        this.introduction = this.editintroduction;
+      } else {
+        ElMessage.error("更新失败，请稍后重试！");
+      }
+
       this.editcontentdialogVisible = false;
     },
     //编辑大纲
@@ -697,9 +740,17 @@ export default {
       );
       if (res && res.data.code === 20000) {
         ElMessage.success("添加成功！");
-        this.editcontentdialogVisible = false;
+        this.subChapterDialogVisible = false;
+        await this.getTimeList();
       } else ElMessage.error("添加失败，请稍后重试！");
       await getTimeList();
+    },
+    //去作业界面
+    goToHomework() {
+      console.log(123);
+      this.$router.push({
+        path: "/homeworkmanagement",
+      });
     },
   },
 };

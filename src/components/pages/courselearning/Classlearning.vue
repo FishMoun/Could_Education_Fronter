@@ -5,7 +5,10 @@
     <el-scrollbar class="left">
       <!-- 左上本节概要区 -->
       <div class="classintroduction">
-        <el-button @click="changerole" style="position: absolute; left: 0"
+        <el-button
+          @click="changerole"
+          style="position: absolute; left: 0"
+          v-show="false"
           >当前是{{ isTeacher ? "老师" : "学生" }}模式</el-button
         >
         <el-card shadow="never" class="introduction-card">
@@ -69,6 +72,14 @@
                 @click="deletePPT"
                 >删除</el-button
               >
+              <el-button
+                type="primary"
+                style="margin-left: 10px; margin-top: 10px"
+                v-show="isPPTExist === true"
+                @click="starResource"
+                ><el-icon class="el-icon--left"><Star /></el-icon
+                >收藏</el-button
+              >
             </div>
             <div v-show="isPPTExist" style="margin-top: 10px">
               <div class="pptzone">
@@ -126,6 +137,14 @@
                   >下载
                 </el-button>
               </a>
+              <el-button
+                type="primary"
+                style="margin-left: 10px; margin-top: 10px"
+                v-show="isVideoExist === true"
+                @click="starResource"
+                ><el-icon class="el-icon--left"><Star /></el-icon
+                >收藏</el-button
+              >
             </div>
             <div
               class="videozone"
@@ -166,29 +185,6 @@
                   >上传</el-button
                 >
               </template>
-              <template #file="{ file }">
-                <img
-                  class="el-upload-list__item-thumbnail"
-                  :src="getFileImage(file.name)"
-                  alt=""
-                />
-
-                <span class="el-upload-list__item-file-name">{{
-                  file.name
-                }}</span>
-                <div class="fileicon">
-                  <el-icon
-                    size="20px"
-                    v-show="isTeacher"
-                    @click="deleteShare(file.id)"
-                    style="cursor: pointer"
-                    ><Delete
-                  /></el-icon>
-                  <a :href="file.url"
-                    ><el-icon size="20px" color=""><Download /></el-icon
-                  ></a>
-                </div>
-              </template>
             </el-upload>
 
             <el-card
@@ -218,9 +214,15 @@
                     style="cursor: pointer"
                     ><Delete
                   /></el-icon>
-                  <a :href="item.url"
+                  <a :href="item.url" style="margin-top: 5px"
                     ><el-icon size="20px" color=""><Download /></el-icon
                   ></a>
+                  <el-icon
+                    size="20px"
+                    @click="starShareFile(item.fileId)"
+                    style="cursor: pointer"
+                    ><Star
+                  /></el-icon>
                 </div>
               </div>
             </el-card>
@@ -318,8 +320,8 @@
                             <use xlink:href="#icon-dianzan"></use>
                           </svg>
                         </el-icon>
+                        <span>{{ item.creditnum }}</span>
                       </el-button>
-                      {{ item.creditnum }}
                     </div>
                     <el-button link @click="item.replyvisible = true"
                       >回复</el-button
@@ -514,6 +516,8 @@ export default {
         //   ],
         // },
       ],
+      //存放fileId
+      files: {},
       chapterloading: false,
       classinfo: {},
       classSubChapterTab: [],
@@ -681,14 +685,14 @@ export default {
         "resful",
         "json"
       );
-      console.log(res);
+      console.log("ppt", res);
       let url;
       if (res?.data.code === 20000 && res.data.data.files.length !== 0) {
         let item = res.data.data.files?.find((item) => item.type === "pdf");
         url = item.url;
-
+        this.files.PPTfileId = res.data.data.resource[0].fileId;
         this.PPTId.push(...res.data.data?.resource.map((item) => item.id));
-        console.log(this.PPTId);
+        console.log("fileId", this.files.PPTfileId);
       }
 
       if (url) return url;
@@ -713,8 +717,10 @@ export default {
           let item = res.data.data.urls;
           url = item[0];
           this.videoId = res.data.data.resources[0].id;
+          this.files.videofileId = res.data.data.resources[0].fileId;
         }
       }
+      console.log(this.files.videofileId);
       if (url) return url;
       else return null;
     },
@@ -739,6 +745,7 @@ export default {
               name: item.name + "." + item.type,
               type: item.type,
               id: res.data.data.resources[index].id,
+              fileId: res.data.data.resources[index].fileId,
             };
           });
           this.shareId = res.data.data.resources.map((item) => item.id);
@@ -1140,6 +1147,38 @@ export default {
       );
       if (res && res.data.code === 20000) {
         this.courseName = res.data.data.course.courseName;
+      }
+    },
+    async starResource() {
+      let fileId;
+
+      if (this.activeNames === "1") {
+        fileId = this.files.PPTfileId;
+      } else if (this.activeNames === "2") fileId = this.files.videofileId;
+      console.log(fileId, "fileId");
+      let res = await this.$request(
+        `/educenter/file/save/${fileId}/${this.userId}`,
+        "",
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res && res.data.code === 20000) {
+        ElMessage.success("收藏成功！");
+      }
+    },
+    async starShareFile(fileId) {
+      let res = await this.$request(
+        `/educenter/file/save/${fileId}/${this.userId}`,
+        "",
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res && res.data.code === 20000) {
+        ElMessage.success("收藏成功！");
       }
     },
   },

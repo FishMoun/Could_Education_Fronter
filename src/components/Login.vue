@@ -106,10 +106,23 @@
           }}</el-button>
         </div>
         <div class="more">
-          <span>{{ boxStatus.isLogin ? "没有账户？" : "已有账户？" }}</span>
-          <span class="action" @click="changeStatus">{{
-            boxStatus.isLogin ? "去注册" : "去登录"
-          }}</span>
+          <div>
+            <span>{{ boxStatus.isLogin ? "没有账户？" : "已有账户？" }}</span>
+            <span class="action" @click="changeStatus">{{
+              boxStatus.isLogin ? "去注册" : "去登录"
+            }}</span>
+          </div>
+          <div>
+            <el-link type="primary" href="http://123.60.88.31:1003/nacos/"
+              >服务管理</el-link
+            >
+            <el-link
+              type="primary"
+              href="http://123.60.88.31:32567/"
+              style="margin-left: 10px"
+              >资源监控</el-link
+            >
+          </div>
         </div>
       </div>
     </el-card>
@@ -177,12 +190,16 @@ export default {
           console.log(info);
           if (info) {
             store.state.userInfo = info;
+            console.log(info);
             ElMessage.success("登录成功！");
+            store.state.isLogin = true;
             if (info.role === "admin") {
               store.state.isAdmin = true;
-            }
-            if (info.role === "teacher") {
+            } else if (info.role === "teacher") {
               store.state.isTeacher = true;
+            } else {
+              store.state.isAdmin = false;
+              store.state.isTeacher = false;
             }
             if (info.role === "admin") {
               router.push({
@@ -284,7 +301,19 @@ export default {
         "params",
         "json"
       );
-
+      let res1 = await proxy.$request(
+        `/api/manager/user/user-role-id/${res?.data.data.userInfo.id}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log("state", res1);
+      if (res1 && res1.data.code === 20000) {
+        for (let key in res1.data.data)
+          store.state.stateId = res1.data.data[key];
+      }
+      console.log("state1", store.state.stateId);
       return res?.data.data.userInfo;
     }
     async function searchRemoteClass(query) {
@@ -391,6 +420,8 @@ export default {
 
   .boxFooter {
     .more {
+      display: flex;
+      justify-content: space-between;
       margin-top: 10px;
       span {
         padding: 5px 0;

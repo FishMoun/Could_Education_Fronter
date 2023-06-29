@@ -30,6 +30,11 @@ import Classmanagement from "../components/pages/admin/Classmanagement.vue"
 
 import EditFlow from "../components/pages/experimentlearning/EditFlow.vue"
 import Terminal from "../components/pages/experimentlearning/Terminal.vue"
+
+//导入vuex的对象
+import store from '../store'
+import { ElMessage } from 'element-plus'
+
 // 创建路由对象
 const router = createRouter({
 	// 指定路由的工作模式
@@ -69,7 +74,7 @@ const router = createRouter({
 					component: Myexperiment,
 				},
 				{
-					path: "/experimentflow/:expId",
+					path: "/experimentflow/:courseId/:expId",
 					name: "实验流程",
 					component: EditFlow,
 				}, {
@@ -156,6 +161,14 @@ const router = createRouter({
 })
 
 //这个位置可以添加路由守卫....
+router.beforeEach((to, from) => {
+	if (to.name !== '登录' && !store.state.isLogin) {
+		ElMessage.error('请先登录！')
+		return {
+			name: '登录'
+		}
+	}
 
+})
 // 导出路由对象
 export default router

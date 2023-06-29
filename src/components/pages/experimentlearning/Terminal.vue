@@ -2,26 +2,90 @@
   <el-row style="height: 100%; justify-content: center">
     <el-col :span="12" class="experiment-zone">
       <el-card shadow="never" class="node-title">
-        {{ monidata.title }}
+        {{ nodetitle }}
         <el-button
           link
           type="primary"
-          style="position: relative; left: 10vw"
+          style="position: relative; left: 150px"
           @click="isTerminalOpen = true"
           >打开实验终端</el-button
         >
       </el-card>
       <el-card shadow="never" style="font-size: 25px; height: 15%">
-        <div>实验资源</div>
-        <el-button type="primary">上传</el-button>
+        <div style="display: flex; justify-content: space-between">
+          实验资源
+        </div>
+        <div style="height: 70%; overflow: auto" v-show="fileList.length !== 0">
+          <div class="filelist" v-for="item in fileList" :key="item.id">
+            <div style="display: flex; align-items: center">
+              <img
+                style="width: 50px; height: 50px"
+                :src="getFileImage(item.name)"
+                alt=""
+              />
+
+              <span style="font-size: 20px">{{ item.name }}</span>
+            </div>
+            <div class="fileicon">
+              <a :href="item.url"
+                ><el-icon size="20px" color=""><Download /></el-icon
+              ></a>
+            </div>
+          </div>
+        </div>
       </el-card>
       <el-card shadow="never" style="height: 60%; font-size: 25px">
         <div>实验步骤</div>
-        <p style="font-size: 20px">{{ monidata.stepconten }}</p>
-        <el-button link type="primary">编辑</el-button>
+        <p style="font-size: 20px">{{ expStep }}</p>
+        <el-button
+          link
+          type="primary"
+          v-show="isTeacher"
+          @click="
+            this.expStepDialogVisible = true;
+            this.expStepInput = this.expStep;
+          "
+          >编辑</el-button
+        >
       </el-card>
       <el-card shadow="never" class="node-report">
-        <el-button type="primary">提交报告</el-button>
+        <el-upload
+          v-show="!isTeacher"
+          class="upload-demo"
+          :action="uploadReportUrl"
+          :on-success="handleSuccess"
+          list-type="picture"
+          :show-file-list="false"
+          :headers="{ token: this.$store.state.token }"
+          :before-upload="beforeUpload"
+        >
+          <template #trigger>
+            <el-button
+              style="margin-left: 10px; margin-top: 10px"
+              type="primary"
+              >提交报告</el-button
+            >
+            <span
+              style="position: relative; left: 10px; top: 5px"
+              v-show="isSubmit"
+              >实验得分:（待批改）</span
+            >
+            <span
+              style="position: relative; left: 10px; top: 5px"
+              v-show="isScored"
+              >实验得分:{{ score }}</span
+            >
+          </template>
+        </el-upload>
+        <div>
+          <el-button type="primary" v-show="isTeacher" @click="goToCri"
+            >批改报告</el-button
+          >
+
+          <span style="margin-left: 10px" v-show="isTeacher"
+            >完成率：{{ finish_rate }}%</span
+          >
+        </div>
       </el-card>
     </el-col>
     <el-col :span="12" class="terminal-zone" v-show="isTerminalOpen">
@@ -37,18 +101,49 @@
       <div class="terminal-wrapper">
         <div ref="terminal" /></div
     ></el-col>
+    <!-- 实验步骤的对话框 -->
+    <el-dialog v-model="expStepDialogVisible" title="实验步骤" width="30%">
+      <el-input
+        v-model="expStepInput"
+        :rows="4"
+        type="textarea"
+        placeholder="输入"
+        :resize="'none'"
+      />
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="expStepDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitExpStep"> 确定 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </el-row>
 </template>
 
 <script>
+import pdfUrl from "/src/assets/img/pdf.png";
+import pptUrl from "/src/assets/img/ppt.png";
+import txtUrl from "/src/assets/img/txt.png";
+import wordUrl from "/src/assets/img/word.png";
+import zipUrl from "/src/assets/img/zip.png";
+import unknownUrl from "/src/assets/img/unknown.png";
 import "xterm/css/xterm.css";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WSSHClient } from "/src/plugins/webssh.js";
+import { ElMessage } from "element-plus";
 export default {
   name: "terminal",
   data() {
     return {
+      hasFinished: false,
+      isScored: false,
+      fileId: "",
+      expStep: "",
+      expStepDialogVisible: false,
+      expStepInput: "",
+      fileList: [],
+      isSubmit: false,
       isTerminalOpen: false,
       term: null,
       socketUri: "ws://60.204.141.214:8005/exp/webssh",
@@ -60,6 +155,9 @@ export default {
         username: "cirros", //用户名
         password: "gocubsgo", //密码
       },
+      nodetitle: "",
+      res: "",
+      finish_rate: "",
       dataoption: { operate: "command", command: "" },
       monidata: {
         title: "基本实验1-初识Linux",
@@ -76,8 +174,39 @@ export default {
     nodeId() {
       return this.$route.params.nodeId;
     },
+    isTeacher() {
+      return this.$store.state.isTeacher;
+    },
+    uploadReportUrl() {
+      return "http://60.204.141.214:30802/manager/course-homework/submit/file";
+    },
+    stateId() {
+      return this.$store.state.stateId;
+    },
   },
-  mounted() {},
+  async mounted() {
+    await this.getNodeInfo(this.nodeId);
+    await this.getNodeResource();
+    if (this.isTeacher) {
+      this.getNodeCompleteRate();
+    } else {
+      console.log("进来了");
+      await this.getNodeStuInfo();
+      console.log(this.hasFinished, "进来了");
+      if (this.hasFinished) {
+        //调用查看作业状态接口
+        console.log(this.hasFinished, "进来了11");
+        let state = await this.getStudentRes();
+        console.log(state, "state");
+        if (state.studentScore.score === 0 && !state.studentScore.remark) {
+          this.isSubmit = true;
+        } else {
+          this.score = state.studentScore.score;
+          this.isScored = true;
+        }
+      }
+    }
+  },
   watch: {
     isTerminalOpen(newval) {
       if (newval) {
@@ -93,14 +222,170 @@ export default {
     this.term && this.term.dispose();
   },
   methods: {
+    //查看作业状态
+    async getStudentRes() {
+      const homeworkId = await this.getNodeHomework();
+      let studentRes = await this.$request(
+        `/manager/course-homework/get-submit/${homeworkId}/${this.stateId}`
+      );
+      console.log(studentRes.data.data);
+      studentRes = studentRes.data.data;
+      return {
+        studentRes: studentRes.submits,
+        studentScore: studentRes.homework,
+      };
+    },
+    async getNodeCompleteRate() {
+      let res = await this.$request(
+        `/exp/flowchart/node/finish-rate/${this.nodeId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res && res.data.code === 20000) {
+        let num = res.data.data.finish_rate * 100;
+        this.finish_rate = num.toFixed(2);
+      }
+    },
+    async submitExpStep() {
+      let node = {
+        id: this.nodeId,
+        steps: this.expStepInput,
+      };
+      let isSubmit = await this.putNodeInfo(node);
+      if (isSubmit) {
+        ElMessage.success("步骤更新成功！");
+        this.expStep = this.expStepInput;
+      } else {
+        ElMessage.error("更新失败请稍后重试！");
+      }
+      this.expStepDialogVisible = false;
+    },
+    async getNodeInfo(nodeId) {
+      let res = await this.$request(
+        `/exp/flowchart/node/${nodeId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res);
+      if (res && res.data.code === 20000) {
+        let node = res.data.data.node;
+        this.nodetitle = node.name;
+        this.expStep = node.steps;
+      }
+    },
+    //获得该节点的资源
+    async getNodeResource() {
+      let res = await this.$request(
+        `/exp/flowchart/node/resource/${this.nodeId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(res, "节点资源");
+      if (res && res.data.code === 20000) {
+        this.fileList = res.data.data.files.map((item) => {
+          return {
+            id: item.id,
+            url: item.url,
+            name: item.name + "." + item.type,
+            memId: item.memId,
+          };
+        });
+      }
+    },
+    async putNodeInfo(node) {
+      let res = await this.$request(
+        `/exp/flowchart/node/${node.id}`,
+        node,
+        "put",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) return true;
+      return false;
+    },
+    //资源缩略图
+    getFileImage(name) {
+      if (name.includes("pdf")) return pdfUrl;
+      else if (name.includes("ppt")) return pptUrl;
+      else if (name.includes("txt")) return txtUrl;
+      else if (name.includes("zip")) return zipUrl;
+      else if (name.includes("doc")) return wordUrl;
+      else return unknownUrl;
+    },
+    async handleSuccess(res) {
+      if (res && res.code === 20000) {
+        ElMessage.success("提交成功！");
+        this.fileId = res.data.file.id;
+        await this.markSubmitState();
+        await this.submitHomework();
+        console.log(res);
+      }
+    },
+    beforeUpload() {
+      if (this.hasFinish) return true;
+      else {
+        ElMessage.error("请勿重复上传！");
+        return false;
+      }
+    },
+    //标记为已提交
+    async markSubmitState() {
+      let res = await this.$request(
+        `/exp/flowchart/node/detail/finish/${this.nodeId}/${this.stateId}`,
+        "",
+        "put",
+        "params",
+        "json"
+      );
+      console.log(res, "mark");
+    },
+    //提交作业
+    async submitHomework() {
+      let homeworkid = await this.getNodeHomework();
+      let res1 = await this.$request(
+        `/manager/course-homework/get-context/${homeworkid}`,
+
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      let homeworkdetail = res1.data.data.contexts;
+      console.log(homeworkdetail, "homeworkdetail");
+      let params = {
+        fileId: this.fileId,
+        studentId: this.stateId,
+        contextId: homeworkdetail[0].id,
+        submitAnswer: "",
+      };
+      let array = [];
+      array.push(params);
+      console.log(params, "params");
+      let res = this.$request(
+        `/manager/course-homework/submit/${this.stateId}/${homeworkid}`,
+        array,
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res, "提交作业");
+    },
+
     initTerm() {
       //新建websocket连接
       const client = new WSSHClient();
       // 1.xterm终端初始化
       const term = new Terminal({
         rendererType: "canvas", //渲染类型
-        rows: 43, //行数
-        cols: 100, // 不指定行数，自动回车后光标从下一行开始
+        rows: 35, //行数
+        cols: 70, // 不指定行数，自动回车后光标从下一行开始
         convertEol: true, //启用时，光标将设置为下一行的开头
         // scrollback: 50, //终端中的回滚量
         disableStdin: false, //是否应禁用输入
@@ -151,6 +436,45 @@ export default {
         },
       });
     },
+    async goToCri() {
+      let id = await this.getNodeHomework();
+      if (id)
+        this.$router.push({
+          path: `/homeworkcorrect/${id}`,
+        });
+    },
+
+    async getNodeHomework() {
+      let res = await this.$request(
+        `/manager/course-homework/get-hmwk-id/${this.nodeId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        console.log(res, "homework");
+        if (!res.data.data.homework) {
+          ElMessage.warning("尚未创建该节点的作业！");
+          return "";
+        } else return res.data.data.homework.id;
+      }
+      return "";
+    },
+    //获得学生节点信息
+    async getNodeStuInfo() {
+      let res = await this.$request(
+        `/exp/flowchart/node/detail/${this.nodeId}/${this.stateId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        console.log(res.data.data.nodeDetail.hasFinish, "成功读取");
+        this.hasFinished = res.data.data.nodeDetail.hasFinish;
+      }
+    },
   },
 };
 </script>
@@ -187,9 +511,18 @@ export default {
 }
 .node-report {
   height: 10%;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
 }
 p {
   margin-top: 10px;
   white-space: pre-line;
+}
+.filelist {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
 }
 </style>
