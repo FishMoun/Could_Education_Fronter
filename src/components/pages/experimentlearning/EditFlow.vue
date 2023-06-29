@@ -93,6 +93,13 @@
               "
               >编辑</el-button
             >
+            <el-button
+              link
+              type="primary"
+              v-show="isTeacher"
+              @click="openExpCreateDialog()"
+              >创建实验作业</el-button
+            >
             <p style="overflow: auto; height: 70%; font-size: 20px">
               {{ expRequirement }}
             </p>
@@ -239,10 +246,57 @@
         </span>
       </template>
     </el-dialog>
+    <!-- 布置实验作业的对话框 -->
+    <el-dialog v-model="isExpCreateDiaglogVisble" title="创建作业" width="60%">
+      <!-- 作业主体 -->
+      <el-form :model="homeworkform" label-width="120px">
+        <div class="addHomework">
+          <el-form-item label="作业名:">
+            <el-input v-model="homeworkform.name" />
+          </el-form-item>
+          <el-form-item label="开始时间:">
+            <el-date-picker
+              v-model="homeworkform.startTime"
+              type="datetime"
+              placeholder="选择开始时间"
+              value-format="YYYY-MM-DD hh:mm:ss"
+            />
+          </el-form-item>
+          <el-form-item label="截止时间:">
+            <el-date-picker
+              v-model="homeworkform.endTime"
+              type="datetime"
+              placeholder="选择截止时间"
+              value-format="YYYY-MM-DD hh:mm:ss"
+            />
+          </el-form-item>
+          <el-form-item label="作业要求">
+            <el-input
+              v-model="homeworkform.context"
+              :rows="4"
+              type="textarea"
+              resize="none"
+            />
+          </el-form-item>
+        </div>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="isExpCreateDiaglogVisble = false">取消</el-button>
+          <el-button type="primary" @click="addHomeWork"> 确认布置 </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </el-row>
 </template>
 
 <script>
+import pdfUrl from "/src/assets/img/pdf.png";
+import pptUrl from "/src/assets/img/ppt.png";
+import txtUrl from "/src/assets/img/txt.png";
+import wordUrl from "/src/assets/img/word.png";
+import zipUrl from "/src/assets/img/zip.png";
+import unknownUrl from "/src/assets/img/unknown.png";
 import { jsPlumb } from "jsplumb";
 import flowNode from "./utilCom/node.vue";
 import { ElMessage } from "element-plus";
@@ -288,6 +342,7 @@ export default {
   },
   data() {
     return {
+      isNodeHomeworkExist: false,
       ratenum: 1,
       deleteDialogVisible: false,
       userdisable: false,
@@ -524,6 +579,14 @@ export default {
           },
         ],
       },
+      isExpCreateDiaglogVisble: false,
+      isNodeHasHomework: false,
+      homeworkform: {
+        name: "",
+        startTime: "",
+        endTime: "",
+        context: "",
+      },
     };
   },
   components: {
@@ -700,10 +763,88 @@ export default {
       );
       console.log("添加节点", res);
       if (res && res.data.code === 20000) {
-        await this.initNodeBasic();
+        await this.initNodeBasic(node.id);
+
         return true;
       }
       return false;
+    },
+    //创建实验作业
+    async createExpHomework() {
+      let params = {
+        nodeId: this.activeElement.nodeId,
+        beginTime: this.homeworkform.startTime,
+        endTime: this.homeworkform.endTime,
+        pname: this.homeworkform.name,
+        teacherId: this.stateId,
+        courseId: this.$route.params.courseId,
+      };
+      const defaulthomeworks = [
+        {
+          context: this.homeworkform.context,
+          refAnswer: "",
+        },
+      ];
+
+      let res = await this.$request(
+        `/manager/course-homework/save?nodeId=${params.nodeId}&beginTime=${params.beginTime}&courseId=${this.$route.params.courseId}&endTime=${params.endTime}&name=${params.pname}&teacherId=${this.stateId}`,
+        defaulthomeworks,
+        "post",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        ElMessage.success("节点作业创建成功！");
+      } else {
+        ElMessage.error("节点作业创建失败，请稍后重试！");
+      }
+    },
+    //确认创建作业
+    async addHomeWork() {
+      await this.createExpHomework();
+      for (let key in this.homeworkform) {
+        this.homeworkform[key] = "";
+      }
+      this.isExpCreateDiaglogVisble = false;
+    },
+    //获取当前的日期
+    getCurDate() {
+      let date = new Date();
+      let year = date.getFullYear();
+      let month = (date.getMonth() + 1).toString().padStart(2, "0");
+      let day = date.getDate().toString().padStart(2, "0");
+      let hour = date.getHours().toString().padStart(2, "0");
+      let min = date.getMinutes().toString().padStart(2, "0");
+      let sec = date.getSeconds().toString().padStart(2, "0");
+      return `${year}-${month}-${day} ${hour}:${min}:${sec}`;
+    },
+    //打开创建实验的窗口
+    openExpCreateDialog() {
+      if (!this.isNodeHomeworkExist) {
+        this.homeworkform.name = this.nodeinfo.name;
+        let str = this.getCurDate();
+        this.homeworkform.startTime = str;
+
+        this.isExpCreateDiaglogVisble = true;
+      } else {
+        ElMessage.warning("该节点的作业已经存在！");
+      }
+    },
+    //查询某个节点的作业
+    async getNodeHomework() {
+      let res = await this.$request(
+        `/manager/course-homework/get-hmwk-id/${this.nodeinfo.id}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      console.log(1, res);
+      if (res && res.data.code === 20000) {
+        console.log(res.data.data.homework);
+        if (res.data.data.homework) this.isNodeHomeworkExist = true;
+        else this.isNodeHomeworkExist = false;
+      }
     },
     //删除一条连线
     async deleteOneLine(lineId) {
@@ -1534,6 +1675,7 @@ export default {
       this.getNodeRate(node);
 
       this.getNodeResource();
+      this.getNodeHomework();
     },
     //保存信息
     saveNodeInfo() {
@@ -1708,12 +1850,12 @@ export default {
     },
     //资源缩略图
     getFileImage(name) {
-      if (name.includes("pdf")) return "/src/assets/img/pdf.png";
-      else if (name.includes("ppt")) return "/src/assets/img/ppt.png";
-      else if (name.includes("txt")) return "/src/assets/img/txt.png";
-      else if (name.includes("zip")) return "/src/assets/img/zip.png";
-      else if (name.includes("doc")) return "/src/assets/img/word.png";
-      else return "/src/assets/img/unknown.png";
+      if (name.includes("pdf")) return pdfUrl;
+      else if (name.includes("ppt")) return pptUrl;
+      else if (name.includes("txt")) return txtUrl;
+      else if (name.includes("zip")) return zipUrl;
+      else if (name.includes("doc")) return wordUrl;
+      else return unknownUrl;
     },
   },
 };

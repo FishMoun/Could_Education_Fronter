@@ -319,7 +319,7 @@ export default {
       );
       teaHomeworkList = teaHomeworkList.data.data.homeworks.map((item) => ({
         ...item,
-        status: item.outdated ? "已过期" : "进行中",
+        status: item.outdated ? "已完成" : "进行中",
       }));
       console.log(teaHomeworkList);
       this.teaTableData = teaHomeworkList;
@@ -356,6 +356,7 @@ export default {
         ElMessage.success("请完整填写作业相关信息！");
         return;
       }
+      console.log({ name, startTime, endTime, courseId, homeworks });
       this.$request(
         `/manager/course-homework/save?beginTime=${startTime}&courseId=${courseId}&endTime=${endTime}&name=${name}&teacherId=${teacherId}`,
         homeworks,

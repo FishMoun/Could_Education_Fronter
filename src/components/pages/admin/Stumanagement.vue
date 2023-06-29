@@ -52,7 +52,7 @@
         <el-table-column prop="class" label="班级" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="{ row }">
-            <el-button type="primary">编辑</el-button>
+            <!-- <el-button type="primary">编辑</el-button> -->
             <el-button type="danger" @click="deleteStudentById(row.stuId)"
               >删除</el-button
             >

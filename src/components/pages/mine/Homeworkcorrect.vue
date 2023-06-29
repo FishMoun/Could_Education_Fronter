@@ -6,13 +6,6 @@
           <span class="homeworktitle">{{
             homeworkDetail?.homework?.name
           }}</span>
-          <span class="homeworktitle" v-show="ismoni">基本实验1-初识Linux</span>
-          <!-- <span v-show="!ismoni"
-            >已批改{{
-              studentRes.filter((item) => item.score.score !== undefined)
-                .length
-            }}/{{ studentRes.length }}</span
-          > -->
           <span v-show="ismoni"
             >已批改{{ this.monidata.correctnum }}/{{
               this.monidata.submitnum
@@ -21,7 +14,7 @@
         </div>
       </template>
       <div class="homeworkcontent">
-        <ul class="homList">
+        <ul class="homeList">
           <li v-for="(item, index) in homeworkDetail?.contexts">
             {{ "作业" + (index + 1) + "：" + item?.context }}
             <br />
@@ -34,30 +27,23 @@
         </ul>
         <el-card
           shadow="never"
-          v-for="item in monidata.fileList"
+          v-for="item in curStudentRes.fileList"
           :key="item.id"
-          v-show="monidata.fileList.length !== 0"
+          v-show="curStudentRes.fileList.length !== 0 && click"
           style="margin-top: 5px; border: none"
           body-style="padding:0 "
         >
-          <div class="filelist" v-show="ismoni && click">
+          <div class="filelist">
             <div style="display: flex; align-items: center">
               <img
-                style="width: 20px; height: 20px"
-                :src="getFileImage(item.name)"
+                style="width: 50px; height: 50px"
+                :src="getFileImage(item.url)"
                 alt=""
               />
 
               <span>{{ item.name }}</span>
             </div>
             <div class="fileicon">
-              <el-icon
-                size="20px"
-                v-show="isTeacher"
-                @click="deleteNodeResource(item.id)"
-                style="cursor: pointer"
-                ><Delete
-              /></el-icon>
               <a :href="item.url"
                 ><el-icon size="20px" color=""><Download /></el-icon
               ></a>
@@ -87,29 +73,6 @@
           </div>
         </div>
       </div>
-      <div>
-        <span>评价</span>
-        <el-input
-          style="margin-bottom: 10px"
-          v-model="mark"
-          :rows="5"
-          type="textarea"
-          placeholder="输入评语"
-          resize="none"
-        />
-        <div>
-          <div class="bottomzone">
-            <div>
-              <span>打分:</span>
-              <el-input
-                v-model="score"
-                style="width: 50px; margin-left: 10px"
-              ></el-input>
-            </div>
-            <el-button type="primary" @click="monimark">完成批改</el-button>
-          </div>
-        </div>
-      </div>
     </el-card>
     <el-card shadow="never" class="stulist" body-style="padding:0">
       <template #header>
@@ -121,6 +84,12 @@
         </div>
       </template>
       <el-scrollbar>
+        <div
+          style="text-align: center; color: grey; margin-top: 10px"
+          v-show="students.length === 0"
+        >
+          暂无提交
+        </div>
         <ul v-show="!ismoni">
           <li class="listitem" v-for="item in students">
             <span class="name">{{ item.name }}</span>
@@ -144,6 +113,12 @@
 
 <script>
 import { ElMessage } from "element-plus";
+import pdfUrl from "/src/assets/img/pdf.png";
+import pptUrl from "/src/assets/img/ppt.png";
+import txtUrl from "/src/assets/img/txt.png";
+import wordUrl from "/src/assets/img/word.png";
+import zipUrl from "/src/assets/img/zip.png";
+import unknownUrl from "/src/assets/img/unknown.png";
 export default {
   data() {
     return {
@@ -158,7 +133,7 @@ export default {
       //教师评语
       mark: "",
       score: "",
-
+      fileList: [],
       monidata: {
         fileList: [
           {
@@ -183,13 +158,16 @@ export default {
       if (this.$route.params.id === "3") return true;
       else return false;
     },
+    isTeacher() {
+      return this.$store.state.isTeacher;
+    },
   },
   async mounted() {
     const homeworkId = this.$route.params.id;
     console.log(homeworkId);
     let homeworkdetail = await this.$request(
       `/manager/course-homework/get-context/${homeworkId}`,
-      // `/manager/course-homework/get-context/${String(homeworkId)}`,
+
       "",
       "get",
       "params",
@@ -210,6 +188,7 @@ export default {
           studentId: item.id,
           res: curStudentRes.studentRes,
           score: curStudentRes.studentScore,
+          fileList: curStudentRes.fileList,
         });
       }
     }
@@ -223,7 +202,7 @@ export default {
         `/manager/course-homework/get-marked/${homeworkId}`
       );
       students = students.data.data.markedStudents;
-      console.log(students);
+      console.log("学生信息", students);
       return students;
     },
     async getStudentRes(studentId) {
@@ -234,9 +213,17 @@ export default {
       );
       console.log(studentRes.data.data);
       studentRes = studentRes.data.data;
+      let fileList;
+      if (studentRes.files) {
+        for (let key in studentRes.files) {
+          fileList = studentRes.files[key];
+        }
+      }
+      console.log(this.fileList, "fileList");
       return {
         studentRes: studentRes.submits,
         studentScore: studentRes.homework,
+        fileList: fileList,
       };
     },
     viewRes(studentId) {
@@ -247,6 +234,7 @@ export default {
       this.curStudentRes = curStudentRes;
       this.score = curStudentRes.score.score;
       this.mark = curStudentRes.score.remark;
+      this.click = true;
     },
     async markRes() {
       if (!this.curStudentRes.studentId) {
@@ -273,12 +261,12 @@ export default {
       this.monidata.correctnum += 1;
     },
     getFileImage(name) {
-      if (name.includes("pdf")) return "/src/assets/img/pdf.png";
-      else if (name.includes("ppt")) return "/src/assets/img/ppt.png";
-      else if (name.includes("txt")) return "/src/assets/img/txt.png";
-      else if (name.includes("zip")) return "/src/assets/img/zip.png";
-      else if (name.includes("doc")) return "/src/assets/img/word.png";
-      else return "/src/assets/img/unknown.png";
+      if (name.includes("pdf")) return pdfUrl;
+      else if (name.includes("ppt")) return pptUrl;
+      else if (name.includes("txt")) return txtUrl;
+      else if (name.includes("zip")) return zipUrl;
+      else if (name.includes("doc")) return wordUrl;
+      else return unknownUrl;
     },
   },
 };

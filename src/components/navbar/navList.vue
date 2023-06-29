@@ -44,7 +44,10 @@ export default {
       return store.state.collapse ? "el-icon-s-unfold" : "el-icon-s-fold";
     });
     watch(store.state.tabList, (newValue) => {
-      if (newValue.length === 0) router.replace({ path: "/mycourse" });
+      if (newValue.length === 0) {
+        if (store.state.isAdmin) router.replace({ path: "/coursemanagement" });
+        else router.replace({ path: "/mycourse" });
+      }
     });
     onMounted(() => {
       store.dispatch("saveTab", route);

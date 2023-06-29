@@ -6,7 +6,7 @@
         <el-button
           link
           type="primary"
-          style="position: relative; left: 10vw"
+          style="position: relative; left: 150px"
           @click="isTerminalOpen = true"
           >打开实验终端</el-button
         >
@@ -57,6 +57,7 @@
           list-type="picture"
           :show-file-list="false"
           :headers="{ token: this.$store.state.token }"
+          :before-upload="beforeUpload"
         >
           <template #trigger>
             <el-button
@@ -69,15 +70,18 @@
               v-show="isSubmit"
               >实验得分:（待批改）</span
             >
+            <span
+              style="position: relative; left: 10px; top: 5px"
+              v-show="isScored"
+              >实验得分:{{ score }}</span
+            >
           </template>
         </el-upload>
         <div>
           <el-button type="primary" v-show="isTeacher" @click="goToCri"
             >批改报告</el-button
           >
-          <span style="margin-left: 10px" v-show="isTeacher"
-            >提交人数：0/11</span
-          >
+
           <span style="margin-left: 10px" v-show="isTeacher"
             >完成率：{{ finish_rate }}%</span
           >
@@ -117,6 +121,12 @@
 </template>
 
 <script>
+import pdfUrl from "/src/assets/img/pdf.png";
+import pptUrl from "/src/assets/img/ppt.png";
+import txtUrl from "/src/assets/img/txt.png";
+import wordUrl from "/src/assets/img/word.png";
+import zipUrl from "/src/assets/img/zip.png";
+import unknownUrl from "/src/assets/img/unknown.png";
 import "xterm/css/xterm.css";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
@@ -126,6 +136,9 @@ export default {
   name: "terminal",
   data() {
     return {
+      hasFinished: false,
+      isScored: false,
+      fileId: "",
       expStep: "",
       expStepDialogVisible: false,
       expStepInput: "",
@@ -167,12 +180,31 @@ export default {
     uploadReportUrl() {
       return "http://60.204.141.214:30802/manager/course-homework/submit/file";
     },
+    stateId() {
+      return this.$store.state.stateId;
+    },
   },
   async mounted() {
     await this.getNodeInfo(this.nodeId);
     await this.getNodeResource();
     if (this.isTeacher) {
       this.getNodeCompleteRate();
+    } else {
+      console.log("进来了");
+      await this.getNodeStuInfo();
+      console.log(this.hasFinished, "进来了");
+      if (this.hasFinished) {
+        //调用查看作业状态接口
+        console.log(this.hasFinished, "进来了11");
+        let state = await this.getStudentRes();
+        console.log(state, "state");
+        if (state.studentScore.score === 0 && !state.studentScore.remark) {
+          this.isSubmit = true;
+        } else {
+          this.score = state.studentScore.score;
+          this.isScored = true;
+        }
+      }
     }
   },
   watch: {
@@ -190,6 +222,19 @@ export default {
     this.term && this.term.dispose();
   },
   methods: {
+    //查看作业状态
+    async getStudentRes() {
+      const homeworkId = await this.getNodeHomework();
+      let studentRes = await this.$request(
+        `/manager/course-homework/get-submit/${homeworkId}/${this.stateId}`
+      );
+      console.log(studentRes.data.data);
+      studentRes = studentRes.data.data;
+      return {
+        studentRes: studentRes.submits,
+        studentScore: studentRes.homework,
+      };
+    },
     async getNodeCompleteRate() {
       let res = await this.$request(
         `/exp/flowchart/node/finish-rate/${this.nodeId}`,
@@ -198,8 +243,10 @@ export default {
         "params",
         "json"
       );
+      console.log(res);
       if (res && res.data.code === 20000) {
-        this.finish_rate = res.data.data.finish_rate;
+        let num = res.data.data.finish_rate * 100;
+        this.finish_rate = num.toFixed(2);
       }
     },
     async submitExpStep() {
@@ -265,20 +312,72 @@ export default {
     },
     //资源缩略图
     getFileImage(name) {
-      if (name.includes("pdf")) return "/src/assets/img/pdf.png";
-      else if (name.includes("ppt")) return "/src/assets/img/ppt.png";
-      else if (name.includes("txt")) return "/src/assets/img/txt.png";
-      else if (name.includes("zip")) return "/src/assets/img/zip.png";
-      else if (name.includes("doc")) return "/src/assets/img/word.png";
-      else return "/src/assets/img/unknown.png";
+      if (name.includes("pdf")) return pdfUrl;
+      else if (name.includes("ppt")) return pptUrl;
+      else if (name.includes("txt")) return txtUrl;
+      else if (name.includes("zip")) return zipUrl;
+      else if (name.includes("doc")) return wordUrl;
+      else return unknownUrl;
     },
-    handleSuccess(res) {
+    async handleSuccess(res) {
       if (res && res.code === 20000) {
         ElMessage.success("提交成功！");
+        this.fileId = res.data.file.id;
+        await this.markSubmitState();
+        await this.submitHomework();
+        console.log(res);
       }
-      ElMessage.success("提交成功！");
-      this.isSubmit = true;
     },
+    beforeUpload() {
+      if (this.hasFinish) return true;
+      else {
+        ElMessage.error("请勿重复上传！");
+        return false;
+      }
+    },
+    //标记为已提交
+    async markSubmitState() {
+      let res = await this.$request(
+        `/exp/flowchart/node/detail/finish/${this.nodeId}/${this.stateId}`,
+        "",
+        "put",
+        "params",
+        "json"
+      );
+      console.log(res, "mark");
+    },
+    //提交作业
+    async submitHomework() {
+      let homeworkid = await this.getNodeHomework();
+      let res1 = await this.$request(
+        `/manager/course-homework/get-context/${homeworkid}`,
+
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      let homeworkdetail = res1.data.data.contexts;
+      console.log(homeworkdetail, "homeworkdetail");
+      let params = {
+        fileId: this.fileId,
+        studentId: this.stateId,
+        contextId: homeworkdetail[0].id,
+        submitAnswer: "",
+      };
+      let array = [];
+      array.push(params);
+      console.log(params, "params");
+      let res = this.$request(
+        `/manager/course-homework/submit/${this.stateId}/${homeworkid}`,
+        array,
+        "post",
+        "params",
+        "json"
+      );
+      console.log(res, "提交作业");
+    },
+
     initTerm() {
       //新建websocket连接
       const client = new WSSHClient();
@@ -337,8 +436,44 @@ export default {
         },
       });
     },
-    goToCri() {
-      this.$router.push({ path: `/homeworkcorrect/${3}` });
+    async goToCri() {
+      let id = await this.getNodeHomework();
+      if (id)
+        this.$router.push({
+          path: `/homeworkcorrect/${id}`,
+        });
+    },
+
+    async getNodeHomework() {
+      let res = await this.$request(
+        `/manager/course-homework/get-hmwk-id/${this.nodeId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        console.log(res, "homework");
+        if (!res.data.data.homework) {
+          ElMessage.warning("尚未创建该节点的作业！");
+          return "";
+        } else return res.data.data.homework.id;
+      }
+      return "";
+    },
+    //获得学生节点信息
+    async getNodeStuInfo() {
+      let res = await this.$request(
+        `/exp/flowchart/node/detail/${this.nodeId}/${this.stateId}`,
+        "",
+        "get",
+        "params",
+        "json"
+      );
+      if (res && res.data.code === 20000) {
+        console.log(res.data.data.nodeDetail.hasFinish, "成功读取");
+        this.hasFinished = res.data.data.nodeDetail.hasFinish;
+      }
     },
   },
 };

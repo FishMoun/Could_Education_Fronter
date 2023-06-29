@@ -92,13 +92,19 @@ export default {
       homeworkRes: {},
       uploadReportUrl:
         "http://60.204.141.214:30802/manager/course-homework/submit/file",
+      fileId: "",
     };
   },
 
   methods: {
-    handleSuccess() {
-      ElMessage.success("上传成功");
+    async handleSuccess(res) {
+      if (res && res.code === 20000) {
+        ElMessage.success("上传成功！");
+        this.fileId = res.data.file.id;
+        console.log(res);
+      }
     },
+
     changemode() {
       this.$store.state.isTeacher = !this.$store.state.isTeacher;
     },
@@ -114,6 +120,7 @@ export default {
           return {
             contextId: item.id,
             submitAnswer: this.answers[index],
+            fileId: this.fileId,
           };
         }),
         "post",

@@ -181,6 +181,7 @@ export default {
           console.log(info);
           if (info) {
             store.state.userInfo = info;
+            console.log(info);
             ElMessage.success("登录成功！");
             store.state.isLogin = true;
             if (info.role === "admin") {

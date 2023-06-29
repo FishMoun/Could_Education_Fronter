@@ -54,6 +54,7 @@ export default createStore({
     //token处理
     //用户标识
     isLogin: false,
+    stateId: '',
     userInfo: {
       avatar: '',
       id: '',

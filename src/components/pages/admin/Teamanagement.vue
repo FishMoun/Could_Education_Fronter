@@ -38,7 +38,7 @@
         <el-table-column prop="college" label="学院" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="{ row }">
-            <el-button type="primary">编辑</el-button>
+            <!-- <el-button type="primary">编辑</el-button> -->
             <el-button type="danger" @click="deleteTeacherById(row.teaId)"
               >删除</el-button
             >

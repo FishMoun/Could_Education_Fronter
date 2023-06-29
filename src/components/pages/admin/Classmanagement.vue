@@ -33,9 +33,9 @@
         >
       </div>
       <div class="buttonbox">
-        <el-button type="primary"
+        <!-- <el-button type="primary"
           ><el-icon><Plus /></el-icon>新增班级</el-button
-        >
+        > -->
       </div></el-header
     >
     <!-- 主体表格区 -->
@@ -47,7 +47,7 @@
         <el-table-column prop="major" label="专业" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="{ row }">
-            <el-button type="primary">编辑</el-button>
+            <!-- <el-button type="primary">编辑</el-button> -->
             <el-button type="danger" @click="deleteClassById(row.classId)"
               >删除</el-button
             >

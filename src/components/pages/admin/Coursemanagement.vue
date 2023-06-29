@@ -69,9 +69,9 @@
         <el-table-column prop="class" label="上课班级" />
         <el-table-column fixed="right" label="操作" width="200px">
           <template #default="{ row }">
-            <el-button type="primary" @click="editForm(row.courseId)"
+            <!-- <el-button type="primary" @click="editForm(row.courseId)"
               >编辑</el-button
-            >
+            > -->
             <el-button type="danger" @click="deleteCourseById(row.courseId)"
               >删除</el-button
             >
@@ -543,8 +543,8 @@ export default {
           college: courses[i]?.department,
           week: courses[i]?.beginWeek + "~" + courses[i]?.endWeek + "周",
           // classroom: ,
-          teacher: courses[i]?.teacherNames,
-          class: courses[i]?.classNames,
+          teacher: courses[i]?.teachers.map((item) => item.name),
+          class: courses[i]?.classes.map((item) => item.name),
         };
       }
       console.log(this.tableData);
