@@ -17,4 +17,6 @@ Elementplus官方：https://element-plus.gitee.io/zh-CN/
 
 前端开发规范：组件的首字母大写，路由的name里面的都用小写
 
-演示视频链接：http://101.34.60.13:8888/down/SVGA6Hg5wzli.MP4
+## 演示视频
+链接：https://pan.baidu.com/s/192UttMdzIik39tOo61REIQ?pwd=ymqc 
+提取码：ymqc 
