@@ -16,3 +16,5 @@ Elementplus官方：https://element-plus.gitee.io/zh-CN/
 3、按q结束服务器
 
 前端开发规范：组件的首字母大写，路由的name里面的都用小写
+
+演示视频链接：http://101.34.60.13:8888/down/SVGA6Hg5wzli.MP4
